@@ -313,35 +313,56 @@ const HomePage = () => {
         </div>
       </div>
       
+      {/* Quick actions - Grab & Go button */}
+      <div className="fixed right-6 bottom-24 animate-fade-in">
+        <Button 
+          variant="outline" 
+          className="w-16 h-16 rounded-full bg-white border-koffa-beige hover:bg-koffa-beige-light hover:scale-105 transition-all duration-300 shadow-lg"
+          onClick={() => navigate('/grab-and-go')}
+        >
+          <ShoppingCart size={28} className="text-koffa-green" />
+        </Button>
+      </div>
+      
       {/* Floating Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-2 w-[90%] max-w-md border border-koffa-beige/20">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-4 w-[90%] max-w-md border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl">
         <div className="flex justify-around items-center relative">
-          <Button variant="ghost" className="koffa-nav-button text-koffa-green">
-            <HomeIcon size={20} />
-            <span>Home</span>
+          <Button 
+            variant="ghost" 
+            className="p-3 h-auto hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+          >
+            <HomeIcon size={28} className="text-koffa-green" />
           </Button>
           
-          <Button variant="ghost" className="koffa-nav-button text-koffa-green-dark">
-            <List size={20} />
-            <span>Lists</span>
+          <Button 
+            variant="ghost" 
+            className="p-3 h-auto hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+          >
+            <List size={28} className="text-koffa-green-dark" />
           </Button>
           
-          <div className="-mt-10 bg-white rounded-full p-2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Button className="rounded-full w-14 h-14 bg-koffa-green hover:bg-koffa-green-dark flex items-center justify-center shadow-lg">
-              <ShoppingCart size={24} className="text-white" />
+          <div className="-mt-12 bg-white rounded-full p-2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Button 
+              className="rounded-full w-16 h-16 bg-koffa-green hover:bg-koffa-green-dark flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <Package size={28} className="text-white" />
             </Button>
           </div>
           
-          <Button variant="ghost" className="koffa-nav-button text-koffa-green-dark">
-            <Package size={20} />
-            <span>Pantry</span>
+          <Button 
+            variant="ghost" 
+            className="p-3 h-auto hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+          >
+            <Package size={28} className="text-koffa-green-dark" />
           </Button>
           
-          <Button variant="ghost" className="koffa-nav-button text-koffa-green-dark">
-            <span className="w-5 h-5 rounded-full bg-koffa-beige flex items-center justify-center">
+          <Button 
+            variant="ghost" 
+            className="p-3 h-auto hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+          >
+            <span className="w-8 h-8 rounded-full bg-koffa-beige flex items-center justify-center text-sm font-medium text-koffa-green">
               JD
             </span>
-            <span>Profile</span>
           </Button>
         </div>
       </div>
