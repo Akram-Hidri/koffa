@@ -326,7 +326,7 @@ const HomePage = () => {
       
       {/* Floating Navigation */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-4 w-[90%] max-w-md border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl">
-        <div className="flex justify-around items-center relative">
+        <div className="flex justify-around items-center">
           <Button 
             variant="ghost" 
             className="p-3 h-auto hover:bg-koffa-beige-light rounded-full transition-all duration-300"
@@ -340,14 +340,6 @@ const HomePage = () => {
           >
             <List size={28} className="text-koffa-green-dark" />
           </Button>
-          
-          <div className="-mt-12 bg-white rounded-full p-2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Button 
-              className="rounded-full w-16 h-16 bg-koffa-green hover:bg-koffa-green-dark flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <Package size={28} className="text-white" />
-            </Button>
-          </div>
           
           <Button 
             variant="ghost" 
