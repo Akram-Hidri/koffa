@@ -23,7 +23,9 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
         />
       </div>
       {size !== 'sm' && (
-        <h1 className="font-bold text-koffa-green text-xl mt-1">KOFFA</h1>
+        <h1 className={`font-bold text-koffa-green ${size === 'lg' ? 'text-2xl' : 'text-xl'} mt-1`}>
+          KOFFA
+        </h1>
       )}
     </div>
   );

@@ -7,7 +7,6 @@ const SplashScreen = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Navigate to auth page after a delay
     const timer = setTimeout(() => {
       navigate('/auth');
     }, 2500);
@@ -19,7 +18,7 @@ const SplashScreen = () => {
     <div className="min-h-screen bg-koffa-green flex flex-col items-center justify-center">
       <div className="animate-fade-in text-center">
         <Logo size="lg" className="text-white" />
-        <p className="text-koffa-beige-light mt-6 text-xl">
+        <p className="text-koffa-beige-light mt-6 text-xl font-medium">
           Family Grocery Simplified
         </p>
       </div>

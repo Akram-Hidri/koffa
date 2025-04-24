@@ -10,13 +10,18 @@ import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner position="top-center" />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<SplashScreen />} />
@@ -25,6 +30,8 @@ const App = () => (
           <Route path="/home" element={<HomePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
+        <Sonner position="top-center" closeButton />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
