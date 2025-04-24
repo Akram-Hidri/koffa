@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -314,9 +313,9 @@ const HomePage = () => {
         </div>
       </div>
       
-      {/* Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-koffa-beige py-2 px-6">
-        <div className="flex justify-around">
+      {/* Floating Navigation */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-2 w-[90%] max-w-md border border-koffa-beige/20">
+        <div className="flex justify-around items-center relative">
           <Button variant="ghost" className="koffa-nav-button text-koffa-green">
             <HomeIcon size={20} />
             <span>Home</span>
@@ -327,9 +326,9 @@ const HomePage = () => {
             <span>Lists</span>
           </Button>
           
-          <div className="-mt-8 bg-white rounded-full p-2">
-            <Button className="rounded-full w-12 h-12 bg-koffa-green hover:bg-koffa-green-dark flex items-center justify-center">
-              <ShoppingCart size={20} className="text-white" />
+          <div className="-mt-10 bg-white rounded-full p-2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Button className="rounded-full w-14 h-14 bg-koffa-green hover:bg-koffa-green-dark flex items-center justify-center shadow-lg">
+              <ShoppingCart size={24} className="text-white" />
             </Button>
           </div>
           
