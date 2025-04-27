@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -8,9 +7,11 @@ import { ShoppingCart, Package, Home as HomeIcon, List, Settings, Users, Calenda
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
+import { useSettings } from '@/contexts/SettingsContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { settings } = useSettings();
   
   // Mock data for our page
   const recentPurchases = [
@@ -525,21 +526,65 @@ const HomePage = () => {
             <HomeIcon size={28} className="text-koffa-green" />
           </Button>
           
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-            onClick={() => navigate('/lists')}
-          >
-            <List size={28} className="text-koffa-green-dark" />
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-            onClick={() => navigate('/pantry')}
-          >
-            <Package size={28} className="text-koffa-green-dark" />
-          </Button>
+          {settings?.navItems?.slice(1, 4).map((item, index) => {
+            const getIcon = () => {
+              switch (item) {
+                case 'pantry':
+                  return <Package size={28} className="text-koffa-green-dark" />;
+                case 'shopping':
+                case 'lists':
+                  return <List size={28} className="text-koffa-green-dark" />;
+                case 'spaces':
+                  return <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+                    <path d="M3 9V6a2 2 0 0 1 2-2h2" />
+                  </svg>;
+                case 'family':
+                  return <Users size={28} className="text-koffa-green-dark" />;
+                case 'calendar':
+                  return <Calendar size={28} className="text-koffa-green-dark" />;
+                default:
+                  return <HomeIcon size={28} className="text-koffa-green-dark" />;
+              }
+            };
+            
+            return (
+              <Button 
+                key={index}
+                variant="ghost" 
+                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+                onClick={() => navigate(`/${item}`)}
+              >
+                {getIcon()}
+              </Button>
+            );
+          }) || (
+            <>
+              <Button 
+                variant="ghost" 
+                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+                onClick={() => navigate('/lists')}
+              >
+                <List size={28} className="text-koffa-green-dark" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+                onClick={() => navigate('/pantry')}
+              >
+                <Package size={28} className="text-koffa-green-dark" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+                onClick={() => navigate('/profile')}
+              >
+                <Users size={28} className="text-koffa-green-dark" />
+              </Button>
+            </>
+          )}
           
           <Button 
             variant="ghost" 
