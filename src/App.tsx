@@ -17,6 +17,16 @@ import AccessibilitySettings from "./pages/settings/AccessibilitySettings";
 import FamilyPage from "./pages/FamilyPage";
 import MemberPage from "./pages/MemberPage";
 
+// New pages we created
+import PantryPage from "./pages/pantry/PantryPage";
+import AddPantryItemPage from "./pages/pantry/AddPantryItemPage";
+import ShoppingListsPage from "./pages/shopping/ShoppingListsPage";
+import ShoppingListDetailPage from "./pages/shopping/ShoppingListDetailPage";
+import SpacesPage from "./pages/spaces/SpacesPage";
+import SpaceDetailPage from "./pages/spaces/SpaceDetailPage";
+import NotificationsPage from "./pages/notifications/NotificationsPage";
+import ReportsPage from "./pages/reports/ReportsPage";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -41,18 +51,28 @@ const App = () => (
         <Route path="/settings/accessibility" element={<AccessibilitySettings />} />
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/family/member/:id" element={<MemberPage />} />
-        <Route path="/grab-and-go" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/lists" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/lists/:id" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/lists/new" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/pantry" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/profile" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/suggestions" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/reminders" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/spaces" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/shopping" element={<HomePage />} /> {/* Placeholder route */}
-        <Route path="/family/staff" element={<FamilyPage />} /> {/* Redirects to Family page with staff tab */}
-        <Route path="/family/invitations" element={<FamilyPage />} /> {/* Redirects to Family page */}
+        
+        {/* New routes */}
+        <Route path="/pantry" element={<PantryPage />} />
+        <Route path="/pantry/add" element={<AddPantryItemPage />} />
+        <Route path="/shopping" element={<ShoppingListsPage />} />
+        <Route path="/shopping/list/:id" element={<ShoppingListDetailPage />} />
+        <Route path="/shopping/new" element={<ShoppingListsPage />} /> {/* Redirect to shopping page with creation modal */}
+        <Route path="/spaces" element={<SpacesPage />} />
+        <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        
+        {/* Original placeholder routes */}
+        <Route path="/grab-and-go" element={<HomePage />} />
+        <Route path="/lists" element={<HomePage />} />
+        <Route path="/lists/:id" element={<HomePage />} />
+        <Route path="/lists/new" element={<HomePage />} />
+        <Route path="/profile" element={<HomePage />} />
+        <Route path="/suggestions" element={<HomePage />} />
+        <Route path="/reminders" element={<HomePage />} />
+        <Route path="/family/staff" element={<FamilyPage />} />
+        <Route path="/family/invitations" element={<FamilyPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

@@ -1,666 +1,158 @@
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Logo from '@/components/Logo';
+import { Link } from 'react-router-dom';
+import PageLayout from '@/components/PageLayout';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ShoppingCart, Package, Home as HomeIcon, List, Settings, Users, Calendar } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
-import { useSettings, NavItem } from '@/contexts/SettingsContext';
-import { useToast } from '@/components/ui/use-toast';
+import { Utensils, ShoppingBag, Layers, BarChart, Bell } from 'lucide-react';
 
 const HomePage = () => {
-  const navigate = useNavigate();
-  const { settings } = useSettings();
-  const { toast } = useToast();
-  
-  // Mock data for our page
-  const recentPurchases = [
-    { id: 1, name: 'Organic Milk', price: '$4.99', date: '2025-04-24', image: '🥛' },
-    { id: 2, name: 'Fresh Eggs', price: '$3.49', date: '2025-04-24', image: '🥚' },
-    { id: 3, name: 'Whole Wheat Bread', price: '$2.99', date: '2025-04-24', image: '🍞' },
-  ];
-  
-  const smartSuggestions = {
-    runningLow: ['Milk', 'Eggs', 'Bread'],
-    frequentlyBought: ['Bananas', 'Yogurt', 'Coffee'],
-    bestDeals: ['20% off Dairy', 'BOGO Produce'],
-    seasonal: ['Spring Vegetables', 'Fresh Herbs']
-  };
-  
-  const shoppingActivity = {
-    steps: 2847,
-    miles: 1.2,
-    calories: 145
-  };
-  
-  const activeLists = [
-    { id: 1, name: 'Pantry Restock', store: 'Costco', progress: 85, itemCount: 3, inCart: 2, members: ['👨', '👩'] },
-    { id: 2, name: 'Weekly Groceries', store: 'Trader Joe\'s', progress: 45, itemCount: 12, inCart: 5, members: ['👨', '👩', '👧'] }
-  ];
-
-  const familyMembers = [
-    { id: 1, name: 'John', emoji: '👨', role: 'Dad' },
-    { id: 2, name: 'Sarah', emoji: '👩', role: 'Mom' },
-    { id: 3, name: 'Emma', emoji: '👧', role: 'Daughter' }
-  ];
-
-  const pantryStatus = [
-    { id: 1, category: 'Dairy', status: 'Low', items: ['Milk', 'Yogurt'] },
-    { id: 2, category: 'Produce', status: 'Good', items: ['Apples', 'Carrots', 'Broccoli'] },
-    { id: 3, category: 'Grains', status: 'Low', items: ['Rice', 'Pasta'] }
-  ];
-
-  const reminders = [
-    { id: 1, title: 'Friday Family Dinner', description: 'Need ingredients for lasagna', date: '2025-04-29', priority: 'high' },
-    { id: 2, title: 'Emma\'s Birthday', description: 'Get cake and decorations', date: '2025-05-12', priority: 'medium' },
-    { id: 3, title: 'Farmers Market', description: 'Fresh produce available', date: '2025-04-30', priority: 'low' }
-  ];
-
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
-
-  const handleCreateList = () => {
-    navigate('/lists/new');
-  };
-
-  const handleListClick = (id: number) => {
-    navigate(`/lists/${id}`);
-  };
-
-  const handleInviteFamilyMember = () => {
-    navigate('/family');
-  };
-
-  const getIcon = (item: NavItem) => {
-    switch (item) {
-      case "pantry":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
-            <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
-            <path d="M10 2v9" />
-          </svg>
-        );
-      case "shopping":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <path d="M8 5h8l2 13H6z" />
-            <path d="M5 8l14 1" />
-            <path d="M9 3v2" />
-            <path d="M15 3v2" />
-            <path d="M11 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-            <path d="M17 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-          </svg>
-        );
-      case "lists":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-        );
-      case "spaces":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-            <path d="M3 9V6a2 2 0 0 1 2-2h2" />
-          </svg>
-        );
-      case "family":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-        );
-      case "calendar":
-        return <Calendar size={28} className="text-koffa-green-dark" />;
-      case "tasks":
-        return (
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-            <rect width="8" height="8" x="3" y="3" rx="1" />
-            <path d="m7 11 4.5 2.7c.6.4 1.4.1 1.5-.7l.3-8" />
-            <path d="M7 13v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-7" />
-            <path d="M16 3h4a1 1 0 0 1 1 1v4" />
-          </svg>
-        );
-      case "settings":
-        return <Settings size={28} className="text-koffa-green-dark" />;
-      default:
-        return <HomeIcon size={28} className="text-koffa-green-dark" />;
-    }
+  // Sample data for quick stats
+  const quickStats = {
+    lowStockItems: 4,
+    expiringItems: 2,
+    pendingTasks: 8,
+    shoppingLists: 3
   };
 
   return (
-    <div className="min-h-screen bg-koffa-beige-light pb-24">
-      {/* Header */}
-      <div className="bg-koffa-beige-light p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <Logo size="sm" />
+    <PageLayout title="Home">
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Welcome back!</h2>
         
-        <Button 
-          variant="ghost" 
-          className="rounded-full p-2 h-auto w-auto"
-          onClick={handleSettingsClick}
-        >
-          <div className="flex items-center gap-2">
-            <Settings size={20} className="text-koffa-green" />
-          </div>
-        </Button>
-      </div>
-      
-      {/* Main content */}
-      <div className="px-4 py-2">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-koffa-green">Hello, Johnson Family</h1>
-          <p className="text-koffa-green-dark text-sm">What's on your shopping list today?</p>
-        </div>
-        
-        {/* Quick actions */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="flex flex-col items-center">
-            <Button 
-              variant="outline" 
-              className="w-16 h-16 rounded-full bg-white border-koffa-beige hover:bg-koffa-beige-light"
-              onClick={() => navigate('/grab-and-go')}
-            >
-              <ShoppingCart size={24} className="text-koffa-green" />
-            </Button>
-            <span className="text-sm mt-2 text-koffa-green">Grab & Go</span>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <Button 
-              variant="outline" 
-              className="w-16 h-16 rounded-full bg-koffa-green text-white border-koffa-green hover:bg-koffa-green-dark"
-              onClick={() => navigate('/lists')}
-            >
-              <List size={24} className="text-white" />
-            </Button>
-            <span className="text-sm mt-2 text-koffa-green">Lists</span>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            <Button 
-              variant="outline" 
-              className="w-16 h-16 rounded-full bg-white border-koffa-beige hover:bg-koffa-beige-light"
-              onClick={() => navigate('/pantry')}
-            >
-              <Package size={24} className="text-koffa-green" />
-            </Button>
-            <span className="text-sm mt-2 text-koffa-green">Pantry</span>
-          </div>
-        </div>
-
-        {/* Family Members Section */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-koffa-green">Family Members</h2>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8 border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-              onClick={handleInviteFamilyMember}
-            >
-              <Users size={14} className="mr-1" /> Invite
-            </Button>
-          </div>
-          <Card className="border-koffa-beige/30 p-4">
-            <div className="flex flex-wrap gap-4">
-              {familyMembers.map(member => (
-                <div key={member.id} className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-koffa-beige-dark flex items-center justify-center text-2xl">
-                    {member.emoji}
-                  </div>
-                  <p className="text-sm font-medium text-koffa-green mt-1">{member.name}</p>
-                  <p className="text-xs text-koffa-green-dark">{member.role}</p>
+        {/* Quick stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="p-4 pb-2">
+              <CardTitle className="text-base flex items-center">
+                <Utensils className="h-4 w-4 mr-2" />
+                Pantry
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-sm">Low stock items:</span>
+                  <span className="font-medium text-amber-500">{quickStats.lowStockItems}</span>
                 </div>
-              ))}
-              <div className="flex flex-col items-center">
-                <Button 
-                  variant="outline" 
-                  className="w-12 h-12 rounded-full border-dashed border-koffa-green"
-                  onClick={handleInviteFamilyMember}
-                >
-                  <Users size={20} className="text-koffa-green" />
+                <div className="flex justify-between">
+                  <span className="text-sm">Expiring soon:</span>
+                  <span className="font-medium text-amber-500">{quickStats.expiringItems}</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Link to="/pantry" className="w-full">
+                <Button variant="outline" className="w-full">View Pantry</Button>
+              </Link>
+            </CardFooter>
+          </Card>
+          
+          <Card>
+            <CardHeader className="p-4 pb-2">
+              <CardTitle className="text-base flex items-center">
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Shopping
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-sm">Active lists:</span>
+                  <span className="font-medium">{quickStats.shoppingLists}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Next due:</span>
+                  <span className="font-medium text-amber-500">Tomorrow</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Link to="/shopping" className="w-full">
+                <Button variant="outline" className="w-full">Shopping Lists</Button>
+              </Link>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        {/* Spaces quick access */}
+        <Card>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base flex items-center">
+              <Layers className="h-4 w-4 mr-2" />
+              Home Spaces
+            </CardTitle>
+            <CardDescription>
+              {quickStats.pendingTasks} tasks pending
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="grid grid-cols-3 gap-2">
+              <Link to="/spaces/1">
+                <Button variant="outline" className="w-full h-full py-4 flex flex-col">
+                  <span>Kitchen</span>
+                  <span className="text-xs text-amber-500">2 tasks</span>
                 </Button>
-                <p className="text-xs text-koffa-green-dark mt-1">Add Member</p>
-              </div>
+              </Link>
+              <Link to="/spaces/2">
+                <Button variant="outline" className="w-full h-full py-4 flex flex-col">
+                  <span>Bathroom</span>
+                  <span className="text-xs text-amber-500">3 tasks</span>
+                </Button>
+              </Link>
+              <Link to="/spaces/3">
+                <Button variant="outline" className="w-full h-full py-4 flex flex-col">
+                  <span>Garden</span>
+                  <span className="text-xs text-amber-500">1 task</span>
+                </Button>
+              </Link>
             </div>
-          </Card>
-        </div>
+          </CardContent>
+          <CardFooter className="p-4 pt-0">
+            <Link to="/spaces" className="w-full">
+              <Button variant="outline" className="w-full">View All Spaces</Button>
+            </Link>
+          </CardFooter>
+        </Card>
         
-        {/* Pantry Status */}
-        <div className="mb-8">
-          <h2 className="font-semibold text-koffa-green mb-3">Pantry Status</h2>
-          <Card className="border-koffa-beige/30 p-4">
-            {pantryStatus.map(category => (
-              <div key={category.id} className="mb-4 last:mb-0">
-                <div className="flex justify-between mb-1">
-                  <span className="font-medium text-koffa-green">{category.category}</span>
-                  <span className={cn(
-                    "text-xs px-2 py-1 rounded-full",
-                    category.status === 'Low' ? "bg-koffa-accent-orange/20 text-koffa-accent-orange" : 
-                    "bg-koffa-green/20 text-koffa-green"
-                  )}>
-                    {category.status}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {category.items.map((item, idx) => (
-                    <span 
-                      key={idx} 
-                      className="text-xs bg-koffa-beige-light px-2 py-1 rounded-full text-koffa-green-dark"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full mt-3 border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-              onClick={() => navigate('/pantry')}
-            >
-              View Full Pantry
-            </Button>
-          </Card>
-        </div>
-        
-        {/* Important Reminders */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-koffa-green">Important Reminders</h2>
-            <Button 
-              variant="link" 
-              className="p-0 h-auto text-sm text-koffa-accent-blue"
-              onClick={() => navigate('/reminders')}
-            >
-              View All
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {reminders.map(reminder => (
-              <Card key={reminder.id} className="border-koffa-beige/30 p-3">
-                <div className="flex gap-3">
-                  <div className={cn(
-                    "rounded-full w-10 h-10 flex items-center justify-center shrink-0",
-                    reminder.priority === 'high' ? "bg-koffa-accent-red/10 text-koffa-accent-red" : 
-                    reminder.priority === 'medium' ? "bg-koffa-accent-orange/10 text-koffa-accent-orange" :
-                    "bg-koffa-accent-blue/10 text-koffa-accent-blue"
-                  )}>
-                    <Calendar size={20} />
-                  </div>
-                  <div>
-                    <div className="flex justify-between">
-                      <h3 className="font-medium text-koffa-green">{reminder.title}</h3>
-                      <span className="text-xs text-koffa-green-dark">{reminder.date}</span>
-                    </div>
-                    <p className="text-sm text-koffa-green-dark">{reminder.description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-        
-        {/* Recent Purchases */}
-        <div className="mb-8">
-          <h2 className="font-semibold text-koffa-green mb-3">Recent Purchases</h2>
-          <div className="flex overflow-x-auto pb-4 gap-4 hide-scrollbar">
-            {recentPurchases.map(item => (
-              <Card key={item.id} className="min-w-[200px] p-3 flex items-center space-x-3 border-koffa-beige/30">
-                <div className="text-3xl">{item.image}</div>
-                <div>
-                  <p className="font-medium text-koffa-green">{item.name}</p>
-                  <p className="text-xs text-gray-500">{item.date}</p>
-                  <p className="text-sm font-medium">{item.price}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-1 h-8 text-xs border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                    onClick={() => navigate('/grab-and-go')}
-                  >
-                    Buy Again
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-        
-        {/* Smart Suggestions */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-koffa-green flex items-center gap-2">
-              <span className="text-lg">💡</span> Smart Suggestions
-            </h2>
-            <Button 
-              variant="link" 
-              className="text-sm text-koffa-accent-blue p-0 h-auto"
-              onClick={() => navigate('/suggestions')}
-            >
-              View All
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {/* Running Low */}
-            <Card className="border-koffa-beige/30 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-koffa-accent-orange text-lg">⬇️</span>
-                <h3 className="font-medium text-koffa-green">Running Low</h3>
-              </div>
-              <ul className="text-sm space-y-1 text-koffa-green-dark">
-                {smartSuggestions.runningLow.map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <span>•</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            
-            {/* Frequently Bought */}
-            <Card className="border-koffa-beige/30 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-koffa-accent-blue text-lg">🕒</span>
-                <h3 className="font-medium text-koffa-green">Frequently Bought</h3>
-              </div>
-              <ul className="text-sm space-y-1 text-koffa-green-dark">
-                {smartSuggestions.frequentlyBought.map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <span>•</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            
-            {/* Best Deals */}
-            <Card className="border-koffa-beige/30 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-koffa-accent-green text-lg">💰</span>
-                <h3 className="font-medium text-koffa-green">Best Deals</h3>
-              </div>
-              <ul className="text-sm space-y-1 text-koffa-green-dark">
-                {smartSuggestions.bestDeals.map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <span>•</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-            
-            {/* Seasonal Items */}
-            <Card className="border-koffa-beige/30 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-purple-500 text-lg">🌱</span>
-                <h3 className="font-medium text-koffa-green">Seasonal Items</h3>
-              </div>
-              <ul className="text-sm space-y-1 text-koffa-green-dark">
-                {smartSuggestions.seasonal.map(item => (
-                  <li key={item} className="flex items-center gap-2">
-                    <span>•</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          </div>
-        </div>
-        
-        {/* Shopping Activity */}
-        <div className="mb-8">
-          <h2 className="font-semibold text-koffa-green mb-3">Shopping Activity</h2>
-          <Card className="border-koffa-beige/30 p-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-blue-500 mb-1">
-                  <span role="img" aria-label="steps" className="text-2xl">👣</span>
-                </div>
-                <p className="text-xl font-bold text-koffa-green">{shoppingActivity.steps.toLocaleString()}</p>
-                <p className="text-xs text-koffa-green-dark">Steps</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-green-500 mb-1">
-                  <span role="img" aria-label="miles" className="text-2xl">📍</span>
-                </div>
-                <p className="text-xl font-bold text-koffa-green">{shoppingActivity.miles}</p>
-                <p className="text-xs text-koffa-green-dark">Miles</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-orange-500 mb-1">
-                  <span role="img" aria-label="calories" className="text-2xl">🔥</span>
-                </div>
-                <p className="text-xl font-bold text-koffa-green">{shoppingActivity.calories}</p>
-                <p className="text-xs text-koffa-green-dark">Calories</p>
-              </div>
-            </div>
-            
-            <div className="bg-koffa-beige-light rounded-lg p-3 mt-4">
-              <div className="flex items-start gap-2">
-                <span className="text-koffa-green bg-koffa-beige-dark h-6 w-6 rounded-full flex items-center justify-center text-xs mt-1">!</span>
-                <div>
-                  <p className="text-sm font-medium text-koffa-green">Fun Fact!</p>
-                  <p className="text-xs text-koffa-green-dark">
-                    That's equivalent to walking around a football field 1.5 times! Keep up the healthy shopping!
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-        
-        {/* Active Shopping Lists */}
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="font-semibold text-koffa-green">Active Shopping Lists</h2>
-            <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                className="p-1 h-auto w-auto text-koffa-green"
-                onClick={() => navigate('/lists')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" x2="21" y1="6" y2="6" />
-                  <line x1="8" x2="21" y1="12" y2="12" />
-                  <line x1="8" x2="21" y1="18" y2="18" />
-                  <line x1="3" x2="3" y1="6" y2="6" />
-                  <line x1="3" x2="3" y1="12" y2="12" />
-                  <line x1="3" x2="3" y1="18" y2="18" />
-                </svg>
+        {/* Recent activity */}
+        <Card>
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-base flex items-center">
+              <Bell className="h-4 w-4 mr-2" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <ul className="space-y-2">
+              <li className="text-sm pb-2 border-b">
+                <span className="font-medium">Driver</span> completed "Weekly Grocery" shopping
+                <div className="text-xs text-gray-500">Just now</div>
+              </li>
+              <li className="text-sm pb-2 border-b">
+                <span className="font-medium">Mother</span> added 3 items to pantry
+                <div className="text-xs text-gray-500">5 minutes ago</div>
+              </li>
+              <li className="text-sm">
+                <span className="font-medium">Ahmad</span> created a new shopping list
+                <div className="text-xs text-gray-500">Yesterday</div>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter className="p-4 pt-0 flex justify-between">
+            <Link to="/notifications" className="flex-1 mr-2">
+              <Button variant="outline" className="w-full">All Notifications</Button>
+            </Link>
+            <Link to="/reports" className="flex-1 ml-2">
+              <Button variant="outline" className="w-full flex items-center">
+                <BarChart className="h-4 w-4 mr-1" />
+                Reports
               </Button>
-              <Button 
-                variant="ghost" 
-                className="p-1 h-auto w-auto text-koffa-green"
-                onClick={() => navigate('/lists')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                  <line x1="3" x2="21" y1="9" y2="9" />
-                  <line x1="3" x2="21" y1="15" y2="15" />
-                  <line x1="9" x2="9" y1="3" y2="21" />
-                  <line x1="15" x2="15" y1="3" y2="21" />
-                </svg>
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="p-1 h-auto w-auto text-koffa-green"
-                onClick={() => navigate('/lists')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-                  <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
-                  <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-                  <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-                </svg>
-              </Button>
-            </div>
-          </div>
-          
-          {activeLists.length > 0 ? (
-            <div className="space-y-4 pb-20">
-              {activeLists.map(list => (
-                <Card 
-                  key={list.id} 
-                  className="border-koffa-beige/30 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleListClick(list.id)}
-                >
-                  <div className="flex justify-between">
-                    <div>
-                      <h3 className="font-medium text-koffa-green">{list.name}</h3>
-                      <p className="text-xs text-koffa-green-dark flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-                          <path d="M3 9V6a2 2 0 0 1 2-2h2" />
-                          <path d="M19 4V2" />
-                          <path d="M15 4V2" />
-                          <path d="M15 4h-5a2 2 0 0 0-2 2v3" />
-                        </svg>
-                        {list.store}
-                      </p>
-                    </div>
-                    <div className="flex gap-1">
-                      {list.members.map((member, idx) => (
-                        <div key={idx} className="text-sm">{member}</div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-koffa-green-dark">Progress</span>
-                      <span className="font-medium text-koffa-green">{list.progress}%</span>
-                    </div>
-                    <div className="w-full bg-koffa-beige-light rounded-full h-2">
-                      <div 
-                        className="bg-koffa-green h-2 rounded-full" 
-                        style={{ width: `${list.progress}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs mt-2 text-koffa-green-dark">
-                      {list.itemCount} items • {list.inCart} in cart
-                    </p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="border-koffa-beige/30 p-6 text-center">
-              <p className="text-koffa-green-dark mb-3">No active lists</p>
-              <Button 
-                className="bg-koffa-green hover:bg-koffa-green-dark text-white"
-                onClick={handleCreateList}
-              >
-                Create a New List
-              </Button>
-            </Card>
-          )}
-        </div>
+            </Link>
+          </CardFooter>
+        </Card>
       </div>
-      
-      {/* Quick actions - Grab & Go button */}
-      <div className="fixed right-6 bottom-24 animate-fade-in">
-        <Button 
-          variant="outline" 
-          className="w-16 h-16 rounded-full bg-white border-koffa-beige hover:bg-koffa-beige-light hover:scale-105 transition-all duration-300 shadow-lg"
-          onClick={() => navigate('/grab-and-go')}
-        >
-          <ShoppingCart size={28} className="text-koffa-green" />
-        </Button>
-      </div>
-      
-      {/* Floating Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-3 w-[80%] max-w-sm border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl">
-        <div className="flex justify-around items-center">
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-            onClick={() => navigate('/home')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-          </Button>
-          
-          {settings?.navItems?.slice(1, 4).map((item, index) => {
-            return (
-              <Button 
-                key={index}
-                variant="ghost" 
-                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-                onClick={() => navigate(`/${item}`)}
-              >
-                {getIcon(item)}
-              </Button>
-            );
-          }) || (
-            <>
-              <Button 
-                variant="ghost" 
-                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-                onClick={() => navigate('/lists')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12"></line>
-                  <line x1="8" y1="18" x2="21" y2="18"></line>
-                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-                onClick={() => navigate('/pantry')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                  <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
-                  <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
-                  <path d="M10 2v9" />
-                </svg>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-                onClick={() => navigate('/family')}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </Button>
-            </>
-          )}
-          
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-            onClick={() => navigate('/profile')}
-          >
-            <div className="w-8 h-8 rounded-full bg-koffa-beige flex items-center justify-center text-sm font-medium text-koffa-green">
-              JD
-            </div>
-          </Button>
-        </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 
