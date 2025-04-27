@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSettings, FamilyMember } from '@/contexts/SettingsContext';
+import { useSettings, FamilyMember, MemberRole } from '@/contexts/SettingsContext';
 import { UsersRound, Bell, Settings, Users, MessageSquare, UserPlus, Plus, MessageCircle } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -20,7 +20,7 @@ const FamilyPage = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [newMemberDetails, setNewMemberDetails] = useState({
     name: '',
-    role: 'member' as const,
+    role: 'member' as MemberRole,
     inviteMethod: 'code' // 'code' or 'direct'
   });
   const { toast } = useToast();
@@ -53,7 +53,7 @@ const FamilyPage = () => {
     const newMember: FamilyMember = {
       id: Date.now().toString(),
       name: newMemberDetails.name,
-      role: newMemberDetails.role as any,
+      role: newMemberDetails.role,
       status: "active",
       joined: new Date().toLocaleDateString(),
       tasksAssigned: 0,
