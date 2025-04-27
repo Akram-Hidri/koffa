@@ -7,7 +7,7 @@ export type Theme = "light" | "dark" | "system";
 export type TextSize = "small" | "medium" | "large" | "extraLarge" | "huge";
 export type ContrastMode = "normal" | "highContrast";
 export type InputMethod = "touch" | "voice" | "switch";
-export type NavItem = "home" | "pantry" | "shopping" | "spaces" | "family" | "tasks" | "calendar" | "notes" | "settings";
+export type NavItem = "home" | "pantry" | "shopping" | "spaces" | "family" | "tasks" | "calendar" | "notes" | "settings" | "lists";
 
 export interface Settings {
   // Appearance

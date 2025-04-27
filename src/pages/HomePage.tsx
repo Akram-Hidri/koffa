@@ -7,7 +7,7 @@ import { ShoppingCart, Package, Home as HomeIcon, List, Settings, Users, Calenda
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings, NavItem } from '@/contexts/SettingsContext';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -74,7 +74,28 @@ const HomePage = () => {
     // Show a toast for demonstration
     alert('Invitation sent to family member!');
   };
-  
+
+  const getIcon = (item: NavItem) => {
+    switch (item) {
+      case "pantry":
+        return <Package size={28} className="text-koffa-green-dark" />;
+      case "shopping":
+      case "lists":
+        return <List size={28} className="text-koffa-green-dark" />;
+      case "spaces":
+        return <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+          <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+          <path d="M3 9V6a2 2 0 0 1 2-2h2" />
+        </svg>;
+      case "family":
+        return <Users size={28} className="text-koffa-green-dark" />;
+      case "calendar":
+        return <Calendar size={28} className="text-koffa-green-dark" />;
+      default:
+        return <HomeIcon size={28} className="text-koffa-green-dark" />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-koffa-beige-light pb-24">
       {/* Header */}
@@ -527,27 +548,6 @@ const HomePage = () => {
           </Button>
           
           {settings?.navItems?.slice(1, 4).map((item, index) => {
-            const getIcon = () => {
-              switch (item) {
-                case 'pantry':
-                  return <Package size={28} className="text-koffa-green-dark" />;
-                case 'shopping':
-                case 'lists':
-                  return <List size={28} className="text-koffa-green-dark" />;
-                case 'spaces':
-                  return <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-                    <path d="M3 9V6a2 2 0 0 1 2-2h2" />
-                  </svg>;
-                case 'family':
-                  return <Users size={28} className="text-koffa-green-dark" />;
-                case 'calendar':
-                  return <Calendar size={28} className="text-koffa-green-dark" />;
-                default:
-                  return <HomeIcon size={28} className="text-koffa-green-dark" />;
-              }
-            };
-            
             return (
               <Button 
                 key={index}
@@ -555,7 +555,7 @@ const HomePage = () => {
                 className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
                 onClick={() => navigate(`/${item}`)}
               >
-                {getIcon()}
+                {getIcon(item)}
               </Button>
             );
           }) || (
