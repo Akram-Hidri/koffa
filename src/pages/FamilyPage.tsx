@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -130,20 +129,6 @@ const FamilyPage = () => {
       description: "This feature will be available in a future update.",
     });
   };
-
-  // Add a default settings object to prevent null references
-  const defaultSettings = {
-    familyMembers: [],
-    staffMembers: [],
-    pendingInvitations: 0,
-    navItems: ["home", "pantry", "shopping", "spaces", "family"]
-  };
-
-  // Use safe access to settings with fallbacks
-  const familyMembers = settings?.familyMembers || defaultSettings.familyMembers;
-  const staffMembers = settings?.staffMembers || defaultSettings.staffMembers;
-  const pendingInvitations = settings?.pendingInvitations ?? defaultSettings.pendingInvitations;
-  const navItems = settings?.navItems || defaultSettings.navItems;
 
   return (
     <div className="min-h-screen bg-koffa-beige-light pb-24">
