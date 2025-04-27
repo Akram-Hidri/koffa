@@ -14,6 +14,8 @@ import AppearanceSettings from "./pages/settings/AppearanceSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccessibilitySettings from "./pages/settings/AccessibilitySettings";
+import FamilyPage from "./pages/FamilyPage";
+import MemberPage from "./pages/MemberPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/settings/account" element={<AccountSettings />} />
           <Route path="/settings/notifications" element={<NotificationSettings />} />
           <Route path="/settings/accessibility" element={<AccessibilitySettings />} />
+          <Route path="/family" element={<FamilyPage />} />
+          <Route path="/family/member/:id" element={<MemberPage />} />
           <Route path="/grab-and-go" element={<HomePage />} /> {/* Placeholder route */}
           <Route path="/lists" element={<HomePage />} /> {/* Placeholder route */}
           <Route path="/lists/:id" element={<HomePage />} /> {/* Placeholder route */}
@@ -46,6 +50,10 @@ const App = () => (
           <Route path="/profile" element={<HomePage />} /> {/* Placeholder route */}
           <Route path="/suggestions" element={<HomePage />} /> {/* Placeholder route */}
           <Route path="/reminders" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/spaces" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/shopping" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/family/staff" element={<FamilyPage />} /> {/* Redirects to Family page with staff tab */}
+          <Route path="/family/invitations" element={<FamilyPage />} /> {/* Redirects to Family page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

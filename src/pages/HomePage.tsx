@@ -8,10 +8,12 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { useSettings, NavItem } from '@/contexts/SettingsContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const { toast } = useToast();
   
   // Mock data for our page
   const recentPurchases = [
@@ -69,28 +71,70 @@ const HomePage = () => {
   };
 
   const handleInviteFamilyMember = () => {
-    // Would integrate with email invitation system
-    console.log('Invite family member');
-    // Show a toast for demonstration
-    alert('Invitation sent to family member!');
+    navigate('/family');
   };
 
   const getIcon = (item: NavItem) => {
     switch (item) {
       case "pantry":
-        return <Package size={28} className="text-koffa-green-dark" />;
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
+            <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
+            <path d="M10 2v9" />
+          </svg>
+        );
       case "shopping":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <path d="M8 5h8l2 13H6z" />
+            <path d="M5 8l14 1" />
+            <path d="M9 3v2" />
+            <path d="M15 3v2" />
+            <path d="M11 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+            <path d="M17 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+          </svg>
+        );
       case "lists":
-        return <List size={28} className="text-koffa-green-dark" />;
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        );
       case "spaces":
-        return <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-          <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-          <path d="M3 9V6a2 2 0 0 1 2-2h2" />
-        </svg>;
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+            <path d="M3 9V6a2 2 0 0 1 2-2h2" />
+          </svg>
+        );
       case "family":
-        return <Users size={28} className="text-koffa-green-dark" />;
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        );
       case "calendar":
         return <Calendar size={28} className="text-koffa-green-dark" />;
+      case "tasks":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <rect width="8" height="8" x="3" y="3" rx="1" />
+            <path d="m7 11 4.5 2.7c.6.4 1.4.1 1.5-.7l.3-8" />
+            <path d="M7 13v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-7" />
+            <path d="M16 3h4a1 1 0 0 1 1 1v4" />
+          </svg>
+        );
+      case "settings":
+        return <Settings size={28} className="text-koffa-green-dark" />;
       default:
         return <HomeIcon size={28} className="text-koffa-green-dark" />;
     }
@@ -544,7 +588,10 @@ const HomePage = () => {
             className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
             onClick={() => navigate('/home')}
           >
-            <HomeIcon size={28} className="text-koffa-green" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
           </Button>
           
           {settings?.navItems?.slice(1, 4).map((item, index) => {
@@ -565,7 +612,14 @@ const HomePage = () => {
                 className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
                 onClick={() => navigate('/lists')}
               >
-                <List size={28} className="text-koffa-green-dark" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
               </Button>
               
               <Button 
@@ -573,15 +627,24 @@ const HomePage = () => {
                 className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
                 onClick={() => navigate('/pantry')}
               >
-                <Package size={28} className="text-koffa-green-dark" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
+                  <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
+                  <path d="M10 2v9" />
+                </svg>
               </Button>
               
               <Button 
                 variant="ghost" 
                 className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/family')}
               >
-                <Users size={28} className="text-koffa-green-dark" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
               </Button>
             </>
           )}
