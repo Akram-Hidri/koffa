@@ -28,6 +28,15 @@ const App = () => (
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/grab-and-go" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/lists" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/lists/:id" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/lists/new" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/pantry" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/profile" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/settings" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/suggestions" element={<HomePage />} /> {/* Placeholder route */}
+          <Route path="/reminders" element={<HomePage />} /> {/* Placeholder route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
