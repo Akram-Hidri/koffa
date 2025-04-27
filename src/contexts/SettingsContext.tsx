@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define types for our settings
@@ -269,53 +270,78 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Load settings from localStorage or use defaults
   const [settings, setSettings] = useState<Settings>(() => {
-    const storedSettings = localStorage.getItem("koffa-settings");
-    return storedSettings ? JSON.parse(storedSettings) : defaultSettings;
+    try {
+      const storedSettings = localStorage.getItem("koffa-settings");
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings);
+        // Ensure critical arrays exist
+        return {
+          ...defaultSettings,
+          ...parsedSettings,
+          familyMembers: Array.isArray(parsedSettings.familyMembers) 
+            ? parsedSettings.familyMembers 
+            : defaultSettings.familyMembers,
+          staffMembers: Array.isArray(parsedSettings.staffMembers) 
+            ? parsedSettings.staffMembers 
+            : defaultSettings.staffMembers,
+          navItems: Array.isArray(parsedSettings.navItems) 
+            ? parsedSettings.navItems 
+            : defaultSettings.navItems,
+        };
+      }
+      return defaultSettings;
+    } catch (error) {
+      console.error("Error loading settings from localStorage:", error);
+      return defaultSettings;
+    }
   });
 
   // Update settings in localStorage when they change
   useEffect(() => {
-    localStorage.setItem("koffa-settings", JSON.stringify(settings));
-    
-    // Apply theme to document body
-    if (settings.theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else if (settings.theme === "light") {
-      document.documentElement.classList.remove("dark");
-    } else {
-      // System preference
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    try {
+      localStorage.setItem("koffa-settings", JSON.stringify(settings));
+      
+      // Apply theme to document body
+      if (settings.theme === "dark") {
         document.documentElement.classList.add("dark");
-      } else {
+      } else if (settings.theme === "light") {
         document.documentElement.classList.remove("dark");
+      } else {
+        // System preference
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
       }
-    }
-    
-    // Apply text size classes to body
-    document.body.classList.remove("text-size-small", "text-size-medium", "text-size-large", "text-size-extra-large", "text-size-huge");
-    document.body.classList.add(`text-size-${settings.textSize}`);
-    
-    // Apply high contrast mode if enabled
-    if (settings.highContrastMode) {
-      document.documentElement.classList.add("high-contrast");
-    } else {
-      document.documentElement.classList.remove("high-contrast");
-    }
-    
-    // Apply reduced motion if enabled
-    if (settings.reduceMotion || settings.reduceAnimations) {
-      document.documentElement.classList.add("reduce-motion");
-    } else {
-      document.documentElement.classList.remove("reduce-motion");
-    }
+      
+      // Apply text size classes to body
+      document.body.classList.remove("text-size-small", "text-size-medium", "text-size-large", "text-size-extra-large", "text-size-huge");
+      document.body.classList.add(`text-size-${settings.textSize}`);
+      
+      // Apply high contrast mode if enabled
+      if (settings.highContrastMode) {
+        document.documentElement.classList.add("high-contrast");
+      } else {
+        document.documentElement.classList.remove("high-contrast");
+      }
+      
+      // Apply reduced motion if enabled
+      if (settings.reduceMotion || settings.reduceAnimations) {
+        document.documentElement.classList.add("reduce-motion");
+      } else {
+        document.documentElement.classList.remove("reduce-motion");
+      }
 
-    // Apply bold text if enabled
-    if (settings.boldText) {
-      document.documentElement.classList.add("bold-text");
-    } else {
-      document.documentElement.classList.remove("bold-text");
+      // Apply bold text if enabled
+      if (settings.boldText) {
+        document.documentElement.classList.add("bold-text");
+      } else {
+        document.documentElement.classList.remove("bold-text");
+      }
+    } catch (error) {
+      console.error("Error saving settings to localStorage:", error);
     }
-    
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
@@ -331,16 +357,25 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addFamilyMember = (member: FamilyMember) => {
     setSettings(prevSettings => {
+      // Ensure arrays exist
+      const currentFamilyMembers = Array.isArray(prevSettings.familyMembers) 
+        ? prevSettings.familyMembers 
+        : [];
+        
+      const currentStaffMembers = Array.isArray(prevSettings.staffMembers) 
+        ? prevSettings.staffMembers 
+        : [];
+        
       if (member.role === 'staff') {
         return {
           ...prevSettings,
-          staffMembers: [...prevSettings.staffMembers, member],
+          staffMembers: [...currentStaffMembers, member],
           pendingInvitations: Math.max(0, prevSettings.pendingInvitations - 1)
         };
       } else {
         return {
           ...prevSettings,
-          familyMembers: [...prevSettings.familyMembers, member],
+          familyMembers: [...currentFamilyMembers, member],
           pendingInvitations: Math.max(0, prevSettings.pendingInvitations - 1)
         };
       }
@@ -349,11 +384,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateFamilyMember = (id: string, updates: Partial<FamilyMember>) => {
     setSettings(prevSettings => {
+      // Ensure arrays exist
+      const familyMembers = Array.isArray(prevSettings.familyMembers) 
+        ? prevSettings.familyMembers 
+        : [];
+        
+      const staffMembers = Array.isArray(prevSettings.staffMembers) 
+        ? prevSettings.staffMembers 
+        : [];
+      
       // Check if the member is in familyMembers array
-      const familyIndex = prevSettings.familyMembers.findIndex(member => member.id === id);
+      const familyIndex = familyMembers.findIndex(member => member.id === id);
       
       if (familyIndex !== -1) {
-        const updatedFamilyMembers = [...prevSettings.familyMembers];
+        const updatedFamilyMembers = [...familyMembers];
         updatedFamilyMembers[familyIndex] = { 
           ...updatedFamilyMembers[familyIndex], 
           ...updates 
@@ -366,10 +410,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       
       // Check if the member is in staffMembers array
-      const staffIndex = prevSettings.staffMembers.findIndex(member => member.id === id);
+      const staffIndex = staffMembers.findIndex(member => member.id === id);
       
       if (staffIndex !== -1) {
-        const updatedStaffMembers = [...prevSettings.staffMembers];
+        const updatedStaffMembers = [...staffMembers];
         updatedStaffMembers[staffIndex] = { 
           ...updatedStaffMembers[staffIndex], 
           ...updates 
@@ -387,10 +431,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const removeFamilyMember = (id: string) => {
     setSettings(prevSettings => {
+      // Ensure arrays exist
+      const familyMembers = Array.isArray(prevSettings.familyMembers) 
+        ? prevSettings.familyMembers 
+        : [];
+        
+      const staffMembers = Array.isArray(prevSettings.staffMembers) 
+        ? prevSettings.staffMembers 
+        : [];
+      
       return {
         ...prevSettings,
-        familyMembers: prevSettings.familyMembers.filter(member => member.id !== id),
-        staffMembers: prevSettings.staffMembers.filter(member => member.id !== id)
+        familyMembers: familyMembers.filter(member => member.id !== id),
+        staffMembers: staffMembers.filter(member => member.id !== id)
       };
     });
   };

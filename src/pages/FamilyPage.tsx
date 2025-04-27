@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,20 @@ const FamilyPage = () => {
     inviteMethod: 'code' // 'code' or 'direct'
   });
   const { toast } = useToast();
+  
+  // Add a default settings object to prevent null references
+  const defaultSettings = {
+    familyMembers: [],
+    staffMembers: [],
+    pendingInvitations: 0,
+    navItems: ["home", "pantry", "shopping", "spaces", "family"]
+  };
+
+  // Use safe access to settings with fallbacks
+  const familyMembers = Array.isArray(settings?.familyMembers) ? settings.familyMembers : defaultSettings.familyMembers;
+  const staffMembers = Array.isArray(settings?.staffMembers) ? settings.staffMembers : defaultSettings.staffMembers;
+  const pendingInvitations = settings?.pendingInvitations ?? defaultSettings.pendingInvitations;
+  const navItems = Array.isArray(settings?.navItems) ? settings.navItems : defaultSettings.navItems;
   
   const handleSettingsClick = () => {
     navigate('/settings');
@@ -77,24 +91,33 @@ const FamilyPage = () => {
       }
     };
 
-    // Add the new member
-    addFamilyMember(newMember);
-    
-    // Show success toast
-    toast({
-      title: "Success!",
-      description: `${newMember.name} has been added as a ${newMember.role}`,
-    });
-    
-    // Reset form
-    setNewMemberDetails({
-      name: '',
-      role: 'member',
-      inviteMethod: 'code'
-    });
-    
-    // Close dialog
-    setIsInviteDialogOpen(false);
+    try {
+      // Add the new member
+      addFamilyMember(newMember);
+      
+      // Show success toast
+      toast({
+        title: "Success!",
+        description: `${newMember.name} has been added as a ${newMember.role}`,
+      });
+      
+      // Reset form
+      setNewMemberDetails({
+        name: '',
+        role: 'member',
+        inviteMethod: 'code'
+      });
+      
+      // Close dialog
+      setIsInviteDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding family member:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add new member. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleManageMember = (id: string) => {
