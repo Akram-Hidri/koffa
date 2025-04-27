@@ -108,6 +108,20 @@ const FamilyPage = () => {
     });
   };
 
+  // Add a default settings object to prevent null references
+  const defaultSettings = {
+    familyMembers: [],
+    staffMembers: [],
+    pendingInvitations: 0,
+    navItems: ["home", "pantry", "shopping", "spaces", "family"]
+  };
+
+  // Use safe access to settings with fallbacks
+  const familyMembers = settings?.familyMembers || defaultSettings.familyMembers;
+  const staffMembers = settings?.staffMembers || defaultSettings.staffMembers;
+  const pendingInvitations = settings?.pendingInvitations ?? defaultSettings.pendingInvitations;
+  const navItems = settings?.navItems || defaultSettings.navItems;
+
   return (
     <div className="min-h-screen bg-koffa-beige-light pb-24">
       {/* Header */}
@@ -296,91 +310,103 @@ const FamilyPage = () => {
           </TabsList>
           
           <TabsContent value="family">
-            {settings.familyMembers.map((member) => (
-              <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
-                      {member.avatar || member.name[0]}
+            {familyMembers.length > 0 ? (
+              familyMembers.map((member) => (
+                <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
+                        {member.avatar || member.name[0]}
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="font-medium text-koffa-green">{member.name}</h3>
+                        <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
+                      </div>
                     </div>
-                    <div className="ml-3">
-                      <h3 className="font-medium text-koffa-green">{member.name}</h3>
-                      <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
+                    <div className="text-right">
+                      <p className="font-medium text-koffa-green">Role: {member.role}</p>
+                      <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-koffa-green">Role: {member.role}</p>
-                    <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
+                        onClick={() => handleManageMember(member.id)}
+                      >
+                        Manage
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
+                        onClick={() => handleMessageMember(member.id)}
+                      >
+                        <MessageCircle size={14} className="mr-1" />
+                        Message
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                  <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleManageMember(member.id)}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleMessageMember(member.id)}
-                    >
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No family members found. Add new members using the Invite button.
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="staff">
-            {settings.staffMembers.map((member) => (
-              <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
-                      {member.avatar || member.name[0]}
+            {staffMembers.length > 0 ? (
+              staffMembers.map((member) => (
+                <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
+                        {member.avatar || member.name[0]}
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="font-medium text-koffa-green">{member.name}</h3>
+                        <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
+                      </div>
                     </div>
-                    <div className="ml-3">
-                      <h3 className="font-medium text-koffa-green">{member.name}</h3>
-                      <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
+                    <div className="text-right">
+                      <p className="font-medium text-koffa-green">Role: {member.role}</p>
+                      <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium text-koffa-green">Role: {member.role}</p>
-                    <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
+                  <div className="flex justify-between items-center mt-3">
+                    <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
+                        onClick={() => handleManageMember(member.id)}
+                      >
+                        Manage
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
+                        onClick={() => handleMessageMember(member.id)}
+                      >
+                        <MessageCircle size={14} className="mr-1" />
+                        Message
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                  <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleManageMember(member.id)}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleMessageMember(member.id)}
-                    >
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No staff members found.
+              </div>
+            )}
             
             <Button 
               variant="outline" 
@@ -456,7 +482,7 @@ const FamilyPage = () => {
           <Card className="border-koffa-beige/30 p-4">
             <div className="flex items-center space-x-3 mb-2">
               <Users size={20} className="text-koffa-green" />
-              <h3 className="font-medium text-koffa-green">Staff Members: {settings.staffMembers.length}</h3>
+              <h3 className="font-medium text-koffa-green">Staff Members: {staffMembers.length}</h3>
             </div>
             <p className="text-sm text-koffa-green-dark mb-4">
               Manage your staff access and permissions
@@ -489,7 +515,7 @@ const FamilyPage = () => {
                 <path d="M12 8v8" />
                 <path d="m8 12 8 0" />
               </svg>
-              <h3 className="font-medium text-koffa-green">Pending Invitations: {settings.pendingInvitations}</h3>
+              <h3 className="font-medium text-koffa-green">Pending Invitations: {pendingInvitations}</h3>
             </div>
             <p className="text-sm text-koffa-green-dark mb-4">
               Review and manage pending member invitations
@@ -519,50 +545,48 @@ const FamilyPage = () => {
             </svg>
           </Button>
           
-          {settings.navItems.slice(1, 4).map((item, index) => {
-            return (
-              <Button 
-                key={index}
-                variant="ghost" 
-                className={`p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 ${item === 'family' ? 'bg-koffa-beige-light' : ''}`}
-                onClick={() => navigate(`/${item}`)}
-              >
-                {item === 'pantry' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                    <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
-                    <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
-                    <path d="M10 2v9" />
-                  </svg>
-                ) : item === 'shopping' || item === 'lists' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                    <path d="M8 5h8l2 13H6z" />
-                    <path d="M5 8l14 1" />
-                    <path d="M9 3v2" />
-                    <path d="M15 3v2" />
-                    <path d="M11 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-                    <path d="M17 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-                  </svg>
-                ) : item === 'spaces' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                    <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-                    <path d="M3 9V6a2 2 0 0 1 2-2h2" />
-                  </svg>
-                ) : item === 'family' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                  </svg>
-                )}
-              </Button>
-            );
-          })}
+          {navItems.slice(1, 4).map((item, index) => (
+            <Button 
+              key={index}
+              variant="ghost" 
+              className={`p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 ${item === 'family' ? 'bg-koffa-beige-light' : ''}`}
+              onClick={() => navigate(`/${item}`)}
+            >
+              {item === 'pantry' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3" />
+                  <path d="M3 8v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8" />
+                  <path d="M10 2v9" />
+                </svg>
+              ) : item === 'shopping' || item === 'lists' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="M8 5h8l2 13H6z" />
+                  <path d="M5 8l14 1" />
+                  <path d="M9 3v2" />
+                  <path d="M15 3v2" />
+                  <path d="M11 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                  <path d="M17 23a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                </svg>
+              ) : item === 'spaces' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+                  <path d="M3 9V6a2 2 0 0 1 2-2h2" />
+                </svg>
+              ) : item === 'family' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              )}
+            </Button>
+          ))}
           
           <Button 
             variant="ghost" 
