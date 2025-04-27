@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = (e: React.FormEvent) => {
@@ -40,13 +40,6 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-koffa-beige-light flex flex-col">
-      {/* Header with date */}
-      <div className="bg-koffa-green text-white p-4 text-center">
-        <p className="text-sm font-medium">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
-      
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="mb-8 text-center">
           <Logo size="lg" />
@@ -56,7 +49,7 @@ const AuthPage = () => {
 
         <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
           <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-6">
+            <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger 
                 value="email" 
                 className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
@@ -68,6 +61,12 @@ const AuthPage = () => {
                 className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
               >
                 Phone
+              </TabsTrigger>
+              <TabsTrigger 
+                value="invite"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+              >
+                Invite Code
               </TabsTrigger>
             </TabsList>
             
@@ -156,6 +155,40 @@ const AuthPage = () => {
                   className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
                 >
                   Send Code
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="invite">
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 8v13H3V8" />
+                        <path d="M1 3h22v5H1z" />
+                        <path d="M10 12h4" />
+                      </svg>
+                    </span>
+                    <Input 
+                      type="text"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      placeholder="Enter your invitation code"
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
+                  onClick={() => {
+                    toast.info("This feature requires backend integration. Please connect to Supabase first.");
+                  }}
+                >
+                  Join Family
                 </Button>
               </form>
             </TabsContent>
