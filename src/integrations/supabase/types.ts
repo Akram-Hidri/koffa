@@ -9,7 +9,208 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      pantry_items: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          expiry_date: string | null
+          id: string
+          location: string | null
+          low_stock: boolean | null
+          name: string
+          notes: string | null
+          quantity: string
+          unit: string | null
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          location?: string | null
+          low_stock?: boolean | null
+          name: string
+          notes?: string | null
+          quantity: string
+          unit?: string | null
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          location?: string | null
+          low_stock?: boolean | null
+          name?: string
+          notes?: string | null
+          quantity?: string
+          unit?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      shopping_list_items: {
+        Row: {
+          added_by: string | null
+          checked: boolean | null
+          created_at: string
+          id: string
+          list_id: string
+          name: string
+          note: string | null
+          priority: string | null
+          quantity: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          checked?: boolean | null
+          created_at?: string
+          id?: string
+          list_id: string
+          name: string
+          note?: string | null
+          priority?: string | null
+          quantity: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          checked?: boolean | null
+          created_at?: string
+          id?: string
+          list_id?: string
+          name?: string
+          note?: string | null
+          priority?: string | null
+          quantity?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_lists: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          id: string
+          status: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      space_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed: boolean | null
+          created_at: string
+          due_date: string | null
+          id: string
+          recurrence: string | null
+          space_id: string
+          task: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed?: boolean | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          recurrence?: string | null
+          space_id: string
+          task: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed?: boolean | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          recurrence?: string | null
+          space_id?: string
+          task?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_tasks_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spaces: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
