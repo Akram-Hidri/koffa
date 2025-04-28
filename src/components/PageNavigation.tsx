@@ -5,11 +5,11 @@ import { Home, Utensils, ShoppingBag, Layers, Users } from 'lucide-react';
 
 const PageNavigation = () => {
   const location = useLocation();
-  const path = location.pathname;
 
+  // Function to determine if a route is active
   const isActive = (route: string) => {
-    if (route === '/home' && path === '/') return true;
-    return path.startsWith(route);
+    if (route === '/home' && (location.pathname === '/' || location.pathname === '/home')) return true;
+    return location.pathname.startsWith(route);
   };
 
   const navItems = [
@@ -21,7 +21,7 @@ const PageNavigation = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full border-t bg-white dark:bg-slate-800 py-2 px-4">
+    <nav className="fixed bottom-0 left-0 right-0 w-full border-t bg-white dark:bg-slate-800 py-2 px-4 z-10">
       <div className="flex justify-between max-w-screen-md mx-auto">
         {navItems.map((item) => (
           <Link
@@ -38,7 +38,7 @@ const PageNavigation = () => {
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   );
 };
 

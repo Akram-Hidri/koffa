@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,8 +15,9 @@ import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccessibilitySettings from "./pages/settings/AccessibilitySettings";
 import FamilyPage from "./pages/FamilyPage";
 import MemberPage from "./pages/MemberPage";
+import FamilyInvitationsPage from "./pages/FamilyInvitationsPage";
 
-// New pages we created
+// Pages
 import PantryPage from "./pages/pantry/PantryPage";
 import AddPantryItemPage from "./pages/pantry/AddPantryItemPage";
 import ShoppingListsPage from "./pages/shopping/ShoppingListsPage";
@@ -44,35 +44,36 @@ const App = () => (
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/home" element={<HomePage />} />
+        
+        {/* Settings routes */}
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/appearance" element={<AppearanceSettings />} />
         <Route path="/settings/account" element={<AccountSettings />} />
         <Route path="/settings/notifications" element={<NotificationSettings />} />
         <Route path="/settings/accessibility" element={<AccessibilitySettings />} />
+        
+        {/* Family routes */}
         <Route path="/family" element={<FamilyPage />} />
         <Route path="/family/member/:id" element={<MemberPage />} />
+        <Route path="/family/invitations" element={<FamilyInvitationsPage />} />
         
-        {/* New routes */}
+        {/* Pantry routes */}
         <Route path="/pantry" element={<PantryPage />} />
         <Route path="/pantry/add" element={<AddPantryItemPage />} />
+        
+        {/* Shopping routes */}
         <Route path="/shopping" element={<ShoppingListsPage />} />
         <Route path="/shopping/list/:id" element={<ShoppingListDetailPage />} />
-        <Route path="/shopping/new" element={<ShoppingListsPage />} /> {/* Redirect to shopping page with creation modal */}
+        <Route path="/shopping/new" element={<ShoppingListsPage />} />
+        
+        {/* Spaces routes */}
         <Route path="/spaces" element={<SpacesPage />} />
         <Route path="/spaces/:id" element={<SpaceDetailPage />} />
+        
+        {/* Other pages */}
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         
-        {/* Original placeholder routes */}
-        <Route path="/grab-and-go" element={<HomePage />} />
-        <Route path="/lists" element={<HomePage />} />
-        <Route path="/lists/:id" element={<HomePage />} />
-        <Route path="/lists/new" element={<HomePage />} />
-        <Route path="/profile" element={<HomePage />} />
-        <Route path="/suggestions" element={<HomePage />} />
-        <Route path="/reminders" element={<HomePage />} />
-        <Route path="/family/staff" element={<FamilyPage />} />
-        <Route path="/family/invitations" element={<FamilyPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
