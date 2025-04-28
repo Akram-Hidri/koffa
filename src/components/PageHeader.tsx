@@ -16,7 +16,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title }) => {
           <Link to="/home" className="flex items-center">
             <Logo size="sm" />
           </Link>
-          <h1 className="text-xl font-semibold">{title}</h1>
+          <h1 className="text-xl font-semibold text-koffa-green-dark dark:text-green-300">{title}</h1>
         </div>
         
         <div className="flex items-center gap-4">

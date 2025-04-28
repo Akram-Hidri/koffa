@@ -29,11 +29,15 @@ const PageNavigation = () => {
             to={item.path}
             className={`flex flex-col items-center p-2 rounded-lg text-sm ${
               isActive(item.path)
-                ? 'text-koffa-green dark:text-green-300 font-medium'
+                ? 'text-koffa-green font-medium'
                 : 'text-gray-500 dark:text-gray-400'
             }`}
           >
-            <item.icon className="h-5 w-5 mb-1" />
+            <item.icon className={`h-5 w-5 mb-1 ${
+              isActive(item.path)
+                ? 'text-koffa-green dark:text-green-300'
+                : 'text-gray-500 dark:text-gray-400'
+            }`} />
             <span>{item.name}</span>
           </Link>
         ))}
