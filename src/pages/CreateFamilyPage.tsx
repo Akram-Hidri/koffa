@@ -25,15 +25,20 @@ const CreateFamilyPage = () => {
     setIsLoading(true);
     
     try {
-      // Here we would create a family in the database
-      // For now, this is just a placeholder
+      // Since there's no family table yet, we'll update the user's profile
+      // with the family name as a temporary solution
+      if (!user) {
+        toast.error("You must be logged in to create a family");
+        navigate('/auth');
+        return;
+      }
       
       const { data, error } = await supabase
-        .from('family')
-        .insert([{ 
-          name: familyName,
-          created_by: user?.id,
-        }])
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          username: familyName // Using username field to store family name temporarily
+        })
         .select();
       
       if (error) throw error;

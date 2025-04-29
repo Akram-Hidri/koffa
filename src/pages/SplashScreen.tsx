@@ -17,7 +17,7 @@ const SplashScreen = () => {
   return (
     <div className="min-h-screen bg-koffa-beige-light flex flex-col items-center justify-center">
       <div className="animate-fade-in text-center">
-        <Logo size="xl" />
+        <Logo size="lg" />
         <p className="text-koffa-green mt-6 text-xl font-medium">
           Family Grocery Simplified
         </p>

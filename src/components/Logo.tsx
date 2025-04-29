@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -11,6 +11,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
     sm: 'w-8 h-8',
     md: 'w-16 h-16',
     lg: 'w-24 h-24',
+    xl: 'w-32 h-32',
   };
 
   return (
@@ -23,7 +24,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className = '' }) => {
         />
       </div>
       {size !== 'sm' && (
-        <h1 className={`font-bold text-koffa-green ${size === 'lg' ? 'text-2xl' : 'text-xl'} mt-1`}>
+        <h1 className={`font-bold text-koffa-green ${size === 'lg' || size === 'xl' ? 'text-2xl' : 'text-xl'} mt-1`}>
           KOFFA
         </h1>
       )}
