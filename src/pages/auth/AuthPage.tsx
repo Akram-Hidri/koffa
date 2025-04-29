@@ -1,101 +1,216 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import Logo from '@/components/Logo';
+import { Eye, EyeOff, Mail, Lock, Package } from 'lucide-react';
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast.success('Registration successful! Please check your email to verify your account.');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        navigate('/home');
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      navigate('/home');
+      toast.success("Successfully signed in!");
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Failed to sign in");
     } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleInviteCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // In a real implementation, this would verify the invite code against the database
+      // For now, we'll just simulate this process
+      if (!inviteCode.trim()) {
+        throw new Error("Please enter an invitation code");
+      }
+      
+      // Simulating validation
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success("Invitation code accepted!");
+        navigate('/signup', { state: { inviteCode } });
+      }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || "Invalid invitation code");
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-slate-900 p-4">
-      <div className="mb-8">
-        <Logo size="lg" />
-      </div>
-      
-      <Card className="w-full max-w-md p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">
-          {isSignUp ? 'Create an Account' : 'Welcome Back'}
-        </h1>
+    <div className="min-h-screen bg-koffa-beige-light flex flex-col">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="mb-8 text-center">
+          <Logo size="lg" />
+          <h2 className="text-2xl font-semibold text-koffa-green mt-6">Welcome to Koffa</h2>
+          <p className="text-koffa-green-dark mt-1">Your family grocery companion</p>
+        </div>
+
+        <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger 
+                value="email" 
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+              >
+                Email
+              </TabsTrigger>
+              <TabsTrigger 
+                value="phone"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+              >
+                Phone
+              </TabsTrigger>
+              <TabsTrigger 
+                value="invite"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+              >
+                Invite Code
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="email">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-koffa-green">Email</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Mail size={18} />
+                    </span>
+                    <Input 
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-koffa-green">Password</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Lock size={18} />
+                    </span>
+                    <Input 
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      placeholder="Enter your password"
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Log In"}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="phone">
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-koffa-green">Phone</label>
+                  <Input 
+                    type="tel"
+                    className="border-koffa-beige focus-visible:ring-koffa-green"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                
+                <Button 
+                  type="button" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
+                  onClick={() => toast.info("Phone authentication coming soon")}
+                >
+                  Send Code
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="invite">
+              <form onSubmit={handleInviteCode} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Package size={18} />
+                    </span>
+                    <Input 
+                      type="text"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      placeholder="Enter your invitation code"
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Verifying..." : "Join Family"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </div>
         
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        <div className="mt-8 text-center">
+          <div className="flex items-center justify-center my-4">
+            <div className="border-t flex-1 border-koffa-beige"></div>
+            <span className="px-4 text-sm text-koffa-green-dark">OR</span>
+            <div className="border-t flex-1 border-koffa-beige"></div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
-          </Button>
-        </form>
-        
-        <div className="mt-4 text-center">
-          <Button
-            variant="link"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm"
+          <p className="text-koffa-green-dark mb-2">New to Koffa?</p>
+          <Button 
+            onClick={() => navigate('/signup')}
+            variant="outline" 
+            className="w-full max-w-md border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
           >
-            {isSignUp
-              ? 'Already have an account? Sign in'
-              : "Don't have an account? Sign up"}
+            Create Account
           </Button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

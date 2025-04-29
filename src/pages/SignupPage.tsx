@@ -1,19 +1,24 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Logo from '@/components/Logo';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const inviteCode = location.state?.inviteCode || '';
+  
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    inviteCode: inviteCode,
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +26,7 @@ const SignupPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -31,23 +36,32 @@ const SignupPage = () => {
       return;
     }
     
-    // Simulate signup (would connect to backend in real app)
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Register with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            invite_code: formData.inviteCode,
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
       toast.success("Account created successfully!");
       navigate('/home');
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create account");
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
     <div className="min-h-screen bg-koffa-beige-light flex flex-col">
-      {/* Header with date */}
-      <div className="bg-koffa-green text-white p-4 text-center">
-        <p className="text-sm font-medium">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-      </div>
-      
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
         <div className="mb-6 text-center">
           <Logo size="md" />
@@ -108,6 +122,20 @@ const SignupPage = () => {
               />
             </div>
             
+            {formData.inviteCode && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
+                <Input 
+                  type="text"
+                  name="inviteCode"
+                  value={formData.inviteCode}
+                  onChange={handleChange}
+                  className="border-koffa-beige focus-visible:ring-koffa-green bg-koffa-beige-light"
+                  readOnly
+                />
+              </div>
+            )}
+            
             <Button 
               type="submit" 
               className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white mt-4" 
@@ -121,7 +149,7 @@ const SignupPage = () => {
         <div className="mt-8 text-center">
           <p className="text-koffa-green-dark">Already have an account?</p>
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/auth')}
             variant="link" 
             className="text-koffa-green hover:text-koffa-accent-blue"
           >

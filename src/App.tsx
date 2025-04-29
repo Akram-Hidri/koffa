@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import SplashScreen from "./pages/SplashScreen";
 import AuthPage from "./pages/auth/AuthPage";
@@ -18,6 +18,7 @@ import AccessibilitySettings from "./pages/settings/AccessibilitySettings";
 import FamilyPage from "./pages/FamilyPage";
 import MemberPage from "./pages/MemberPage";
 import FamilyInvitationsPage from "./pages/FamilyInvitationsPage";
+import CreateFamilyPage from "./pages/CreateFamilyPage";
 import PantryPage from "./pages/pantry/PantryPage";
 import AddPantryItemPage from "./pages/pantry/AddPantryItemPage";
 import ShoppingListsPage from "./pages/shopping/ShoppingListsPage";
@@ -42,9 +43,10 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<SplashScreen />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/create-family" element={<CreateFamilyPage />} />
           
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
