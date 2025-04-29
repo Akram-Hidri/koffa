@@ -9,6 +9,97 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      families: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          family_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          family_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          family_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          family_id: string
+          id: string
+          is_used: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          family_id: string
+          id?: string
+          is_used?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          family_id?: string
+          id?: string
+          is_used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pantry_items: {
         Row: {
           added_by: string | null
@@ -55,22 +146,33 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          family_id: string | null
           id: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          family_id?: string | null
           id: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          family_id?: string | null
           id?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shopping_list_items: {
         Row: {
@@ -216,7 +318,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_valid_invite_code: {
+        Args: { code_param: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

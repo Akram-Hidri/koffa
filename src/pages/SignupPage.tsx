@@ -38,18 +38,61 @@ const SignupPage = () => {
     
     try {
       // Register with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             full_name: formData.name,
-            invite_code: formData.inviteCode,
           }
         }
       });
       
-      if (error) throw error;
+      if (authError) throw authError;
+      
+      // If there's an invite code, process it
+      if (formData.inviteCode) {
+        // First, find the invitation details
+        const { data: inviteData, error: inviteError } = await supabase
+          .from('invitations')
+          .select('id, family_id')
+          .eq('code', formData.inviteCode)
+          .eq('is_used', false)
+          .single();
+        
+        if (inviteError && inviteError.code !== 'PGRST116') {
+          throw inviteError;
+        }
+        
+        if (inviteData && authData.user) {
+          // Add the user to the family
+          const { error: memberError } = await supabase
+            .from('family_members')
+            .insert({
+              family_id: inviteData.family_id,
+              user_id: authData.user.id,
+              role: 'member'
+            });
+          
+          if (memberError) throw memberError;
+          
+          // Update the invitation to mark it as used
+          const { error: updateError } = await supabase
+            .from('invitations')
+            .update({ is_used: true })
+            .eq('id', inviteData.id);
+          
+          if (updateError) throw updateError;
+          
+          // Update the user's profile with the family_id
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ family_id: inviteData.family_id })
+            .eq('id', authData.user.id);
+          
+          if (profileError) throw profileError;
+        }
+      }
       
       toast.success("Account created successfully!");
       navigate('/home');

@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,8 @@ import { Eye, EyeOff, Mail, Lock, Package } from 'lucide-react';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const defaultTab = location.state?.defaultTab || 'email';
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,20 +43,25 @@ const AuthPage = () => {
     setIsLoading(true);
     
     try {
-      // In a real implementation, this would verify the invite code against the database
-      // For now, we'll just simulate this process
       if (!inviteCode.trim()) {
         throw new Error("Please enter an invitation code");
       }
       
-      // Simulating validation
-      setTimeout(() => {
-        setIsLoading(false);
-        toast.success("Invitation code accepted!");
-        navigate('/signup', { state: { inviteCode } });
-      }, 1500);
+      // Check if the invite code is valid using our database function
+      const { data, error } = await supabase
+        .rpc('is_valid_invite_code', { code_param: inviteCode.trim() });
+        
+      if (error) throw error;
+      
+      if (!data) {
+        throw new Error("Invalid or expired invitation code");
+      }
+      
+      toast.success("Invitation code accepted!");
+      navigate('/signup', { state: { inviteCode: inviteCode.trim() } });
     } catch (error: any) {
       toast.error(error.message || "Invalid invitation code");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -70,7 +76,7 @@ const AuthPage = () => {
         </div>
 
         <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
-          <Tabs defaultValue="email" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger 
                 value="email" 

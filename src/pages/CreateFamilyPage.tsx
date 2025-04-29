@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,8 +24,7 @@ const CreateFamilyPage = () => {
     setIsLoading(true);
     
     try {
-      // Since there's no family table yet, we'll update the user's profile
-      // with the family name as a temporary solution
+      // Create a new family using the families table
       if (!user) {
         toast.error("You must be logged in to create a family");
         navigate('/auth');
@@ -34,10 +32,10 @@ const CreateFamilyPage = () => {
       }
       
       const { data, error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          username: familyName // Using username field to store family name temporarily
+        .from('families')
+        .insert({
+          name: familyName,
+          created_by: user.id
         })
         .select();
       
@@ -46,11 +44,7 @@ const CreateFamilyPage = () => {
       toast.success("Family created successfully!");
       navigate('/home');
     } catch (error: any) {
-      if (error.message.includes('does not exist')) {
-        toast.error("Family functionality requires database setup");
-      } else {
-        toast.error(error.message || "Failed to create family");
-      }
+      toast.error(error.message || "Failed to create family");
     } finally {
       setIsLoading(false);
     }

@@ -1,25 +1,54 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useSettings } from '@/contexts/SettingsContext';
-import { ArrowLeft, Bell, Settings } from 'lucide-react';
+import { ArrowLeft, Bell, Settings, Copy } from 'lucide-react';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
 
 const FamilyInvitationsPage = () => {
   const navigate = useNavigate();
-  const { settings } = useSettings();
-  
-  // Add a default settings object to prevent null references
-  const defaultSettings = {
-    pendingInvitations: 0,
-    navItems: ["home", "pantry", "shopping", "spaces", "family"]
+  const { user } = useAuth();
+  const [invitations, setInvitations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchInvitations();
+    }
+  }, [user]);
+
+  const fetchInvitations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invitations')
+        .select('*')
+        .eq('created_by', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setInvitations(data || []);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load invitations');
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  // Use safe access to settings with fallbacks
-  const pendingInvitations = settings?.pendingInvitations ?? defaultSettings.pendingInvitations;
-  const navItems = Array.isArray(settings?.navItems) ? settings.navItems : defaultSettings.navItems;
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code)
+      .then(() => {
+        toast.success('Invitation code copied to clipboard');
+      })
+      .catch(() => {
+        toast.error('Failed to copy code');
+      });
+  };
   
   return (
     <div className="min-h-screen bg-koffa-beige-light pb-24">
@@ -36,7 +65,7 @@ const FamilyInvitationsPage = () => {
           <Logo size="sm" />
         </div>
         
-        <h1 className="text-xl font-semibold text-koffa-green">Pending Invitations</h1>
+        <h1 className="text-xl font-semibold text-koffa-green">Family Invitations</h1>
         
         <div className="flex items-center gap-3">
           <Button 
@@ -58,7 +87,7 @@ const FamilyInvitationsPage = () => {
       <div className="p-4">
         <div className="mb-6">
           <p className="text-koffa-green-dark mb-2">
-            You currently have {pendingInvitations} pending invitation{pendingInvitations !== 1 ? 's' : ''}.
+            You currently have {invitations.length} active invitation{invitations.length !== 1 ? 's' : ''}.
           </p>
           <Button 
             className="bg-koffa-green text-white hover:bg-koffa-green-dark"
@@ -68,26 +97,41 @@ const FamilyInvitationsPage = () => {
           </Button>
         </div>
         
-        {pendingInvitations > 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <div className="animate-spin h-8 w-8 border-4 border-koffa-green border-t-transparent rounded-full"></div>
+          </div>
+        ) : invitations.length > 0 ? (
           <div className="space-y-4">
-            <Card className="p-4 border-koffa-beige/30">
-              <p className="text-lg font-medium text-koffa-green">Invitation Details</p>
-              <p className="text-sm text-gray-500 mb-4">This is where pending invitations will be displayed once implemented.</p>
-              
-              <div className="border-t border-koffa-beige pt-4 mt-2">
-                <Button
-                  variant="outline"
-                  className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                  onClick={() => navigate('/family')}
-                >
-                  Return to Family
-                </Button>
-              </div>
-            </Card>
+            {invitations.map(invitation => (
+              <Card key={invitation.id} className="p-4 border-koffa-beige/30">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-lg font-medium text-koffa-green">Invitation Code:</p>
+                    <p className="text-xl font-mono font-semibold">{formatInviteCodeForDisplay(invitation.code)}</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyToClipboard(invitation.code)}
+                    className="flex items-center gap-1"
+                  >
+                    <Copy size={14} />
+                    Copy
+                  </Button>
+                </div>
+                
+                <div className="mt-3 text-sm text-koffa-green-dark">
+                  <p>Created: {new Date(invitation.created_at).toLocaleDateString()}</p>
+                  <p>Expires: {new Date(invitation.expires_at).toLocaleDateString()}</p>
+                  <p>Status: {invitation.is_used ? 'Used' : 'Active'}</p>
+                </div>
+              </Card>
+            ))}
           </div>
         ) : (
           <Card className="p-6 border-koffa-beige/30 text-center">
-            <p className="text-lg font-medium text-koffa-green mb-2">No Pending Invitations</p>
+            <p className="text-lg font-medium text-koffa-green mb-2">No Active Invitations</p>
             <p className="text-sm text-gray-500 mb-6">You don't have any pending invitations at the moment.</p>
             
             <Button
