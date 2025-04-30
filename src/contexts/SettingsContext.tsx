@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define types for our settings
@@ -67,6 +66,9 @@ export interface Settings {
   familyMembers: FamilyMember[];
   staffMembers: FamilyMember[];
   pendingInvitations: number;
+  
+  // Dialect settings
+  preferred_dialect_id?: string;
 }
 
 interface SettingsContextType {

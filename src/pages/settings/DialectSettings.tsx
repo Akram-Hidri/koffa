@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -76,11 +75,13 @@ const DialectSettings = () => {
   
   const fetchComparisonTerms = async () => {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('custom_terms')
         .select('custom_terms.*, dialects.name as dialect_name')
-        .eq('standard_term', searchTerm || 'Shopping List')
-        .join('dialects', { 'custom_terms.dialect_id': 'dialects.id' });
+        .eq('standard_term', searchTerm || 'Shopping List');
+        
+      // Using custom join for TypeScript compatibility
+      const { data, error } = await query.eq('custom_terms.dialect_id', 'dialects.id');
         
       if (error) throw error;
       
@@ -93,7 +94,7 @@ const DialectSettings = () => {
 
   const handleDialectChange = (dialectId: string) => {
     setSelectedDialect(dialectId);
-    updateSettings({ preferred_dialect_id: dialectId });
+    updateSettings({ preferred_dialect_id: dialectId } as any);
     toast.success('Dialect preference updated');
   };
   
