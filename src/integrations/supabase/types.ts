@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_terms: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          custom_term: string
+          dialect_id: string | null
+          id: string
+          standard_term: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          custom_term: string
+          dialect_id?: string | null
+          id?: string
+          standard_term: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          custom_term?: string
+          dialect_id?: string | null
+          id?: string
+          standard_term?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_terms_dialect_id_fkey"
+            columns: ["dialect_id"]
+            isOneToOne: false
+            referencedRelation: "dialects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dialects: {
+        Row: {
+          base_language: string
+          id: string
+          name: string
+          region: string | null
+        }
+        Insert: {
+          base_language?: string
+          id?: string
+          name: string
+          region?: string | null
+        }
+        Update: {
+          base_language?: string
+          id?: string
+          name?: string
+          region?: string | null
+        }
+        Relationships: []
+      }
       families: {
         Row: {
           created_at: string
@@ -145,24 +201,72 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bold_text: boolean | null
           created_at: string
           family_id: string | null
+          high_contrast_mode: boolean | null
           id: string
+          input_method: string | null
+          language: string | null
+          navigation_items: string[] | null
+          preferred_dialect_id: string | null
+          reduce_animations: boolean | null
+          reduce_motion: boolean | null
+          reduce_transparency: boolean | null
+          screen_reader_compatible: boolean | null
+          show_labels_with_icons: boolean | null
+          simplified_mode: boolean | null
+          text_size: string | null
+          theme: string | null
+          touch_accommodations: boolean | null
           username: string | null
+          voice_commands: boolean | null
         }
         Insert: {
           avatar_url?: string | null
+          bold_text?: boolean | null
           created_at?: string
           family_id?: string | null
+          high_contrast_mode?: boolean | null
           id: string
+          input_method?: string | null
+          language?: string | null
+          navigation_items?: string[] | null
+          preferred_dialect_id?: string | null
+          reduce_animations?: boolean | null
+          reduce_motion?: boolean | null
+          reduce_transparency?: boolean | null
+          screen_reader_compatible?: boolean | null
+          show_labels_with_icons?: boolean | null
+          simplified_mode?: boolean | null
+          text_size?: string | null
+          theme?: string | null
+          touch_accommodations?: boolean | null
           username?: string | null
+          voice_commands?: boolean | null
         }
         Update: {
           avatar_url?: string | null
+          bold_text?: boolean | null
           created_at?: string
           family_id?: string | null
+          high_contrast_mode?: boolean | null
           id?: string
+          input_method?: string | null
+          language?: string | null
+          navigation_items?: string[] | null
+          preferred_dialect_id?: string | null
+          reduce_animations?: boolean | null
+          reduce_motion?: boolean | null
+          reduce_transparency?: boolean | null
+          screen_reader_compatible?: boolean | null
+          show_labels_with_icons?: boolean | null
+          simplified_mode?: boolean | null
+          text_size?: string | null
+          theme?: string | null
+          touch_accommodations?: boolean | null
           username?: string | null
+          voice_commands?: boolean | null
         }
         Relationships: [
           {
@@ -170,6 +274,13 @@ export type Database = {
             columns: ["family_id"]
             isOneToOne: false
             referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_preferred_dialect_id_fkey"
+            columns: ["preferred_dialect_id"]
+            isOneToOne: false
+            referencedRelation: "dialects"
             referencedColumns: ["id"]
           },
         ]
