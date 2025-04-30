@@ -11,6 +11,7 @@ import AuthPage from "./pages/auth/AuthPage";
 import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
+import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import AppearanceSettings from "./pages/settings/AppearanceSettings";
 import AccountSettings from "./pages/settings/AccountSettings";
@@ -55,6 +56,7 @@ const App = () => (
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/home" element={<HomePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/appearance" element={<AppearanceSettings />} />
               <Route path="/settings/account" element={<AccountSettings />} />
