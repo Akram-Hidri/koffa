@@ -18,6 +18,7 @@ import AccountSettings from "./pages/settings/AccountSettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import AccessibilitySettings from "./pages/settings/AccessibilitySettings";
 import DialectSettings from "./pages/settings/DialectSettings";
+import NavigationSettings from "./pages/settings/NavigationSettings";
 import FamilyPage from "./pages/FamilyPage";
 import MemberPage from "./pages/MemberPage";
 import FamilyInvitationsPage from "./pages/FamilyInvitationsPage";
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/settings/notifications" element={<NotificationSettings />} />
               <Route path="/settings/accessibility" element={<AccessibilitySettings />} />
               <Route path="/settings/dialect" element={<DialectSettings />} />
+              <Route path="/settings/navigation" element={<NavigationSettings />} />
               <Route path="/family" element={<FamilyPage />} />
               <Route path="/family/member/:id" element={<MemberPage />} />
               <Route path="/family/invitations" element={<FamilyInvitationsPage />} />
