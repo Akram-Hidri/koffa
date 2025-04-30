@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 60 33% 92%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 120 16% 36%;
+    --primary-foreground: 60 33% 92%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 13% 49%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -35,14 +35,14 @@
 
     --radius: 0.5rem;
     
-    /* Koffa custom colors */
-    --koffa-green: 120 34% 20%;
-    --koffa-green-dark: 120 34% 15%;
-    --koffa-beige: 45 25% 85%;
-    --koffa-beige-light: 45 25% 95%;
-    --koffa-beige-dark: 45 25% 75%;
+    /* Koffa custom colors - updated with new palette */
+    --koffa-green: 120 16% 36%;
+    --koffa-green-dark: 120 16% 30%;
+    --koffa-beige: 60 33% 92%;
+    --koffa-beige-light: 60 33% 96%;
+    --koffa-beige-dark: 43 11% 57%;
     --koffa-accent-red: 0 70% 50%;
-    --koffa-accent-blue: 210 70% 50%;
+    --koffa-accent-blue: 210 13% 49%;
     --koffa-accent-orange: 30 70% 50%;
     --koffa-accent-green: 120 70% 40%;
   }
@@ -57,7 +57,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 120 16% 55%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;

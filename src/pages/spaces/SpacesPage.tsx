@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, LayoutGrid } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import SpaceCard from '@/components/spaces/SpaceCard';
 import { Card } from '@/components/ui/card';
@@ -62,16 +62,22 @@ const SpacesPage = () => {
   return (
     <PageLayout title="Home Spaces">
       <div className="space-y-6">
+        {/* Header with icon */}
+        <div className="flex items-center mb-4">
+          <LayoutGrid className="h-6 w-6 mr-2 text-[#586b4d]" />
+          <h1 className="text-lg font-semibold">Manage Your Spaces</h1>
+        </div>
+        
         {/* Header controls */}
         <div className="flex justify-between items-center">
-          <select className="text-sm rounded-md border px-3 py-1 bg-white dark:bg-slate-800">
+          <select className="text-sm rounded-md border border-[#98948c] px-3 py-1 bg-white dark:bg-slate-800">
             <option value="all">Manage ▼ All Spaces</option>
             <option value="living">Living Areas</option>
             <option value="bedrooms">Bedrooms</option>
             <option value="outdoor">Outdoor</option>
           </select>
           
-          <Button onClick={handleAddSpace}>
+          <Button onClick={handleAddSpace} className="bg-[#586b4d] hover:bg-[#586b4d]/90">
             <Plus className="mr-1 h-4 w-4" />
             Add New Space
           </Button>
@@ -91,12 +97,12 @@ const SpacesPage = () => {
         </div>
         
         {/* Upcoming maintenance */}
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold text-center mb-3">Upcoming Maintenance</h3>
+        <Card className="p-4 border-[#98948c]/30 bg-white">
+          <h3 className="text-lg font-semibold text-center mb-3 text-[#586b4d]">Upcoming Maintenance</h3>
           <ul className="space-y-2">
             {UPCOMING_MAINTENANCE.map((item, index) => (
               <li key={index} className="flex">
-                <span className="mr-2">•</span>
+                <span className="mr-2 text-[#586b4d]">•</span>
                 <span>{item.task} - <span className="text-amber-600 dark:text-amber-400">{item.due}</span></span>
               </li>
             ))}

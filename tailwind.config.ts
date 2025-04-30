@@ -65,19 +65,20 @@ export default {
 				},
 				koffa: {
 					green: {
-						DEFAULT: '#556B4C', // Primary olive green
-						dark: '#415339', 
-						light: '#799070',
+						DEFAULT: '#586b4d', // Axolotl
+						dark: '#4a5a41',
+						light: '#6a7e5c',
 					},
 					beige: {
-						DEFAULT: '#DECEA0', // Primary beige color
-						light: '#F5F1E0',
-						dark: '#C2B280',
+						DEFAULT: '#f3f3e3', // Ecru White
+						light: '#f9f9f2',
+						dark: '#e5e5d2',
 					},
 					accent: {
-						orange: '#E6A44E', // Accent orange color
-						red: '#C05746', // Accent red for warnings/errors
-						blue: '#4C97AB', // Accent blue for info
+						blue: '#6a798f', // Slate Gray
+						gray: '#98948c', // Zorba
+						orange: '#E6A44E', 
+						red: '#C05746',
 					}
 				}
 			},

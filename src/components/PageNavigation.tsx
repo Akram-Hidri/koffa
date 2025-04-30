@@ -3,7 +3,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
-import { Home, Package, ShoppingCart, Home as SpacesIcon, Users, User, Calendar, ListTodo, BookOpen, Settings } from 'lucide-react';
+import { Home, Package, ShoppingCart, LayoutGrid, Users, User, Calendar, ListTodo, BookOpen, Settings } from 'lucide-react';
 
 const PageNavigation = () => {
   const location = useLocation();
@@ -21,7 +21,7 @@ const PageNavigation = () => {
     home: Home,
     pantry: Package,
     shopping: ShoppingCart,
-    spaces: SpacesIcon,
+    spaces: LayoutGrid, // Changed from Home to LayoutGrid
     family: Users,
     calendar: Calendar,
     tasks: ListTodo,
@@ -40,21 +40,21 @@ const PageNavigation = () => {
     return (
       <IconComponent 
         size={24} 
-        className={active ? "text-koffa-green" : "text-koffa-green-dark"}
+        className={active ? "text-[#586b4d]" : "text-[#6a798f]"}
       />
     );
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-3 w-[80%] max-w-sm border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl z-40">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-3 w-[80%] max-w-sm border border-[#f3f3e3]/20 transition-all duration-300 hover:shadow-xl z-40">
       <div className="flex justify-around items-center">
         {/* Show up to 5 navigation items based on settings */}
         {navItems.slice(0, 4).map((item, index) => (
           <Button 
             key={index}
             variant="ghost" 
-            className={`p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 ${
-              isActive(`/${item}`) ? 'bg-koffa-beige-light' : ''
+            className={`p-2 h-auto w-14 hover:bg-[#f3f3e3] rounded-full transition-all duration-300 ${
+              isActive(`/${item}`) ? 'bg-[#f3f3e3]' : ''
             }`}
             onClick={() => navigate(`/${item}`)}
           >
@@ -65,13 +65,13 @@ const PageNavigation = () => {
         {/* Profile button is always shown on the right */}
         <Button 
           variant="ghost" 
-          className={`p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 ${
-            isActive('/profile') ? 'bg-koffa-beige-light' : ''
+          className={`p-2 h-auto w-14 hover:bg-[#f3f3e3] rounded-full transition-all duration-300 ${
+            isActive('/profile') ? 'bg-[#f3f3e3]' : ''
           }`}
           onClick={() => navigate('/profile')}
         >
-          <div className="w-8 h-8 rounded-full bg-koffa-beige flex items-center justify-center text-sm font-medium text-koffa-green">
-            <User size={20} className={isActive('/profile') ? "text-koffa-green" : "text-koffa-green-dark"} />
+          <div className="w-8 h-8 rounded-full bg-[#f3f3e3] flex items-center justify-center text-sm font-medium text-[#586b4d]">
+            <User size={20} className={isActive('/profile') ? "text-[#586b4d]" : "text-[#6a798f]"} />
           </div>
         </Button>
       </div>
