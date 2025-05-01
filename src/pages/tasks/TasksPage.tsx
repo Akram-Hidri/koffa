@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, ListTodo, CheckCircle } from 'lucide-react';
@@ -40,7 +39,7 @@ const TasksPage = () => {
             space_id,
             spaces:space_id (name)
           `)
-          .order('due_date', { ascending: true, nullsLast: true });
+          .order('due_date', { ascending: true });
         
         if (error) throw error;
         
