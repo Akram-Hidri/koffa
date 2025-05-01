@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import Logo from '@/components/Logo';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -91,6 +92,8 @@ const SignupPage = () => {
             .eq('id', authData.user.id);
           
           if (profileError) throw profileError;
+          
+          toast.success("You've joined a family!");
         }
       }
       
@@ -171,11 +174,13 @@ const SignupPage = () => {
                 <Input 
                   type="text"
                   name="inviteCode"
-                  value={formData.inviteCode}
-                  onChange={handleChange}
-                  className="border-koffa-beige focus-visible:ring-koffa-green bg-koffa-beige-light"
+                  value={formatInviteCodeForDisplay(formData.inviteCode)}
+                  className="border-koffa-beige focus-visible:ring-koffa-green bg-koffa-beige-light font-mono text-center"
                   readOnly
                 />
+                <p className="text-xs text-green-600 font-medium">
+                  Valid invitation code - you'll be added to a family
+                </p>
               </div>
             )}
             

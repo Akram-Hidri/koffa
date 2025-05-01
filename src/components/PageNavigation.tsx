@@ -33,8 +33,8 @@ const PageNavigation = () => {
   const navItems = settings?.navItems || ['home', 'pantry', 'shopping', 'spaces', 'family'];
 
   // Render the icon for a specific navigation item
-  const renderNavIcon = (item) => {
-    const IconComponent = navIconMap[item];
+  const renderNavIcon = (item: string) => {
+    const IconComponent = navIconMap[item as keyof typeof navIconMap];
     const active = isActive(`/${item}`);
     
     return (

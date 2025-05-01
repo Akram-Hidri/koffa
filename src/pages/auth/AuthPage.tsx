@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Eye, EyeOff, Mail, Lock, Package } from 'lucide-react';
+import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -47,9 +49,12 @@ const AuthPage = () => {
         throw new Error("Please enter an invitation code");
       }
       
+      // Remove any formatting (like dashes) from the invite code
+      const cleanCode = inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      
       // Check if the invite code is valid using our database function
       const { data, error } = await supabase
-        .rpc('is_valid_invite_code', { code_param: inviteCode.trim() });
+        .rpc('is_valid_invite_code', { code_param: cleanCode });
         
       if (error) throw error;
       
@@ -58,12 +63,23 @@ const AuthPage = () => {
       }
       
       toast.success("Invitation code accepted!");
-      navigate('/signup', { state: { inviteCode: inviteCode.trim() } });
+      navigate('/signup', { state: { inviteCode: cleanCode } });
     } catch (error: any) {
       toast.error(error.message || "Invalid invitation code");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to format invite code as user types
+  const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove any non-alphanumeric characters
+    const rawValue = e.target.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    
+    // Only allow up to 8 characters
+    if (rawValue.length > 8) return;
+    
+    setInviteCode(rawValue);
   };
 
   return (
@@ -180,18 +196,21 @@ const AuthPage = () => {
                     </span>
                     <Input 
                       type="text"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
-                      placeholder="Enter your invitation code"
+                      value={formatInviteCodeForDisplay(inviteCode)}
+                      onChange={handleInviteCodeChange}
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green font-mono tracking-wider text-center"
+                      placeholder="XXXX-XXXX"
                     />
                   </div>
+                  <p className="text-xs text-gray-500">
+                    Enter the 8-character invitation code you received from a family member
+                  </p>
                 </div>
                 
                 <Button 
                   type="submit" 
                   className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
-                  disabled={isLoading}
+                  disabled={isLoading || inviteCode.length < 1}
                 >
                   {isLoading ? "Verifying..." : "Join Family"}
                 </Button>

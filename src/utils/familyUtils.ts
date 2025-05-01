@@ -43,3 +43,14 @@ export const getFamilyForUser = async (userId: string) => {
   // User has no family
   return null;
 };
+
+export const getFamilyInvitations = async (familyId: string) => {
+  const { data, error } = await supabase
+    .from('invitations')
+    .select('*')
+    .eq('family_id', familyId)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
