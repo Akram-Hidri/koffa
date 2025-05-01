@@ -42,6 +42,7 @@ const SpacesPage = () => {
       const { data: spacesData, error: spacesError } = await supabase
         .from('spaces')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (spacesError) throw spacesError;
@@ -49,7 +50,8 @@ const SpacesPage = () => {
       // Then get all tasks to calculate stats
       const { data: tasksData, error: tasksError } = await supabase
         .from('space_tasks')
-        .select('id, space_id, completed');
+        .select('id, space_id, completed')
+        .eq('user_id', user.id);
       
       if (tasksError) throw tasksError;
       
@@ -80,7 +82,9 @@ const SpacesPage = () => {
   };
   
   useEffect(() => {
-    fetchSpaces();
+    if (user) {
+      fetchSpaces();
+    }
   }, [user]);
   
   const handleAddSpace = () => {
@@ -162,8 +166,10 @@ const SpacesPage = () => {
               <LayoutGrid className="h-12 w-12 text-gray-400" />
               <h3 className="font-medium text-lg">No spaces yet</h3>
               <p className="text-gray-500">Create spaces to organize tasks by location in your home</p>
-              <Button onClick={handleAddSpace} className="mt-4 bg-[#586b4d] hover:bg-[#586b4d]/90">
-                <Plus className="mr-1 h-4 w-4" />
+              <Button 
+                onClick={handleAddSpace} 
+                className="mt-4 bg-[#586b4d] hover:bg-[#586b4d]/90"
+              >
                 Add Your First Space
               </Button>
             </div>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,14 +7,84 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import PageNavigation from '@/components/PageNavigation';
 import { ArrowLeft, User, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface UserProfile {
+  username?: string;
+  avatar_url?: string;
+  family_id?: string;
+  family_name?: string;
+}
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { session, signOut } = useAuth();
+  const { session, signOut, user } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoading(true);
+        
+        // Fetch user profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('username, avatar_url, family_id')
+          .eq('id', user.id)
+          .single();
+          
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
+        }
+        
+        // If user has a family, fetch family name
+        let familyName = null;
+        if (profileData?.family_id) {
+          const { data: familyData, error: familyError } = await supabase
+            .from('families')
+            .select('name')
+            .eq('id', profileData.family_id)
+            .single();
+            
+          if (familyError && familyError.code !== 'PGRST116') {
+            throw familyError;
+          }
+          
+          familyName = familyData?.name;
+        }
+        
+        setProfile({
+          ...profileData,
+          family_name: familyName
+        });
+      } catch (error: any) {
+        toast.error(`Failed to load profile: ${error.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
   
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (profile?.username) {
+      return profile.username.substring(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'U';
   };
 
   return (
@@ -45,33 +115,48 @@ const ProfilePage = () => {
       
       {/* Main content */}
       <div className="px-4 py-6">
-        <Card className="border-koffa-beige/30 p-6 mb-6 flex items-center">
-          <div className="mr-4 w-16 h-16 rounded-full bg-koffa-beige flex items-center justify-center text-2xl font-medium text-koffa-green">
-            JD
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-koffa-green">John Doe</h2>
-            <p className="text-koffa-green-dark">{session?.user?.email || 'john.doe@example.com'}</p>
-            <div className="mt-2 space-x-2">
-              <Button 
-                size="sm"
-                variant="outline" 
-                className="border-koffa-green text-koffa-green"
-                onClick={() => navigate('/settings/account')}
-              >
-                Edit Profile
-              </Button>
-              <Button 
-                size="sm"
-                variant="outline" 
-                className="border-koffa-red text-koffa-red"
-                onClick={handleSignOut}
-              >
-                Sign Out
-              </Button>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-pulse p-4 rounded-full bg-koffa-green/10">
+              <div className="h-8 w-8 rounded-full border-2 border-koffa-green border-t-transparent animate-spin"></div>
             </div>
           </div>
-        </Card>
+        ) : (
+          <Card className="border-koffa-beige/30 p-6 mb-6 flex items-center">
+            <div className="mr-4 w-16 h-16 rounded-full bg-koffa-beige flex items-center justify-center text-2xl font-medium text-koffa-green">
+              {getUserInitials()}
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-koffa-green">
+                {profile?.username || user?.email?.split('@')[0] || 'User'}
+              </h2>
+              <p className="text-koffa-green-dark">{user?.email}</p>
+              {profile?.family_name && (
+                <p className="text-sm text-koffa-green-dark mt-1">
+                  Family: {profile.family_name}
+                </p>
+              )}
+              <div className="mt-2 space-x-2">
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  className="border-koffa-green text-koffa-green"
+                  onClick={() => navigate('/settings/account')}
+                >
+                  Edit Profile
+                </Button>
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  className="border-koffa-red text-koffa-red"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         <Card className="border-koffa-beige/30 p-4 mb-4">
           <div className="flex items-center justify-between">
