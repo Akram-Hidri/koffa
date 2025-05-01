@@ -30,7 +30,9 @@ const PageNavigation = () => {
   };
 
   // Get navigation items from settings or use default
-  const navItems = settings?.navItems || ['home', 'pantry', 'shopping', 'spaces', 'family'];
+  const navItems = Array.isArray(settings?.navItems) 
+    ? settings.navItems 
+    : ['home', 'pantry', 'shopping', 'spaces', 'family'];
 
   // Render the icon for a specific navigation item
   const renderNavIcon = (item: string) => {
