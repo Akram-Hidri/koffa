@@ -21,7 +21,7 @@ const PageNavigation = () => {
     home: Home,
     pantry: Package,
     shopping: ShoppingCart,
-    spaces: LayoutGrid, // Changed from Home to LayoutGrid
+    spaces: LayoutGrid,
     family: Users,
     calendar: Calendar,
     tasks: ListTodo,
@@ -48,7 +48,7 @@ const PageNavigation = () => {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-3 w-[80%] max-w-sm border border-[#f3f3e3]/20 transition-all duration-300 hover:shadow-xl z-40">
       <div className="flex justify-around items-center">
-        {/* Show up to 5 navigation items based on settings */}
+        {/* Show up to 4 navigation items based on settings */}
         {navItems.slice(0, 4).map((item, index) => (
           <Button 
             key={index}
