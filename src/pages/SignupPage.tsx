@@ -7,6 +7,8 @@ import Logo from '@/components/Logo';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
+import { createNewFamily, useInviteCode } from '@/utils/familyUtils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -20,11 +22,20 @@ const SignupPage = () => {
     password: '',
     confirmPassword: '',
     inviteCode: inviteCode,
+    familyName: '',
+    createFamily: !inviteCode, // Default to true if no invite code
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const toggleCreateFamily = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      createFamily: checked
+    }));
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,6 +44,12 @@ const SignupPage = () => {
     
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords don't match");
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.createFamily && !formData.familyName.trim()) {
+      toast.error("Please enter a family name");
       setIsLoading(false);
       return;
     }
@@ -50,50 +67,24 @@ const SignupPage = () => {
       });
       
       if (authError) throw authError;
+      if (!authData.user) throw new Error("Failed to create account");
       
       // If there's an invite code, process it
       if (formData.inviteCode) {
-        // First, find the invitation details
-        const { data: inviteData, error: inviteError } = await supabase
-          .from('invitations')
-          .select('id, family_id')
-          .eq('code', formData.inviteCode)
-          .eq('is_used', false)
-          .single();
-        
-        if (inviteError && inviteError.code !== 'PGRST116') {
-          throw inviteError;
-        }
-        
-        if (inviteData && authData.user) {
-          // Add the user to the family
-          const { error: memberError } = await supabase
-            .from('family_members')
-            .insert({
-              family_id: inviteData.family_id,
-              user_id: authData.user.id,
-              role: 'member'
-            });
-          
-          if (memberError) throw memberError;
-          
-          // Update the invitation to mark it as used
-          const { error: updateError } = await supabase
-            .from('invitations')
-            .update({ is_used: true })
-            .eq('id', inviteData.id);
-          
-          if (updateError) throw updateError;
-          
-          // Update the user's profile with the family_id
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ family_id: inviteData.family_id })
-            .eq('id', authData.user.id);
-          
-          if (profileError) throw profileError;
-          
+        try {
+          await useInviteCode(formData.inviteCode, authData.user.id);
           toast.success("You've joined a family!");
+        } catch (error: any) {
+          toast.error(`Failed to join family: ${error.message}`);
+        }
+      } 
+      // If user wants to create a family
+      else if (formData.createFamily && formData.familyName) {
+        try {
+          await createNewFamily(formData.familyName, authData.user.id);
+          toast.success(`Family "${formData.familyName}" created successfully!`);
+        } catch (error: any) {
+          toast.error(`Failed to create family: ${error.message}`);
         }
       }
       
@@ -168,7 +159,7 @@ const SignupPage = () => {
               />
             </div>
             
-            {formData.inviteCode && (
+            {formData.inviteCode ? (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
                 <Input 
@@ -182,6 +173,36 @@ const SignupPage = () => {
                   Valid invitation code - you'll be added to a family
                 </p>
               </div>
+            ) : (
+              <>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="createFamily" 
+                    checked={formData.createFamily}
+                    onCheckedChange={toggleCreateFamily}
+                  />
+                  <label
+                    htmlFor="createFamily"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Create a family
+                  </label>
+                </div>
+                
+                {formData.createFamily && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-koffa-green">Family Name</label>
+                    <Input 
+                      name="familyName"
+                      value={formData.familyName}
+                      onChange={handleChange}
+                      className="border-koffa-beige focus-visible:ring-koffa-green"
+                      placeholder="Your family name"
+                      required={formData.createFamily}
+                    />
+                  </div>
+                )}
+              </>
             )}
             
             <Button 

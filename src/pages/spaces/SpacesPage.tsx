@@ -1,62 +1,130 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, LayoutGrid } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import SpaceCard from '@/components/spaces/SpaceCard';
 import { Card } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
-// Sample data for spaces
-const SAMPLE_SPACES = [
-  {
-    id: '1',
-    name: 'Kitchen',
-    tasksCount: 2,
-    allTasksDone: false
-  },
-  {
-    id: '2',
-    name: 'Majlis',
-    tasksCount: 0,
-    allTasksDone: true
-  },
-  {
-    id: '3',
-    name: "Children's Rooms",
-    tasksCount: 1,
-    allTasksDone: false
-  },
-  {
-    id: '4',
-    name: 'Master Bedroom',
-    tasksCount: 0,
-    allTasksDone: false
-  },
-  {
-    id: '5',
-    name: 'Bathrooms',
-    tasksCount: 3,
-    allTasksDone: false
-  },
-  {
-    id: '6',
-    name: 'Garden',
-    tasksCount: 1,
-    allTasksDone: false
-  }
-];
+interface Space {
+  id: string;
+  name: string;
+  tasksCount: number;
+  allTasksDone: boolean;
+}
 
-const UPCOMING_MAINTENANCE = [
-  { task: 'AC Filter Cleaning', due: 'Due in 5 days' },
-  { task: 'Monthly Deep Clean', due: 'This weekend' }
-];
+interface SpaceTask {
+  id: string;
+  completed: boolean;
+}
 
 const SpacesPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newSpaceName, setNewSpaceName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const fetchSpaces = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // First get all spaces
+      const { data: spacesData, error: spacesError } = await supabase
+        .from('spaces')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (spacesError) throw spacesError;
+      
+      // Then get all tasks to calculate stats
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('space_tasks')
+        .select('id, space_id, completed');
+      
+      if (tasksError) throw tasksError;
+      
+      // Map spaces with task counts
+      const spacesWithTaskCounts = spacesData.map((space: any) => {
+        const spaceTasks = tasksData.filter((task: SpaceTask & { space_id: string }) => 
+          task.space_id === space.id
+        );
+        
+        const tasksCount = spaceTasks.length;
+        const completedTasksCount = spaceTasks.filter((task: SpaceTask) => task.completed).length;
+        const allTasksDone = tasksCount > 0 && tasksCount === completedTasksCount;
+        
+        return {
+          id: space.id,
+          name: space.name,
+          tasksCount: tasksCount - completedTasksCount, // Only count incomplete tasks
+          allTasksDone
+        };
+      });
+      
+      setSpaces(spacesWithTaskCounts);
+    } catch (error: any) {
+      toast.error(`Failed to load spaces: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchSpaces();
+  }, [user]);
   
   const handleAddSpace = () => {
-    navigate('/spaces/new');
+    setIsDialogOpen(true);
+  };
+  
+  const createSpace = async () => {
+    if (!newSpaceName.trim() || !user) {
+      toast.error("Please enter a space name");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('spaces')
+        .insert({
+          name: newSpaceName.trim(),
+          user_id: user.id
+        })
+        .select();
+      
+      if (error) throw error;
+      
+      toast.success("Space created successfully!");
+      
+      // Add the new space to the list
+      if (data?.[0]) {
+        setSpaces(prev => [{
+          id: data[0].id,
+          name: data[0].name,
+          tasksCount: 0,
+          allTasksDone: false
+        }, ...prev]);
+      }
+      
+      // Close dialog and reset form
+      setIsDialogOpen(false);
+      setNewSpaceName('');
+    } catch (error: any) {
+      toast.error(`Failed to create space: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,30 +152,71 @@ const SpacesPage = () => {
         </div>
         
         {/* Spaces grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {SAMPLE_SPACES.map((space) => (
-            <SpaceCard
-              key={space.id}
-              id={space.id}
-              name={space.name}
-              tasksCount={space.tasksCount}
-              allTasksDone={space.allTasksDone}
-            />
-          ))}
-        </div>
-        
-        {/* Upcoming maintenance */}
-        <Card className="p-4 border-[#98948c]/30 bg-white">
-          <h3 className="text-lg font-semibold text-center mb-3 text-[#586b4d]">Upcoming Maintenance</h3>
-          <ul className="space-y-2">
-            {UPCOMING_MAINTENANCE.map((item, index) => (
-              <li key={index} className="flex">
-                <span className="mr-2 text-[#586b4d]">•</span>
-                <span>{item.task} - <span className="text-amber-600 dark:text-amber-400">{item.due}</span></span>
-              </li>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <p>Loading spaces...</p>
+          </div>
+        ) : spaces.length === 0 ? (
+          <Card className="p-8 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <LayoutGrid className="h-12 w-12 text-gray-400" />
+              <h3 className="font-medium text-lg">No spaces yet</h3>
+              <p className="text-gray-500">Create spaces to organize tasks by location in your home</p>
+              <Button onClick={handleAddSpace} className="mt-4 bg-[#586b4d] hover:bg-[#586b4d]/90">
+                <Plus className="mr-1 h-4 w-4" />
+                Add Your First Space
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {spaces.map((space) => (
+              <SpaceCard
+                key={space.id}
+                id={space.id}
+                name={space.name}
+                tasksCount={space.tasksCount}
+                allTasksDone={space.allTasksDone}
+              />
             ))}
-          </ul>
-        </Card>
+          </div>
+        )}
+        
+        {/* Create Space Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New Space</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">Space Name</label>
+                <Input
+                  id="name"
+                  value={newSpaceName}
+                  onChange={(e) => setNewSpaceName(e.target.value)}
+                  placeholder="e.g., Kitchen, Living Room, Master Bedroom"
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline" 
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={createSpace} 
+                className="bg-[#586b4d] hover:bg-[#586b4d]/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Space"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </PageLayout>
   );
