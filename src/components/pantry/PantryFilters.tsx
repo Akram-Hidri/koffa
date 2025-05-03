@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Grid3x3 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface PantryFiltersProps {

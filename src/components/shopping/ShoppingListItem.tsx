@@ -32,10 +32,14 @@ const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <Card className="mb-4 p-3 md:p-4 shadow-sm">
+    <Card className="mb-3 p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex">
-        <div className="mr-2 md:mr-3 pt-1">
-          <Checkbox checked={checked} onCheckedChange={onToggle} />
+        <div className="mr-2 md:mr-3 pt-1 flex-shrink-0">
+          <Checkbox 
+            checked={checked} 
+            onCheckedChange={onToggle}
+            className="h-5 w-5 md:h-6 md:w-6"
+          />
         </div>
         
         <div className="flex-1 min-w-0">
@@ -50,27 +54,30 @@ const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
                 size="sm" 
                 className="text-red-500 p-1 h-auto ml-auto" 
                 onClick={onDelete}
+                aria-label="Delete item"
               >
                 <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
             </div>
           </div>
           
-          <div className={`flex ${isMobile ? 'flex-col space-y-1' : 'justify-between'} mt-1 md:mt-2`}>
+          <div className={`flex ${isMobile ? 'flex-col space-y-1' : 'justify-between items-center'} mt-1 md:mt-2`}>
             {note && (
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 truncate">
                 Note: {note}
               </p>
             )}
-            <p className={`text-xs md:text-sm font-medium ${isMobile ? '' : 'ml-auto'} ${
-              priority === 'High' 
-                ? 'text-red-500' 
-                : priority === 'Medium' 
-                ? 'text-orange-500' 
-                : 'text-blue-500'
-            }`}>
-              {priority} Priority
-            </p>
+            <div className={`flex items-center ${isMobile ? 'justify-between mt-1' : 'ml-auto'}`}>
+              <span className={`text-xs md:text-sm font-medium px-2 py-0.5 rounded-full ${
+                priority === 'High' 
+                  ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' 
+                  : priority === 'Medium' 
+                  ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' 
+                  : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+              }`}>
+                {priority} Priority
+              </span>
+            </div>
           </div>
         </div>
       </div>

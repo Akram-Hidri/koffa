@@ -50,13 +50,16 @@ export const useShoppingListWithItems = (listId: string) => {
   return useQuery({
     queryKey: ['shoppingList', listId, user?.id],
     queryFn: async () => {
-      // For non-existent lists, return empty data structure instead of error
-      if (!listId) {
+      // For new lists, return empty data structure instead of attempting a database fetch
+      if (!listId || listId === 'new') {
         return {
           list: {
+            id: '',
             title: 'New Shopping List',
             assigned_to: null,
-            status: 'Not Started'
+            status: 'Not Started',
+            user_id: user?.id || '',
+            created_at: new Date().toISOString()
           },
           items: []
         };
@@ -83,9 +86,12 @@ export const useShoppingListWithItems = (listId: string) => {
         
         return {
           list: list || {
+            id: '',
             title: 'Shopping List',
             assigned_to: null,
-            status: 'Not Started'
+            status: 'Not Started',
+            user_id: user?.id || '',
+            created_at: new Date().toISOString()
           },
           items: items || []
         };
