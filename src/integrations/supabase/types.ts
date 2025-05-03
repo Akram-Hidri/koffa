@@ -9,6 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          all_day: boolean | null
+          assigned_to: string | null
+          category: string
+          color: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_time: string | null
+          family_id: string | null
+          id: string
+          is_recurring: boolean | null
+          location: string | null
+          recurrence_pattern: string | null
+          start_time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          all_day?: boolean | null
+          assigned_to?: string | null
+          category: string
+          color?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_time?: string | null
+          family_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          location?: string | null
+          recurrence_pattern?: string | null
+          start_time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          all_day?: boolean | null
+          assigned_to?: string | null
+          category?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_time?: string | null
+          family_id?: string | null
+          id?: string
+          is_recurring?: boolean | null
+          location?: string | null
+          recurrence_pattern?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_terms: {
         Row: {
           created_at: string | null
@@ -152,6 +217,50 @@ export type Database = {
             columns: ["family_id"]
             isOneToOne: false
             referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          event_id: string | null
+          id: string
+          is_read: boolean | null
+          scheduled_for: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          scheduled_for?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          scheduled_for?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
             referencedColumns: ["id"]
           },
         ]

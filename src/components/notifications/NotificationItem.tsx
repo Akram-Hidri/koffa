@@ -4,20 +4,24 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 interface NotificationItemProps {
+  id: string;
   title: string;
   time: string;
   isNew?: boolean;
   additionalAction?: string;
-  onView: () => void;
-  onDismiss: () => void;
-  onAdditionalAction?: () => void;
+  type: string;
+  onView: (id: string, type: string) => void;
+  onDismiss: (id: string) => void;
+  onAdditionalAction?: (id: string) => void;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
+  id,
   title,
   time,
   isNew = false,
   additionalAction,
+  type,
   onView,
   onDismiss,
   onAdditionalAction
@@ -40,14 +44,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         
         <div className="flex justify-end space-x-2">
           {additionalAction && (
-            <Button variant="outline" size="sm" onClick={onAdditionalAction}>
+            <Button variant="outline" size="sm" onClick={() => onAdditionalAction && onAdditionalAction(id)}>
               {additionalAction}
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={onView}>
+          <Button variant="ghost" size="sm" onClick={() => onView(id, type)}>
             View
           </Button>
-          <Button variant="ghost" size="sm" onClick={onDismiss}>
+          <Button variant="ghost" size="sm" onClick={() => onDismiss(id)}>
             Dismiss
           </Button>
         </div>

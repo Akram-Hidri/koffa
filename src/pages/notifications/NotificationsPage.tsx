@@ -2,78 +2,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Loader2 } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import NotificationItem from '@/components/notifications/NotificationItem';
-import { toast } from '@/components/ui/sonner';
-
-// Sample data for notifications
-const SAMPLE_NOTIFICATIONS = [
-  {
-    id: '1',
-    title: 'Driver has completed "Weekly Grocery" shopping',
-    time: 'Just now',
-    type: 'shopping',
-    isNew: true
-  },
-  {
-    id: '2',
-    title: 'Mother added 3 items to "Ramadan Preparations"',
-    time: '5 minutes ago',
-    type: 'shopping',
-    isNew: true
-  },
-  {
-    id: '3',
-    title: 'Task "Clean refrigerator" is due tomorrow',
-    time: '30 minutes ago',
-    type: 'tasks',
-    isNew: false
-  },
-  {
-    id: '4',
-    title: 'Rice is running low (1kg remaining)',
-    time: '2 hours ago',
-    type: 'pantry',
-    isNew: false,
-    additionalAction: 'Add to List'
-  },
-  {
-    id: '5',
-    title: 'Father added "Monthly Deep Clean" task for Saturday',
-    time: '5 hours ago',
-    type: 'tasks',
-    isNew: false
-  },
-  {
-    id: '6',
-    title: 'Milk will expire tomorrow',
-    time: 'Yesterday',
-    type: 'pantry',
-    isNew: false
-  }
-];
+import { toast } from 'sonner';
+import useNotifications from '@/hooks/useNotifications';
+import { formatNotificationTime } from '@/utils/notificationUtils';
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
   
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({
-      ...notification,
-      isNew: false
-    })));
+  const { 
+    notifications, 
+    isLoading, 
+    markAsRead, 
+    markAllAsRead,
+    dismiss 
+  } = useNotifications();
+  
+  const handleMarkAllAsRead = async () => {
+    const success = await markAllAsRead();
+    if (success) {
+      toast.success('All notifications marked as read');
+    }
+  };
+  
+  const handleDismiss = async (id: string) => {
+    const success = await dismiss(id);
+    if (success) {
+      toast.success('Notification dismissed');
+    }
+  };
+  
+  const handleView = async (id: string, type: string) => {
+    // Mark notification as read
+    await markAsRead(id);
     
-    toast.success('All notifications marked as read');
-  };
-  
-  const handleDismiss = (id: string) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
-    toast.success('Notification dismissed');
-  };
-  
-  const handleView = (id: string, type: string) => {
     // Navigate based on notification type
     if (type === 'shopping') {
       navigate('/shopping');
@@ -81,12 +46,9 @@ const NotificationsPage = () => {
       navigate('/spaces');
     } else if (type === 'pantry') {
       navigate('/pantry');
+    } else if (type === 'calendar') {
+      navigate('/calendar');
     }
-    
-    // Mark as read
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? { ...notification, isNew: false } : notification
-    ));
   };
   
   const handleAddToList = (id: string) => {
@@ -94,6 +56,7 @@ const NotificationsPage = () => {
     // In a real app, you would add the item to a shopping list
   };
   
+  // Filter notifications based on the active tab
   const filteredNotifications = notifications.filter(notification => {
     if (activeTab === 'all') return true;
     return notification.type === activeTab;
@@ -132,6 +95,13 @@ const NotificationsPage = () => {
           >
             📦 Pantry
           </Button>
+          <Button 
+            variant={activeTab === 'calendar' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('calendar')}
+            className="rounded-full whitespace-nowrap"
+          >
+            📅 Calendar
+          </Button>
         </div>
         
         {/* Actions */}
@@ -146,28 +116,34 @@ const NotificationsPage = () => {
         </div>
         
         {/* Notifications list */}
-        <div className="mt-2">
-          {filteredNotifications.length > 0 ? (
-            filteredNotifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                title={notification.title}
-                time={notification.time}
-                isNew={notification.isNew}
-                additionalAction={notification.additionalAction}
-                onView={() => handleView(notification.id, notification.type)}
-                onDismiss={() => handleDismiss(notification.id)}
-                onAdditionalAction={notification.additionalAction 
-                  ? () => handleAddToList(notification.id)
-                  : undefined}
-              />
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No notifications to display
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-koffa-green" />
+          </div>
+        ) : (
+          <div className="mt-2">
+            {filteredNotifications.length > 0 ? (
+              filteredNotifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  id={notification.id}
+                  title={notification.title}
+                  time={formatNotificationTime(notification.created_at)}
+                  isNew={!notification.is_read}
+                  type={notification.type}
+                  additionalAction={notification.type === 'pantry' ? 'Add to List' : undefined}
+                  onView={handleView}
+                  onDismiss={handleDismiss}
+                  onAdditionalAction={notification.type === 'pantry' ? handleAddToList : undefined}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No notifications to display
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </PageLayout>
   );

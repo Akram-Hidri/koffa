@@ -3,59 +3,86 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Bell, Settings, Calendar as CalendarIcon, PlusCircle, Filter } from 'lucide-react';
+import { 
+  Bell, 
+  Settings, 
+  Calendar as CalendarIcon, 
+  PlusCircle, 
+  Filter,
+  Loader2 
+} from 'lucide-react';
 import Logo from '@/components/Logo';
 import PageNavigation from '@/components/PageNavigation';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MonthCalendar from '@/components/calendar/MonthCalendar';
+import EventSuggestionCard from '@/components/calendar/EventSuggestionCard';
+import EventCard from '@/components/calendar/EventCard';
+import EventDialog from '@/components/calendar/EventDialog';
+import useCalendarEvents, { CalendarEvent, NewCalendarEvent } from '@/hooks/useCalendarEvents';
+import { EVENT_SUGGESTIONS, CATEGORY_OPTIONS } from '@/utils/calendarUtils';
 
 const CalendarPage = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'list'>('month');
-  const [currentMonth, setCurrentMonth] = useState('April 2025');
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [filter, setFilter] = useState('all');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(undefined);
   
-  // Mock data for calendar cells
-  const days = Array.from({ length: 35 }, (_, i) => {
-    const day = i - 2; // Offset to start from March 30
-    if (day <= 0) return { day: day + 31, isCurrentMonth: false };
-    if (day > 30) return { day: day - 30, isCurrentMonth: false };
-    return { day, isCurrentMonth: true };
-  });
+  const { 
+    events, 
+    isLoading, 
+    createEvent, 
+    updateEvent, 
+    deleteEvent, 
+    familyId 
+  } = useCalendarEvents();
   
-  // Mock events
-  const events = [
-    { day: 4, type: 'prayer', label: 'Fri Pray', color: 'bg-amber-100 text-amber-700' },
-    { day: 9, type: 'shopping', label: 'Shopping', color: 'bg-blue-100 text-blue-700' },
-    { day: 11, type: 'prayer', label: 'Fri Pray', color: 'bg-amber-100 text-amber-700' },
-    { day: 12, type: 'cleaning', label: 'Deep Clean', color: 'bg-green-100 text-green-700' },
-    { day: 18, type: 'prayer', label: 'Fri Pray', color: 'bg-amber-100 text-amber-700' },
-    { day: 21, type: 'appointment', label: 'Doc Appt', color: 'bg-red-100 text-red-700' },
-    { day: 25, type: 'prayer', label: 'Fri Pray', color: 'bg-amber-100 text-amber-700' },
-    { day: 26, type: 'family', label: 'Fam Dinr', color: 'bg-purple-100 text-purple-700' },
-  ];
+  // Event handlers
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsDialogOpen(true);
+  };
   
-  // Upcoming events
-  const upcomingEvents = [
-    { day: 'Tomorrow', label: 'Weekly Shopping', assignedTo: 'Driver' },
-    { day: 'Apr 12', label: 'Monthly Deep Clean', assignedTo: 'All Family' },
-    { day: 'Apr 21', label: 'Doctor Appointment', assignedTo: 'Father' },
-    { day: 'Apr 26', label: 'Family Dinner', assignedTo: 'All Family + Guests' },
-  ];
-
-  const getEventForDay = (day: number) => {
-    return events.find(e => e.day === day);
+  const handleDayClick = (date: Date) => {
+    // Create event on the selected day
+    setSelectedEvent(undefined);
+    setCurrentDate(date);
+    setIsDialogOpen(true);
+  };
+  
+  const handleAddClick = () => {
+    setSelectedEvent(undefined);
+    setIsDialogOpen(true);
+  };
+  
+  const handleEventSave = async (eventData: NewCalendarEvent) => {
+    if (selectedEvent) {
+      return updateEvent({
+        ...selectedEvent,
+        ...eventData
+      } as CalendarEvent);
+    } else {
+      return createEvent(eventData);
+    }
   };
 
-  const previousMonth = () => {
-    setCurrentMonth('March 2025');
-    toast.info('Calendar navigation between months coming soon');
+  const handleSuggestionSelect = (category: string) => {
+    setSelectedEvent(undefined);
+    setIsDialogOpen(true);
+    // The category will be pre-selected in the dialog
+    const selectedCategory = CATEGORY_OPTIONS.find(opt => opt.value === category);
+    if (selectedCategory) {
+      toast.info(`Creating a new ${selectedCategory.label} event`);
+    }
   };
-
-  const nextMonth = () => {
-    setCurrentMonth('May 2025');
-    toast.info('Calendar navigation between months coming soon');
-  };
+  
+  // Filter events for upcoming
+  const upcomingEvents = events
+    .filter(event => new Date(event.start_time) >= new Date())
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    .slice(0, 4);
   
   return (
     <div className="min-h-screen bg-koffa-beige-light pb-24">
@@ -67,7 +94,9 @@ const CalendarPage = () => {
             className="p-2 h-auto w-auto"
             onClick={() => navigate('/home')}
           >
-            <ArrowLeft size={20} className="text-koffa-green" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
           </Button>
           <Logo size="sm" />
         </div>
@@ -78,6 +107,7 @@ const CalendarPage = () => {
           <Button 
             variant="ghost" 
             className="rounded-full p-2 h-auto w-auto"
+            onClick={() => navigate('/notifications')}
           >
             <Bell size={20} className="text-koffa-green" />
           </Button>
@@ -92,139 +122,139 @@ const CalendarPage = () => {
       </div>
 
       {/* View selector */}
-      <div className="flex border-b border-koffa-beige/40">
+      <div className="flex border-b border-koffa-beige/40 overflow-x-auto hide-scrollbar">
         <Button 
           variant={viewMode === 'month' ? 'default' : 'ghost'}
-          className={viewMode === 'month' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark'}
+          className={viewMode === 'month' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark whitespace-nowrap'}
           onClick={() => setViewMode('month')}
         >
           <CalendarIcon className="mr-2 h-4 w-4" /> Month
         </Button>
         <Button 
           variant={viewMode === 'week' ? 'default' : 'ghost'}
-          className={viewMode === 'week' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark'}
-          onClick={() => setViewMode('week')}
+          className={viewMode === 'week' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark whitespace-nowrap'}
+          onClick={() => {
+            setViewMode('week');
+            toast.info('Week view coming soon');
+          }}
         >
           <CalendarIcon className="mr-2 h-4 w-4" /> Week
         </Button>
         <Button 
           variant={viewMode === 'list' ? 'default' : 'ghost'}
-          className={viewMode === 'list' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark'}
-          onClick={() => setViewMode('list')}
+          className={viewMode === 'list' ? 'bg-koffa-green text-white' : 'text-koffa-green-dark whitespace-nowrap'}
+          onClick={() => {
+            setViewMode('list');
+            toast.info('List view coming soon');
+          }}
         >
           <CalendarIcon className="mr-2 h-4 w-4" /> List
         </Button>
         
-        <div className="ml-auto pr-4">
+        <div className="ml-auto pr-4 flex items-center">
+          <div className="flex items-center gap-2 mr-2">
+            <Filter size={16} className="text-koffa-green" />
+            <Select
+              value={filter}
+              onValueChange={setFilter}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {CATEGORY_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           <Button
             className="bg-koffa-green text-white"
             size="sm"
-            onClick={() => toast.info("Add event coming soon")}
+            onClick={handleAddClick}
           >
             <PlusCircle className="mr-1 h-4 w-4" /> Add Event
           </Button>
         </div>
       </div>
 
-      {/* Month navigation and filter */}
-      <div className="flex justify-between items-center p-4 border-b border-koffa-beige/40">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={previousMonth}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green">
-              <path d="m15 18-6-6 6-6"/>
-            </svg>
-          </Button>
-          <h2 className="text-lg font-medium text-koffa-green">{currentMonth}</h2>
-          <Button variant="ghost" size="icon" onClick={nextMonth}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green">
-              <path d="m9 18 6-6-6-6"/>
-            </svg>
-          </Button>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Filter size={16} className="text-koffa-green" />
-          <Select
-            value={filter}
-            onValueChange={setFilter}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="prayer">Prayers</SelectItem>
-              <SelectItem value="shopping">Shopping</SelectItem>
-              <SelectItem value="cleaning">Cleaning</SelectItem>
-              <SelectItem value="appointment">Appointments</SelectItem>
-              <SelectItem value="family">Family Events</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="p-4">
-        {/* Day headers */}
-        <div className="grid grid-cols-7 text-center font-semibold text-koffa-green border-b pb-2 mb-2">
-          <div>Sun</div>
-          <div>Mon</div>
-          <div>Tue</div>
-          <div>Wed</div>
-          <div>Thu</div>
-          <div>Fri</div>
-          <div>Sat</div>
-        </div>
-        
-        {/* Calendar cells */}
-        <div className="grid grid-cols-7 gap-1 auto-rows-fr">
-          {days.map((day, index) => {
-            const event = getEventForDay(day.day);
-            const isFiltered = filter !== 'all' && event?.type !== filter;
-            
-            return (
-              <div 
-                key={index} 
-                className={`border rounded-md p-1 min-h-[80px] ${day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'} ${isFiltered ? 'opacity-40' : ''}`}
-              >
-                <div className={`text-right ${day.isCurrentMonth ? 'font-medium' : 'text-gray-400'}`}>
-                  {day.day}
-                </div>
-                {event && (!filter || filter === 'all' || filter === event.type) && (
-                  <div className={`mt-1 text-xs p-1 rounded ${event.color}`}>
-                    {event.label}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      <div className="container mx-auto p-4">
+        {/* Calendar */}
+        <div className="mb-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-koffa-green" />
+            </div>
+          ) : (
+            <MonthCalendar
+              events={events}
+              currentDate={currentDate}
+              onDateChange={setCurrentDate}
+              onEventClick={handleEventClick}
+              onDayClick={handleDayClick}
+              onAddClick={handleAddClick}
+              filterCategory={filter !== 'all' ? filter : undefined}
+            />
+          )}
         </div>
         
         {/* Upcoming events */}
-        <Card className="mt-6 border-koffa-beige/30 p-4">
+        <Card className="mb-8 border-koffa-beige/30 p-4">
           <h3 className="text-lg font-medium text-koffa-green mb-3">Upcoming Events</h3>
-          <ul className="space-y-2">
-            {upcomingEvents.map((event, index) => (
-              <li key={index} className="flex items-center">
-                <span className="text-koffa-green mr-2">•</span>
-                <span className="text-koffa-green-dark font-medium">{event.day}:</span>
-                <span className="ml-1">{event.label}</span>
-                <span className="text-sm text-gray-500 ml-1">({event.assignedTo})</span>
-              </li>
-            ))}
-          </ul>
+          {upcomingEvents.length > 0 ? (
+            <div className="space-y-2">
+              {upcomingEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => handleEventClick(event)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No upcoming events</p>
+          )}
           
           <div className="flex justify-end mt-3">
             <Button 
               variant="link" 
               className="text-koffa-accent-blue p-0"
-              onClick={() => toast.info("View all events coming soon")}
+              onClick={handleAddClick}
             >
-              View All Events
+              Add New Event
             </Button>
           </div>
         </Card>
+        
+        {/* Event suggestions */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium text-koffa-green mb-3">Suggested Events</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {EVENT_SUGGESTIONS.map((suggestion, index) => (
+              <EventSuggestionCard
+                key={index}
+                title={suggestion.title}
+                description={suggestion.description}
+                icon={suggestion.icon}
+                category={suggestion.category}
+                onSelect={handleSuggestionSelect}
+              />
+            ))}
+          </div>
+        </div>
       </div>
+      
+      {/* Event dialog */}
+      <EventDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleEventSave}
+        onDelete={deleteEvent}
+        event={selectedEvent}
+        familyId={familyId}
+      />
       
       <PageNavigation />
     </div>
