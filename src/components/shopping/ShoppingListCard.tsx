@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ShoppingListCardProps {
   id: string;
@@ -24,6 +25,8 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
   status,
   onViewEdit
 }) => {
+  const isMobile = useIsMobile();
+  
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -35,33 +38,37 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
   
   return (
     <Card 
-      className="mb-4 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      className="mb-4 p-3 md:p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
       onClick={onViewEdit}
     >
-      <div className="flex justify-between">
+      <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-between'}`}>
         <div>
-          <h3 className="font-medium">{title}</h3>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Assigned to: {assignedTo}</p>
+          <h3 className="font-medium text-sm md:text-base">{title}</h3>
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Assigned to: {assignedTo}</p>
         </div>
-        <div className="text-right">
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Created: {createdDate}</p>
-          <p className="text-sm">Items: {itemCount}</p>
+        <div className={`${isMobile ? '' : 'text-right'}`}>
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">Created: {createdDate}</p>
+          <p className="text-xs md:text-sm">Items: {itemCount}</p>
         </div>
       </div>
       
-      <div className="flex justify-between items-center mt-2 pt-2 border-t">
-        <span className={`text-sm font-medium ${
+      <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-between items-center'} mt-2 pt-2 border-t`}>
+        <span className={`text-xs md:text-sm font-medium ${
           status === 'Completed' 
             ? 'text-green-600 dark:text-green-400' 
             : status === 'In Progress'
             ? 'text-blue-600 dark:text-blue-400'
             : 'text-gray-600 dark:text-gray-400'
-        }`}>
+        } ${isMobile ? 'mb-2' : ''}`}>
           Status: {status}
         </span>
         
-        <div className="flex gap-2">
-          <Button size="sm" onClick={onViewEdit}>
+        <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
+          <Button 
+            size="sm" 
+            onClick={onViewEdit}
+            className={isMobile ? 'flex-1' : ''}
+          >
             View/Edit
           </Button>
           <Button 
@@ -70,7 +77,7 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
             className="text-red-500 border-red-200 hover:bg-red-50"
             onClick={handleDelete}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
           </Button>
         </div>
       </div>

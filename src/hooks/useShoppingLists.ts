@@ -50,30 +50,52 @@ export const useShoppingListWithItems = (listId: string) => {
   return useQuery({
     queryKey: ['shoppingList', listId, user?.id],
     queryFn: async () => {
-      // Get the list details
-      const { data: list, error: listError } = await supabase
-        .from('shopping_lists')
-        .select('*')
-        .eq('id', listId)
-        .single();
+      // For non-existent lists, return empty data structure instead of error
+      if (!listId) {
+        return {
+          list: {
+            title: 'New Shopping List',
+            assigned_to: null,
+            status: 'Not Started'
+          },
+          items: []
+        };
+      }
       
-      if (listError) throw listError;
-      
-      // Get the items for this list
-      const { data: items, error: itemsError } = await supabase
-        .from('shopping_list_items')
-        .select('*')
-        .eq('list_id', listId)
-        .order('created_at', { ascending: false });
-      
-      if (itemsError) throw itemsError;
-      
-      return {
-        list,
-        items: items || []
-      };
+      try {
+        // Get the list details
+        const { data: list, error: listError } = await supabase
+          .from('shopping_lists')
+          .select('*')
+          .eq('id', listId)
+          .maybeSingle();
+        
+        if (listError) throw listError;
+        
+        // Get the items for this list
+        const { data: items, error: itemsError } = await supabase
+          .from('shopping_list_items')
+          .select('*')
+          .eq('list_id', listId)
+          .order('created_at', { ascending: false });
+        
+        if (itemsError) throw itemsError;
+        
+        return {
+          list: list || {
+            title: 'Shopping List',
+            assigned_to: null,
+            status: 'Not Started'
+          },
+          items: items || []
+        };
+      } catch (error) {
+        console.error('Error fetching shopping list:', error);
+        throw error;
+      }
     },
-    enabled: !!user && !!listId,
+    enabled: !!user,
+    retry: 1,
   });
 };
 
@@ -124,7 +146,8 @@ export const useAddShoppingListItem = () => {
         .from('shopping_list_items')
         .insert({
           ...item,
-          user_id: user.id
+          user_id: user.id,
+          added_by: user.email || 'Anonymous'
         })
         .select();
       
@@ -163,6 +186,30 @@ export const useUpdateShoppingListItem = () => {
     },
     onError: (error: any) => {
       toast.error(`Failed to update item: ${error.message}`);
+    }
+  });
+};
+
+export const useDeleteShoppingListItem = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, list_id }: { id: string; list_id: string }) => {
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      return { list_id };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['shoppingList', result.list_id] });
+      toast.success('Item removed from shopping list');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete item: ${error.message}`);
     }
   });
 };
