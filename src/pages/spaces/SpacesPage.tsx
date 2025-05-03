@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, LayoutGrid } from 'lucide-react';
+import { Plus, LayoutGrid, RefreshCw } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import SpaceCard from '@/components/spaces/SpaceCard';
 import { Card } from '@/components/ui/card';
@@ -38,28 +38,80 @@ const SpacesPage = () => {
     
     setIsLoading(true);
     try {
-      // First get all spaces
-      const { data: spacesData, error: spacesError } = await supabase
+      // First get user profile to check family_id
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('family_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      // Get spaces created by the user
+      const { data: userSpaces, error: userSpacesError } = await supabase
         .from('spaces')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
-      if (spacesError) throw spacesError;
+      if (userSpacesError) throw userSpacesError;
+      
+      let familySpaces: any[] = [];
+      
+      // If user has a family, also get spaces shared via family
+      if (profileData?.family_id) {
+        // Get other family members
+        const { data: familyMembers, error: familyMembersError } = await supabase
+          .from('family_members')
+          .select('user_id')
+          .eq('family_id', profileData.family_id)
+          .neq('user_id', user.id);
+        
+        if (familyMembersError) throw familyMembersError;
+        
+        // If there are other family members, get their spaces
+        if (familyMembers && familyMembers.length > 0) {
+          const familyMemberIds = familyMembers.map(member => member.user_id);
+          
+          const { data: otherFamilySpaces, error: otherSpacesError } = await supabase
+            .from('spaces')
+            .select('*')
+            .in('user_id', familyMemberIds)
+            .order('created_at', { ascending: false });
+          
+          if (otherSpacesError) throw otherSpacesError;
+          
+          familySpaces = otherFamilySpaces || [];
+        }
+      }
+      
+      // Combine user spaces and family spaces
+      const allSpacesData = [...(userSpaces || []), ...familySpaces];
+      
+      if (allSpacesData.length === 0) {
+        setSpaces([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Get all space IDs to fetch tasks
+      const spaceIds = allSpacesData.map(space => space.id);
       
       // Then get all tasks to calculate stats
       const { data: tasksData, error: tasksError } = await supabase
         .from('space_tasks')
         .select('id, space_id, completed')
-        .eq('user_id', user.id);
+        .in('space_id', spaceIds);
       
       if (tasksError) throw tasksError;
       
       // Map spaces with task counts
-      const spacesWithTaskCounts = spacesData.map((space: any) => {
-        const spaceTasks = tasksData.filter((task: SpaceTask & { space_id: string }) => 
+      const spacesWithTaskCounts = allSpacesData.map((space: any) => {
+        const spaceTasks = tasksData?.filter((task: SpaceTask & { space_id: string }) => 
           task.space_id === space.id
-        );
+        ) || [];
         
         const tasksCount = spaceTasks.length;
         const completedTasksCount = spaceTasks.filter((task: SpaceTask) => task.completed).length;
@@ -69,12 +121,14 @@ const SpacesPage = () => {
           id: space.id,
           name: space.name,
           tasksCount: tasksCount - completedTasksCount, // Only count incomplete tasks
-          allTasksDone
+          allTasksDone,
+          isOwner: space.user_id === user.id
         };
       });
       
       setSpaces(spacesWithTaskCounts);
     } catch (error: any) {
+      console.error("Error fetching spaces:", error);
       toast.error(`Failed to load spaces: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -89,6 +143,11 @@ const SpacesPage = () => {
   
   const handleAddSpace = () => {
     setIsDialogOpen(true);
+  };
+  
+  const handleRefresh = () => {
+    fetchSpaces();
+    toast.success("Spaces refreshed");
   };
   
   const createSpace = async () => {
@@ -124,10 +183,51 @@ const SpacesPage = () => {
       // Close dialog and reset form
       setIsDialogOpen(false);
       setNewSpaceName('');
+      
+      // Create a notification for other family members
+      await createFamilyNotification(user.id, `${newSpaceName} space created`);
+      
     } catch (error: any) {
       toast.error(`Failed to create space: ${error.message}`);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const createFamilyNotification = async (userId: string, message: string) => {
+    try {
+      // Get user's family
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('family_id')
+        .eq('id', userId)
+        .single();
+      
+      if (profileError) return;
+      
+      const familyId = profileData?.family_id;
+      if (!familyId) return;
+      
+      // Get family members
+      const { data: familyMembers, error: familyMembersError } = await supabase
+        .from('family_members')
+        .select('user_id')
+        .eq('family_id', familyId)
+        .neq('user_id', userId);
+      
+      if (familyMembersError || !familyMembers) return;
+      
+      // Create notification for each family member
+      for (const member of familyMembers) {
+        await supabase.from('notifications').insert({
+          user_id: member.user_id,
+          title: 'New Space Created',
+          body: message,
+          type: 'space'
+        });
+      }
+    } catch (err) {
+      console.error("Error creating notifications:", err);
     }
   };
 
@@ -141,7 +241,7 @@ const SpacesPage = () => {
         </div>
         
         {/* Header controls */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-2">
           <select className="text-sm rounded-md border border-[#98948c] px-3 py-1 bg-white dark:bg-slate-800">
             <option value="all">Manage ▼ All Spaces</option>
             <option value="living">Living Areas</option>
@@ -149,10 +249,22 @@ const SpacesPage = () => {
             <option value="outdoor">Outdoor</option>
           </select>
           
-          <Button onClick={handleAddSpace} className="bg-[#586b4d] hover:bg-[#586b4d]/90">
-            <Plus className="mr-1 h-4 w-4" />
-            Add New Space
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh} 
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            
+            <Button onClick={handleAddSpace} className="bg-[#586b4d] hover:bg-[#586b4d]/90">
+              <Plus className="mr-1 h-4 w-4" />
+              Add New Space
+            </Button>
+          </div>
         </div>
         
         {/* Spaces grid */}
@@ -175,7 +287,7 @@ const SpacesPage = () => {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {spaces.map((space) => (
               <SpaceCard
                 key={space.id}
@@ -203,6 +315,7 @@ const SpacesPage = () => {
                   onChange={(e) => setNewSpaceName(e.target.value)}
                   placeholder="e.g., Kitchen, Living Room, Master Bedroom"
                   className="col-span-3"
+                  autoFocus
                 />
               </div>
             </div>

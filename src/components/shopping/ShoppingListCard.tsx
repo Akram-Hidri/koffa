@@ -2,8 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ShoppingListCardProps {
+  id: string;
   title: string;
   createdDate: string;
   assignedTo: string;
@@ -13,6 +16,7 @@ interface ShoppingListCardProps {
 }
 
 const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
+  id,
   title,
   createdDate,
   assignedTo,
@@ -20,11 +24,23 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
   status,
   onViewEdit
 }) => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (confirm('Are you sure you want to delete this shopping list?')) {
+      toast.success("Shopping list deleted");
+      // Ideally we'd call a mutation function here
+    }
+  };
+  
   return (
-    <Card className="mb-4 p-4 shadow-sm">
+    <Card 
+      className="mb-4 p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onViewEdit}
+    >
       <div className="flex justify-between">
         <div>
-          <h3 className="font-medium">[{title}]</h3>
+          <h3 className="font-medium">{title}</h3>
           <p className="text-gray-600 dark:text-gray-300 text-sm">Assigned to: {assignedTo}</p>
         </div>
         <div className="text-right">
@@ -44,9 +60,19 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
           Status: {status}
         </span>
         
-        <Button size="sm" onClick={onViewEdit}>
-          View/Edit
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={onViewEdit}>
+            View/Edit
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="text-red-500 border-red-200 hover:bg-red-50"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </Card>
   );

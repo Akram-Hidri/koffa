@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface SpaceCardProps {
   id: string;
@@ -24,15 +25,19 @@ const SpaceCard: React.FC<SpaceCardProps> = ({ id, name, tasksCount, allTasksDon
     >
       <h3 className="font-semibold">{name}</h3>
       
-      <div className="mt-4 text-sm">
+      <div className="mt-4">
         {allTasksDone ? (
-          <span className="text-green-600 dark:text-green-400">All tasks done</span>
+          <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-200">
+            All tasks done
+          </Badge>
         ) : tasksCount > 0 ? (
-          <span className="text-amber-600 dark:text-amber-400">
+          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-200">
             {tasksCount} task{tasksCount > 1 ? 's' : ''} pending
-          </span>
+          </Badge>
         ) : (
-          <span className="text-gray-500">No tasks</span>
+          <Badge variant="outline" className="text-gray-500 border-gray-200">
+            No tasks
+          </Badge>
         )}
       </div>
     </Card>
