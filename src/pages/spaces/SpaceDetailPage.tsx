@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,26 +14,21 @@ import { useSpaceWithTasks, useAddTask, useToggleTaskCompletion } from '@/hooks/
 import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 
-interface Task {
-  id: string;
-  task: string;
-  due_date: string | null;
-  assigned_to: string | null;
-  recurrence: string | null;
-  completed: boolean;
-}
-
 // Common task templates by space type
-const COMMON_TASKS = {
-  'Living Room': ['Vacuum carpet', 'Dust furniture', 'Clean windows', 'Organize books'],
-  'Kitchen': ['Clean counters', 'Wash dishes', 'Mop floor', 'Take out trash', 'Clean refrigerator'],
-  'Bedroom': ['Change bed sheets', 'Vacuum floor', 'Dust surfaces', 'Organize wardrobe'],
-  'Bathroom': ['Clean toilet', 'Clean shower', 'Wash sink', 'Replace towels', 'Refill soap dispensers'],
-  'Garden': ['Water plants', 'Mow lawn', 'Remove weeds', 'Trim bushes'],
-  'Garage': ['Organize tools', 'Sweep floor', 'Check oil levels', 'Clean car'],
-  'Yacht': ['Check engine', 'Clean deck', 'Inspect safety equipment', 'Refill fuel'],
-  'Majlis': ['Vacuum carpet', 'Dust furniture', 'Arrange cushions', 'Clean coffee table'],
-  'General': ['Clean floors', 'Dust surfaces', 'Organize items', 'Empty trash']
+const COMMON_TASKS: Record<string, string[]> = {
+  'Living Room': ['Vacuum carpet', 'Dust furniture', 'Clean windows', 'Organize books', 'Water plants', 'Clean TV screen', 'Fluff pillows', 'Dust light fixtures', 'Wipe baseboards'],
+  'Kitchen': ['Clean counters', 'Wash dishes', 'Mop floor', 'Take out trash', 'Clean refrigerator', 'Wipe appliances', 'Organize pantry', 'Clean oven', 'Sanitize sink', 'Wipe cabinet doors'],
+  'Bedroom': ['Change bed sheets', 'Vacuum floor', 'Dust surfaces', 'Organize wardrobe', 'Clean mirror', 'Arrange bedside table', 'Rotate mattress', 'Wash pillow covers'],
+  'Bathroom': ['Clean toilet', 'Clean shower', 'Wash sink', 'Replace towels', 'Refill soap dispensers', 'Clean mirror', 'Mop floor', 'Wash bath mat', 'Clean shower head', 'Check toilet flush'],
+  'Garden': ['Water plants', 'Mow lawn', 'Remove weeds', 'Trim bushes', 'Fertilize plants', 'Check irrigation system', 'Sweep pathways', 'Prune dead leaves', 'Check soil moisture'],
+  'Garage': ['Organize tools', 'Sweep floor', 'Check oil levels', 'Clean car', 'Dispose of old items', 'Check tire pressure', 'Arrange storage', 'Check vehicle fluids'],
+  'Yacht': ['Check engine', 'Clean deck', 'Inspect safety equipment', 'Refill fuel', 'Clean interior cabin', 'Wash exterior', 'Wipe windows', 'Check navigation equipment'],
+  'Majlis': ['Vacuum carpet', 'Dust furniture', 'Arrange cushions', 'Clean coffee table', 'Dust decor items', 'Refresh air freshener', 'Organize seating', 'Clean curtains'],
+  'Home Office': ['Organize desk', 'Clean computer screen', 'Empty trash bin', 'File documents', 'Dust shelves', 'Clean keyboard', 'Arrange cables', 'Wipe desk surface'],
+  'Dining Room': ['Polish table', 'Dust chairs', 'Clean light fixture', 'Arrange centerpiece', 'Vacuum floor', 'Wipe baseboards', 'Clean china cabinet', 'Wash table linens'],
+  'Laundry Room': ['Clean washing machine', 'Wipe dryer', 'Sweep floor', 'Organize supplies', 'Clean lint trap', 'Check hoses', 'Wipe counters', 'Check drainage'],
+  'Backyard': ['Sweep patio', 'Clean furniture', 'Trim plants', 'Check lighting', 'Clean grill', 'Organize garden tools', 'Check irrigation', 'Clean outdoor cushions'],
+  'General': ['Clean floors', 'Dust surfaces', 'Organize items', 'Empty trash', 'Wipe light switches', 'Clean door handles', 'Check smoke detectors']
 };
 
 const SpaceDetailPage = () => {
@@ -197,7 +191,7 @@ const SpaceDetailPage = () => {
           </div>
         </div>
         
-        {/* Common Task Suggestions */}
+        {/* Common Task Suggestions - Improved UI */}
         {showCommonTasks && (
           <Card className="p-4 bg-gray-50 dark:bg-gray-800/50 mb-4">
             <h4 className="font-medium mb-2">Common Tasks for {spaceName}</h4>
@@ -217,6 +211,7 @@ const SpaceDetailPage = () => {
           </Card>
         )}
         
+        {/* Task lists */}
         {tasks.length === 0 ? (
           <Card className="p-8 text-center">
             <div className="flex flex-col items-center gap-2">
@@ -323,7 +318,7 @@ const SpaceDetailPage = () => {
           </Button>
         </div>
         
-        {/* Tab navigation */}
+        {/* Tab navigation - More mobile friendly */}
         <div className="flex items-center border-b overflow-x-auto hide-scrollbar pb-2">
           <Button 
             variant={activeTab === 'tasks' ? 'default' : 'ghost'}
@@ -358,7 +353,7 @@ const SpaceDetailPage = () => {
         {/* Tab content */}
         {renderTabContent()}
         
-        {/* Add Task Dialog */}
+        {/* Add Task Dialog - Improved Mobile Experience */}
         <Dialog open={isAddTaskDialogOpen} onOpenChange={setIsAddTaskDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>

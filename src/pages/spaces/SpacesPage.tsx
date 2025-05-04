@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, LayoutGrid, RefreshCw, Search, Filter } from 'lucide-react';
+import { Plus, LayoutGrid, RefreshCw, Search } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import SpaceCard from '@/components/spaces/SpaceCard';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -22,56 +22,84 @@ const SPACE_TEMPLATES = [
     icon: 'sofa',
     color: '#6a798f',
     type: 'indoor',
-    tasks: ['Vacuum carpet', 'Dust furniture', 'Clean windows', 'Organize books']
+    tasks: ['Vacuum carpet', 'Dust furniture', 'Clean windows', 'Organize books', 'Water plants', 'Clean TV screen', 'Fluff pillows']
   },
   { 
     name: 'Kitchen',
     icon: 'kitchen',
     color: '#E6A44E',
     type: 'indoor',
-    tasks: ['Clean counters', 'Wash dishes', 'Mop floor', 'Take out trash', 'Clean refrigerator']
+    tasks: ['Clean counters', 'Wash dishes', 'Mop floor', 'Take out trash', 'Clean refrigerator', 'Wipe appliances', 'Organize pantry', 'Clean oven']
   },
   { 
     name: 'Master Bedroom',
     icon: 'bed',
     color: '#7E69AB',
     type: 'indoor',
-    tasks: ['Change bed sheets', 'Vacuum floor', 'Dust surfaces', 'Organize wardrobe']
+    tasks: ['Change bed sheets', 'Vacuum floor', 'Dust surfaces', 'Organize wardrobe', 'Clean mirror', 'Arrange bedside table']
   },
   { 
     name: 'Bathroom',
     icon: 'bath',
     color: '#0EA5E9',
     type: 'indoor',
-    tasks: ['Clean toilet', 'Clean shower', 'Wash sink', 'Replace towels', 'Refill soap dispensers']
+    tasks: ['Clean toilet', 'Clean shower', 'Wash sink', 'Replace towels', 'Refill soap dispensers', 'Clean mirror', 'Mop floor', 'Wash bath mat']
   },
   { 
     name: 'Garden',
     icon: 'flower',
     color: '#586b4d',
     type: 'outdoor',
-    tasks: ['Water plants', 'Mow lawn', 'Remove weeds', 'Trim bushes']
+    tasks: ['Water plants', 'Mow lawn', 'Remove weeds', 'Trim bushes', 'Fertilize plants', 'Check irrigation system', 'Sweep pathways']
   },
   { 
     name: 'Majlis',
     icon: 'sofa',
     color: '#C05746',
     type: 'indoor',
-    tasks: ['Vacuum carpet', 'Dust furniture', 'Arrange cushions', 'Clean coffee table']
+    tasks: ['Vacuum carpet', 'Dust furniture', 'Arrange cushions', 'Clean coffee table', 'Dust decor items', 'Refresh air freshener', 'Organize seating']
   },
   { 
     name: 'Garage',
     icon: 'car',
     color: '#8E9196',
     type: 'outdoor',
-    tasks: ['Organize tools', 'Sweep floor', 'Check oil levels', 'Clean car']
+    tasks: ['Organize tools', 'Sweep floor', 'Check oil levels', 'Clean car', 'Dispose of old items', 'Check tire pressure', 'Arrange storage']
   },
   { 
     name: 'Yacht',
     icon: 'ship',
     color: '#0EA5E9',
     type: 'outdoor',
-    tasks: ['Check engine', 'Clean deck', 'Inspect safety equipment', 'Refill fuel']
+    tasks: ['Check engine', 'Clean deck', 'Inspect safety equipment', 'Refill fuel', 'Clean interior cabin', 'Wash exterior', 'Wipe windows']
+  },
+  { 
+    name: 'Home Office',
+    icon: 'computer',
+    color: '#6b7280',
+    type: 'indoor',
+    tasks: ['Organize desk', 'Clean computer screen', 'Empty trash bin', 'File documents', 'Dust shelves', 'Clean keyboard', 'Arrange cables']
+  },
+  { 
+    name: 'Dining Room',
+    icon: 'dining',
+    color: '#8B4513',
+    type: 'indoor',
+    tasks: ['Polish table', 'Dust chairs', 'Clean light fixture', 'Arrange centerpiece', 'Vacuum floor', 'Wipe baseboards', 'Clean china cabinet']
+  },
+  { 
+    name: 'Laundry Room',
+    icon: 'laundry',
+    color: '#4A6FA5',
+    type: 'indoor',
+    tasks: ['Clean washing machine', 'Wipe dryer', 'Sweep floor', 'Organize supplies', 'Clean lint trap', 'Check hoses', 'Wipe counters']
+  },
+  { 
+    name: 'Backyard',
+    icon: 'backyard',
+    color: '#2F4F4F',
+    type: 'outdoor',
+    tasks: ['Sweep patio', 'Clean furniture', 'Trim plants', 'Check lighting', 'Clean grill', 'Organize garden tools', 'Check irrigation']
   },
 ];
 
@@ -275,7 +303,7 @@ const SpacesPage = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Color</label>
                 <div className="flex gap-2 flex-wrap">
-                  {['#586b4d', '#6a798f', '#E6A44E', '#C05746', '#7E69AB', '#0EA5E9'].map(color => (
+                  {['#586b4d', '#6a798f', '#E6A44E', '#C05746', '#7E69AB', '#0EA5E9', '#8B4513', '#4A6FA5'].map(color => (
                     <button
                       key={color}
                       type="button"
@@ -283,6 +311,22 @@ const SpacesPage = () => {
                       style={{ backgroundColor: color }}
                       onClick={() => setNewSpace({...newSpace, color})}
                     />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Icon</label>
+                <div className="grid grid-cols-6 gap-2">
+                  {['sofa', 'kitchen', 'bed', 'bath', 'flower', 'car', 'ship', 'house', 'garden', 'computer', 'laundry', 'storage', 'dining', 'office', 'backyard'].map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      className={`w-10 h-10 rounded-md flex items-center justify-center ${newSpace.icon === icon ? 'ring-2 ring-offset-1 ring-black bg-gray-100' : 'bg-gray-50'}`}
+                      onClick={() => setNewSpace({...newSpace, icon})}
+                    >
+                      <Icon name={icon} size={20} />
+                    </button>
                   ))}
                 </div>
               </div>

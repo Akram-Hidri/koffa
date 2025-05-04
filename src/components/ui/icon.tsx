@@ -3,14 +3,14 @@ import React from 'react';
 import {
   LayoutGrid,
   Sofa,
-  CookingPot, // Replace Kitchen with CookingPot
+  CookingPot, // Kitchen icon
   Bed,
   Bath,
   Flower,
   Car,
   Ship,
-  Home, // Replace House with Home
-  Sprout, // Replace GardenHose with Sprout
+  Home, // House icon
+  Sprout, // Garden icon
   Tv,
   Table2,
   Dog,
@@ -18,11 +18,19 @@ import {
   BookOpen,
   Computer,
   WashingMachine,
-  Wrench, // Replace Tool with Wrench
+  Wrench, // Tool icon
   Warehouse,
   LampDesk,
   ChefHat,
-  BookmarkCheck
+  BookmarkCheck,
+  Trees, // Backyard icon
+  School, // Playroom/study icon
+  Dumbbell, // Gym icon
+  Utensils, // Dining room icon
+  BriefcaseBusiness, // Office icon
+  Paintbrush, // Art room icon
+  Music2, // Music room icon
+  Shirt // Wardrobe icon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +57,15 @@ const icons: Record<string, React.ElementType> = {
   'storage': Warehouse,
   'lamp': LampDesk,
   'chef': ChefHat,
-  'task': BookmarkCheck
+  'task': BookmarkCheck,
+  'backyard': Trees,
+  'playroom': School,
+  'gym': Dumbbell,
+  'dining': Utensils,
+  'office': BriefcaseBusiness,
+  'art': Paintbrush,
+  'music': Music2,
+  'wardrobe': Shirt
 };
 
 export interface IconProps extends React.HTMLAttributes<HTMLElement> {

@@ -12,6 +12,7 @@ interface SpaceCardProps {
   color?: string;
   tasksCount?: number;
   allTasksDone?: boolean;
+  type?: string;
   onClick?: () => void;
 }
 
@@ -22,32 +23,39 @@ const SpaceCard: React.FC<SpaceCardProps> = ({
   color = '#586b4d',
   tasksCount,
   allTasksDone,
+  type,
   onClick 
 }) => {
   return (
     <Card 
-      className="p-4 flex flex-col items-center justify-center text-center h-32 cursor-pointer hover:shadow-md transition-shadow border-t-4"
+      className="p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow border-t-4"
       onClick={onClick}
       style={{ borderTopColor: color }}
     >
       <div 
         className={cn(
-          "w-12 h-12 rounded-full flex items-center justify-center mb-2",
+          "w-14 h-14 rounded-full flex items-center justify-center mb-3",
           "bg-opacity-20"
         )}
         style={{ backgroundColor: `${color}30` }}
       >
         <Icon 
           name={icon}
-          className="h-6 w-6"
+          className="h-7 w-7"
           style={{ color }}
         />
       </div>
       
-      <h3 className="font-semibold">{name}</h3>
+      <h3 className="font-semibold text-center">{name}</h3>
+      
+      {type && (
+        <Badge variant="outline" className="mt-2 text-xs">
+          {type.charAt(0).toUpperCase() + type.slice(1)}
+        </Badge>
+      )}
       
       {(tasksCount !== undefined || allTasksDone !== undefined) && (
-        <div className="mt-2">
+        <div className="mt-3">
           {allTasksDone ? (
             <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-200">
               All tasks done
