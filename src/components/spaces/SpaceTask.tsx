@@ -2,6 +2,8 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Calendar, User, RefreshCw } from 'lucide-react';
 
 interface SpaceTaskProps {
   task: string;
@@ -20,28 +22,35 @@ const SpaceTask: React.FC<SpaceTaskProps> = ({
   completed,
   onToggle
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <Card className="mb-4 p-4 shadow-sm">
+    <Card className="mb-3 p-3 transition-all hover:shadow-sm border-l-4 border-l-transparent hover:border-l-[#586b4d]">
       <div className="flex">
         <div className="mr-3 pt-1">
           <Checkbox checked={completed} onCheckedChange={onToggle} />
         </div>
         
         <div className="flex-1">
-          <div className="flex justify-between">
-            <h3 className={`font-medium ${completed ? 'line-through text-gray-400' : ''}`}>
+          <div className="flex justify-between flex-wrap">
+            <h3 className={`font-medium text-sm sm:text-base ${completed ? 'line-through text-gray-400' : ''}`}>
               {task}
             </h3>
-            <p className="text-sm text-amber-600 dark:text-amber-400">Due: {dueDate}</p>
           </div>
           
-          <div className="flex justify-between mt-2">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Assigned to: {assignedTo}
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Recurrence: {recurrence}
-            </p>
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-1' : 'grid-cols-3 gap-2'} mt-2`}>
+            <div className="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <Calendar className="h-3 w-3 mr-1" />
+              {dueDate}
+            </div>
+            <div className="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <User className="h-3 w-3 mr-1" />
+              {assignedTo}
+            </div>
+            <div className="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <RefreshCw className="h-3 w-3 mr-1" />
+              {recurrence}
+            </div>
           </div>
         </div>
       </div>

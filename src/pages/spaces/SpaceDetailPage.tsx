@@ -7,12 +7,13 @@ import PageLayout from '@/components/PageLayout';
 import SpaceTask from '@/components/spaces/SpaceTask';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { createEventNotification } from '@/utils/notificationUtils';
+import { useSpaceWithTasks, useAddTask, useToggleTaskCompletion } from '@/hooks/useSpaces';
+import { Icon } from '@/components/ui/icon';
+import { cn } from '@/lib/utils';
 
 interface Task {
   id: string;
@@ -23,15 +24,26 @@ interface Task {
   completed: boolean;
 }
 
+// Common task templates by space type
+const COMMON_TASKS = {
+  'Living Room': ['Vacuum carpet', 'Dust furniture', 'Clean windows', 'Organize books'],
+  'Kitchen': ['Clean counters', 'Wash dishes', 'Mop floor', 'Take out trash', 'Clean refrigerator'],
+  'Bedroom': ['Change bed sheets', 'Vacuum floor', 'Dust surfaces', 'Organize wardrobe'],
+  'Bathroom': ['Clean toilet', 'Clean shower', 'Wash sink', 'Replace towels', 'Refill soap dispensers'],
+  'Garden': ['Water plants', 'Mow lawn', 'Remove weeds', 'Trim bushes'],
+  'Garage': ['Organize tools', 'Sweep floor', 'Check oil levels', 'Clean car'],
+  'Yacht': ['Check engine', 'Clean deck', 'Inspect safety equipment', 'Refill fuel'],
+  'Majlis': ['Vacuum carpet', 'Dust furniture', 'Arrange cushions', 'Clean coffee table'],
+  'General': ['Clean floors', 'Dust surfaces', 'Organize items', 'Empty trash']
+};
+
 const SpaceDetailPage = () => {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('tasks');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [spaceName, setSpaceName] = useState('Loading...');
-  const [isLoading, setIsLoading] = useState(true);
   const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
+  const [showCommonTasks, setShowCommonTasks] = useState(false);
   const [newTask, setNewTask] = useState({
     task: '',
     due_date: '',
@@ -39,77 +51,30 @@ const SpaceDetailPage = () => {
     recurrence: ''
   });
   
-  const fetchSpaceDetails = async () => {
-    if (!id || !user) return;
-    
-    setIsLoading(true);
-    try {
-      // Get space details
-      const { data: spaceData, error: spaceError } = await supabase
-        .from('spaces')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (spaceError) throw spaceError;
-      
-      setSpaceName(spaceData.name);
-      
-      // Get space tasks
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('space_tasks')
-        .select('*')
-        .eq('space_id', id)
-        .order('created_at', { ascending: false });
-      
-      if (tasksError) throw tasksError;
-      
-      setTasks(tasksData || []);
-    } catch (error: any) {
-      console.error("Error fetching space details:", error);
-      toast.error(`Failed to load space: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+  const { 
+    data: spaceData,
+    isLoading,
+    refetch
+  } = useSpaceWithTasks(id);
+
+  const addTask = useAddTask();
+  const toggleTaskCompletion = useToggleTaskCompletion();
+  
+  const fetchSpaceDetails = () => {
+    refetch();
   };
   
   useEffect(() => {
     fetchSpaceDetails();
-  }, [id, user]);
+  }, [id]);
   
-  const handleToggleTask = async (taskId: string) => {
+  const handleToggleTask = async (taskId: string, completed: boolean) => {
+    if (!id) return;
+    
     try {
-      const task = tasks.find(t => t.id === taskId);
-      if (!task) return;
-      
-      const newCompletedState = !task.completed;
-      
-      const { error } = await supabase
-        .from('space_tasks')
-        .update({ completed: newCompletedState })
-        .eq('id', taskId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setTasks(prevTasks => 
-        prevTasks.map(t => 
-          t.id === taskId ? { ...t, completed: newCompletedState } : t
-        )
-      );
-      
-      // Create notification for completed tasks
-      if (newCompletedState && user) {
-        createEventNotification(
-          user.id,
-          taskId,
-          `Task completed in ${spaceName}`,
-          `"${task.task}" was marked as complete.`,
-          'space'
-        );
-      }
-    } catch (error: any) {
-      toast.error(`Failed to update task: ${error.message}`);
+      await toggleTaskCompletion.mutateAsync({ taskId, completed, spaceId: id });
+    } catch (error) {
+      // Error is handled by the mutation
     }
   };
   
@@ -127,33 +92,20 @@ const SpaceDetailPage = () => {
   };
   
   const handleSubmitNewTask = async () => {
-    if (!newTask.task.trim() || !user || !id) {
+    if (!newTask.task.trim() || !id) {
       toast.error("Please enter a task description");
       return;
     }
     
     try {
-      const { data, error } = await supabase
-        .from('space_tasks')
-        .insert({
-          task: newTask.task.trim(),
-          due_date: newTask.due_date || null,
-          assigned_to: newTask.assigned_to || null,
-          recurrence: newTask.recurrence || null,
-          space_id: id,
-          user_id: user.id,
-          completed: false
-        })
-        .select();
+      await addTask.mutateAsync({
+        task: newTask.task,
+        space_id: id,
+        due_date: newTask.due_date || undefined,
+        assigned_to: newTask.assigned_to || undefined,
+        recurrence: newTask.recurrence || undefined
+      });
       
-      if (error) throw error;
-      
-      // Add new task to the list
-      if (data?.[0]) {
-        setTasks(prev => [data[0], ...prev]);
-      }
-      
-      toast.success("Task added successfully!");
       setIsAddTaskDialogOpen(false);
       setNewTask({
         task: '',
@@ -161,62 +113,169 @@ const SpaceDetailPage = () => {
         assigned_to: '',
         recurrence: ''
       });
-      
-    } catch (error: any) {
-      toast.error(`Failed to add task: ${error.message}`);
+    } catch (error) {
+      // Error is handled by the mutation
     }
+  };
+
+  const handleAddCommonTask = async (task: string) => {
+    if (!id) return;
+    
+    try {
+      await addTask.mutateAsync({
+        task,
+        space_id: id
+      });
+      
+      toast.success(`"${task}" task added`);
+    } catch (error) {
+      // Error is handled by the mutation
+    }
+  };
+
+  // Find relevant common tasks
+  const getCommonTasks = () => {
+    const spaceName = spaceData?.space?.name || '';
+    
+    // Try to match space name directly
+    for (const [key, tasks] of Object.entries(COMMON_TASKS)) {
+      if (spaceName.toLowerCase().includes(key.toLowerCase())) {
+        return tasks;
+      }
+    }
+    
+    // Default to general tasks
+    return COMMON_TASKS['General'];
+  };
+  
+  const renderTasksTab = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center py-12">
+          <p>Loading tasks...</p>
+        </div>
+      );
+    }
+
+    const tasks = spaceData?.tasks || [];
+    const spaceName = spaceData?.space?.name || '';
+    const spaceColor = spaceData?.space?.color || '#586b4d';
+    const spaceIcon = spaceData?.space?.icon || 'layout-grid';
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div 
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center mr-2",
+                "bg-opacity-20"
+              )}
+              style={{ backgroundColor: `${spaceColor}30` }}
+            >
+              <Icon 
+                name={spaceIcon}
+                className="h-4 w-4"
+                style={{ color: spaceColor }}
+              />
+            </div>
+            <h3 className="text-lg font-medium">{spaceName} Tasks</h3>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setShowCommonTasks(!showCommonTasks)}
+            >
+              {showCommonTasks ? 'Hide Suggestions' : 'Show Suggestions'}
+            </Button>
+            <Button size="sm" onClick={handleAddTask}>
+              <Plus className="h-4 w-4 mr-1" />
+              Add Task
+            </Button>
+          </div>
+        </div>
+        
+        {/* Common Task Suggestions */}
+        {showCommonTasks && (
+          <Card className="p-4 bg-gray-50 dark:bg-gray-800/50 mb-4">
+            <h4 className="font-medium mb-2">Common Tasks for {spaceName}</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {getCommonTasks().map((task, index) => (
+                <Button 
+                  key={index} 
+                  variant="outline" 
+                  className="justify-start text-left h-auto py-2"
+                  onClick={() => handleAddCommonTask(task)}
+                >
+                  <Plus className="h-3 w-3 mr-2 flex-shrink-0" />
+                  <span className="truncate">{task}</span>
+                </Button>
+              ))}
+            </div>
+          </Card>
+        )}
+        
+        {tasks.length === 0 ? (
+          <Card className="p-8 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <h3 className="font-medium text-lg">No tasks yet</h3>
+              <p className="text-gray-500">Add tasks to manage this space</p>
+              <Button 
+                onClick={handleAddTask} 
+                className="mt-4"
+              >
+                <Plus className="mr-1 h-4 w-4" />Add First Task
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <div>
+            <h4 className="font-medium mb-2 text-gray-600">Active Tasks</h4>
+            {tasks.filter(task => !task.completed).map((task) => (
+              <SpaceTask
+                key={task.id}
+                task={task.task}
+                dueDate={task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                assignedTo={task.assigned_to || 'Unassigned'}
+                recurrence={task.recurrence || 'One-time'}
+                completed={task.completed}
+                onToggle={() => handleToggleTask(task.id, !task.completed)}
+              />
+            ))}
+            
+            {tasks.some(task => task.completed) && (
+              <>
+                <h4 className="font-medium my-2 text-gray-600">Completed Tasks</h4>
+                {tasks.filter(task => task.completed).map((task) => (
+                  <SpaceTask
+                    key={task.id}
+                    task={task.task}
+                    dueDate={task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                    assignedTo={task.assigned_to || 'Unassigned'}
+                    recurrence={task.recurrence || 'One-time'}
+                    completed={task.completed}
+                    onToggle={() => handleToggleTask(task.id, !task.completed)}
+                  />
+                ))}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
   
   const renderTabContent = () => {
     switch (activeTab) {
       case 'tasks':
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Tasks</h3>
-              <Button size="sm" onClick={handleAddTask}>
-                <Plus className="h-4 w-4 mr-1" />
-                Add
-              </Button>
-            </div>
-            
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <p>Loading tasks...</p>
-              </div>
-            ) : tasks.length === 0 ? (
-              <Card className="p-8 text-center">
-                <div className="flex flex-col items-center gap-2">
-                  <h3 className="font-medium text-lg">No tasks yet</h3>
-                  <p className="text-gray-500">Add tasks to manage this space</p>
-                  <Button 
-                    onClick={handleAddTask} 
-                    className="mt-4"
-                  >
-                    <Plus className="mr-1 h-4 w-4" />Add First Task
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-              tasks.map((task) => (
-                <SpaceTask
-                  key={task.id}
-                  task={task.task}
-                  dueDate={task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
-                  assignedTo={task.assigned_to || 'Unassigned'}
-                  recurrence={task.recurrence || 'One-time'}
-                  completed={task.completed}
-                  onToggle={() => handleToggleTask(task.id)}
-                />
-              ))
-            )}
-          </div>
-        );
+        return renderTasksTab();
       
       case 'inventory':
         return (
           <Card className="p-4">
-            <h3 className="text-lg font-medium mb-3">{spaceName} Inventory & Equipment</h3>
+            <h3 className="text-lg font-medium mb-3">{spaceData?.space?.name} Inventory & Equipment</h3>
             <p className="text-gray-500 text-center py-8">
               Inventory management is coming soon
             </p>
@@ -233,7 +292,7 @@ const SpaceDetailPage = () => {
       case 'notes':
         return (
           <Card className="p-4">
-            <h3 className="text-lg font-medium mb-3">{spaceName} Notes</h3>
+            <h3 className="text-lg font-medium mb-3">{spaceData?.space?.name} Notes</h3>
             <p className="text-gray-500 text-center py-8">
               Notes feature coming soon
             </p>
@@ -246,7 +305,7 @@ const SpaceDetailPage = () => {
   };
 
   return (
-    <PageLayout title={spaceName}>
+    <PageLayout title={spaceData?.space?.name || "Space Details"}>
       <div className="space-y-6">
         {/* Back button and refresh */}
         <div className="flex justify-between items-center">
@@ -356,7 +415,12 @@ const SpaceDetailPage = () => {
               <Button variant="outline" onClick={() => setIsAddTaskDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmitNewTask}>Add Task</Button>
+              <Button 
+                onClick={handleSubmitNewTask}
+                disabled={addTask.isPending}
+              >
+                {addTask.isPending ? "Adding..." : "Add Task"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
