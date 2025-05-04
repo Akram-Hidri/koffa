@@ -3,14 +3,14 @@ import React from 'react';
 import {
   LayoutGrid,
   Sofa,
-  Kitchen,
+  CookingPot, // Replace Kitchen with CookingPot
   Bed,
   Bath,
   Flower,
   Car,
   Ship,
-  House,
-  GardenHose,
+  Home, // Replace House with Home
+  Sprout, // Replace GardenHose with Sprout
   Tv,
   Table2,
   Dog,
@@ -18,7 +18,7 @@ import {
   BookOpen,
   Computer,
   WashingMachine,
-  Tool,
+  Wrench, // Replace Tool with Wrench
   Warehouse,
   LampDesk,
   ChefHat,
@@ -30,14 +30,14 @@ import { cn } from '@/lib/utils';
 const icons: Record<string, React.ElementType> = {
   'layout-grid': LayoutGrid,
   'sofa': Sofa,
-  'kitchen': Kitchen,
+  'kitchen': CookingPot,
   'bed': Bed,
   'bath': Bath,
   'flower': Flower,
   'car': Car,
   'ship': Ship,
-  'house': House,
-  'garden': GardenHose,
+  'house': Home,
+  'garden': Sprout,
   'tv': Tv, 
   'table': Table2,
   'dog': Dog,
@@ -45,7 +45,7 @@ const icons: Record<string, React.ElementType> = {
   'book': BookOpen,
   'computer': Computer,
   'laundry': WashingMachine,
-  'tool': Tool,
+  'tool': Wrench,
   'storage': Warehouse,
   'lamp': LampDesk,
   'chef': ChefHat,

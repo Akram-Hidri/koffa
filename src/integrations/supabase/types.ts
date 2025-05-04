@@ -514,21 +514,30 @@ export type Database = {
       }
       spaces: {
         Row: {
+          color: string | null
           created_at: string
+          icon: string | null
           id: string
           name: string
+          type: string | null
           user_id: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
+          icon?: string | null
           id?: string
           name: string
+          type?: string | null
           user_id: string
         }
         Update: {
+          color?: string | null
           created_at?: string
+          icon?: string | null
           id?: string
           name?: string
+          type?: string | null
           user_id?: string
         }
         Relationships: []
