@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { useSpaces, useCreateSpace, Space } from '@/hooks/useSpaces';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SpaceTemplateCard from '@/components/spaces/SpaceTemplateCard';
+import { Icon } from '@/components/ui/icon';
 
 // Space templates with predefined spaces
 const SPACE_TEMPLATES = [
