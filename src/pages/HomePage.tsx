@@ -5,6 +5,9 @@ import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Utensils, ShoppingBag, LayoutGrid, Bell, Calendar, ListTodo, BookOpen } from 'lucide-react';
+import { useSpaces } from '@/hooks/useSpaces';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Icon } from '@/components/ui/icon';
 
 const HomePage = () => {
   // Sample data for quick stats
@@ -14,6 +17,12 @@ const HomePage = () => {
     pendingTasks: 8,
     shoppingLists: 3
   };
+
+  // Fetch real spaces data
+  const { data: spaces = [], isLoading: isLoadingSpaces } = useSpaces();
+
+  // Get the first 3 spaces to display
+  const displaySpaces = spaces.slice(0, 3);
 
   return (
     <PageLayout title="Home">
@@ -128,26 +137,43 @@ const HomePage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            <div className="grid grid-cols-3 gap-2">
-              <Link to="/spaces/1">
-                <Button variant="outline" className="w-full h-full py-4 flex flex-col hover:border-koffa-green">
-                  <span>Kitchen</span>
-                  <span className="text-xs text-amber-500">2 tasks</span>
-                </Button>
-              </Link>
-              <Link to="/spaces/2">
-                <Button variant="outline" className="w-full h-full py-4 flex flex-col hover:border-koffa-green">
-                  <span>Bathroom</span>
-                  <span className="text-xs text-amber-500">3 tasks</span>
-                </Button>
-              </Link>
-              <Link to="/spaces/3">
-                <Button variant="outline" className="w-full h-full py-4 flex flex-col hover:border-koffa-green">
-                  <span>Garden</span>
-                  <span className="text-xs text-amber-500">1 task</span>
-                </Button>
-              </Link>
-            </div>
+            {isLoadingSpaces ? (
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((index) => (
+                  <div key={index} className="w-full h-24">
+                    <Skeleton className="w-full h-full" />
+                  </div>
+                ))}
+              </div>
+            ) : displaySpaces.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {displaySpaces.map((space) => (
+                  <Link to={`/spaces/${space.id}`} key={space.id}>
+                    <Button variant="outline" className="w-full h-full py-4 flex flex-col hover:border-koffa-green">
+                      <div className="flex items-center justify-center mb-1">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center" 
+                          style={{ backgroundColor: `${space.color || '#586b4d'}20` }}>
+                          <Icon 
+                            name={space.icon || 'layout-grid'} 
+                            size={14}
+                            style={{ color: space.color || '#586b4d' }}
+                          />
+                        </div>
+                      </div>
+                      <span>{space.name}</span>
+                      <span className="text-xs text-amber-500">tasks</span>
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No spaces created yet</p>
+                <Link to="/spaces">
+                  <Button variant="link" className="mt-2">Create your first space</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="p-4 pt-0">
             <Link to="/spaces" className="w-full">
