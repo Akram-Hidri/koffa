@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -160,9 +160,15 @@ export const BookingForm: React.FC<BookingFormProps> = ({ chef }) => {
           price: item.price
         }));
       
+      // We need to pass all required fields from the form values
       await createBooking.mutateAsync({
-        ...values,
         chef_id: chef.id,
+        booking_date: values.booking_date,
+        start_time: values.start_time,
+        end_time: values.end_time,
+        meal_type: values.meal_type,
+        guests_count: values.guests_count,
+        special_requests: values.special_requests,
         grocery_items: groceryItemsForBooking
       });
       

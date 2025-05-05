@@ -22,7 +22,7 @@ const ChefDetailPage: React.FC = () => {
   
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout title="Chef Details">
         <div className="animate-pulse space-y-6">
           <div className="flex justify-between">
             <div className="h-8 w-40 bg-koffa-beige/30 rounded"></div>
@@ -40,7 +40,7 @@ const ChefDetailPage: React.FC = () => {
   
   if (!chef) {
     return (
-      <PageLayout>
+      <PageLayout title="Chef Not Found">
         <div className="text-center py-16">
           <ChefHat className="mx-auto h-16 w-16 text-koffa-green/40 mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Chef Not Found</h2>
@@ -64,7 +64,7 @@ const ChefDetailPage: React.FC = () => {
     .toUpperCase();
   
   return (
-    <PageLayout>
+    <PageLayout title={chef.name}>
       <div className="space-y-6">
         {/* Back button and actions */}
         <div className="flex justify-between items-center">
