@@ -161,7 +161,7 @@ export const UserBookings: React.FC<UserBookingsProps> = ({ limit }) => {
                     )}
                   </Avatar>
                   <div className="text-sm font-medium text-koffa-green">
-                    ${parseFloat(booking.total_price).toFixed(2).toString()}
+                    ${String(parseFloat(booking.total_price).toFixed(2))}
                   </div>
                 </div>
                 <Link to={`/services/chef/${booking.chef_id}`}>
