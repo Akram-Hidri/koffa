@@ -24,12 +24,19 @@ export const usePantryItems = () => {
   return useQuery({
     queryKey: ['pantryItems', user?.id],
     queryFn: async () => {
+      console.log('Fetching pantry items for user ID:', user?.id);
+      
       const { data, error } = await supabase
         .from('pantry_items')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching pantry items:', error);
+        throw error;
+      }
+      
+      console.log('Pantry items fetched:', data?.length || 0, 'items');
       return data as PantryItem[];
     },
     enabled: !!user,
@@ -44,6 +51,9 @@ export const useAddPantryItem = () => {
     mutationFn: async (item: Omit<PantryItem, 'id' | 'created_at' | 'user_id'>) => {
       if (!user) throw new Error('User must be logged in');
       
+      console.log('Adding pantry item for user ID:', user.id);
+      console.log('Item data:', item);
+      
       const { data, error } = await supabase
         .from('pantry_items')
         .insert({
@@ -52,14 +62,21 @@ export const useAddPantryItem = () => {
         })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding pantry item:', error);
+        throw error;
+      }
+      
+      console.log('New pantry item added:', data);
       return data[0];
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Invalidating pantry items query cache');
       queryClient.invalidateQueries({ queryKey: ['pantryItems'] });
       toast.success('Item added to pantry');
     },
     onError: (error: any) => {
+      console.error('Failed to add item:', error);
       toast.error(`Failed to add item: ${error.message}`);
     }
   });
