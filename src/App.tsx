@@ -78,6 +78,7 @@ function App() {
           <Route path="/pantry/add" element={<ProtectedRoute><AddPantryItemPage /></ProtectedRoute>} />
           <Route path="/shopping" element={<ProtectedRoute><ShoppingListsPage /></ProtectedRoute>} />
           <Route path="/shopping/:id" element={<ProtectedRoute><ShoppingListDetailPage /></ProtectedRoute>} />
+          <Route path="/shopping/list/:id" element={<ProtectedRoute><ShoppingListDetailPage /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
           <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
