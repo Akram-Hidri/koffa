@@ -3,11 +3,22 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { NavItem, useSettings } from '@/contexts/SettingsContext';
-import { Home, Package, ShoppingCart, Home as SpacesIcon, Users, Calendar, ListTodo, BookOpen, Settings, ArrowLeft } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { 
+  Home, 
+  Package, 
+  ShoppingCart, 
+  LayoutGrid as SpacesIcon, 
+  Users, 
+  Calendar, 
+  ListTodo, 
+  BookOpen, 
+  Settings 
+} from 'lucide-react';
+import { toast } from 'sonner';
+import SettingsLayout from '@/components/SettingsLayout';
 
 const NavigationSettings = () => {
   const navigate = useNavigate();
@@ -37,7 +48,7 @@ const NavigationSettings = () => {
   );
 
   // Handle drag and drop for reordering nav items
-  const handleDragEnd = (result) => {
+  const handleDragEnd = (result: any) => {
     if (!result.destination) return;
     
     const items = Array.from(selectedItems);
@@ -50,11 +61,7 @@ const NavigationSettings = () => {
   // Add item to navigation bar (if less than 5 items already)
   const addNavItem = (item: NavItem) => {
     if (selectedItems.length >= 5) {
-      toast({
-        title: "Maximum items reached",
-        description: "You can select up to 5 navigation items. Remove an item first.",
-        variant: "destructive",
-      });
+      toast.error("Maximum items reached. Remove an item first.");
       return;
     }
     
@@ -64,11 +71,7 @@ const NavigationSettings = () => {
   // Remove item from navigation bar
   const removeNavItem = (itemToRemove: NavItem) => {
     if (selectedItems.length <= 1) {
-      toast({
-        title: "Cannot remove item",
-        description: "You need at least one navigation item.",
-        variant: "destructive",
-      });
+      toast.error("You need at least one navigation item.");
       return;
     }
     
@@ -78,35 +81,21 @@ const NavigationSettings = () => {
   // Save settings changes
   const saveSettings = () => {
     updateSettings({ navItems: selectedItems });
-    toast({
-      title: "Navigation bar updated",
-      description: "Your navigation preferences have been saved.",
-    });
+    toast.success("Navigation bar updated");
+    navigate('/settings');
   };
 
   return (
-    <div className="min-h-screen bg-koffa-beige-light pb-24">
-      {/* Header */}
-      <div className="bg-koffa-beige-light p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            className="mr-2 h-8 w-8 p-0" 
-            onClick={() => navigate('/settings')}
-          >
-            <ArrowLeft size={20} className="text-koffa-green" />
-          </Button>
-          <h1 className="text-xl font-semibold text-koffa-green">Navigation Settings</h1>
-        </div>
-      </div>
-
-      <div className="p-4">
-        <Card className="border-koffa-beige/30 p-4 mb-6">
-          <h2 className="font-semibold text-koffa-green mb-4">Customize Navigation Bar</h2>
-          <p className="text-koffa-green-dark mb-4 text-sm">
+    <SettingsLayout title="Navigation Settings" activeTab="navigation">
+      <Card className="border-koffa-beige/30 p-4 mb-6">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="font-semibold text-koffa-green">Customize Navigation Bar</CardTitle>
+          <CardDescription>
             Drag and drop items to reorder. Select up to 5 items to display in your navigation bar.
-          </p>
-          
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="px-0">
           <h3 className="font-medium text-koffa-green mb-2">Selected Items ({selectedItems.length}/5)</h3>
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="selected-nav-items">
@@ -138,7 +127,7 @@ const NavigationSettings = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => removeNavItem(itemId as NavItem)}
-                                className="text-koffa-red hover:text-koffa-red-dark"
+                                className="text-red-500 hover:text-red-700"
                               >
                                 Remove
                               </Button>
@@ -196,9 +185,9 @@ const NavigationSettings = () => {
           >
             Save Navigation Settings
           </Button>
-        </Card>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </SettingsLayout>
   );
 };
 
