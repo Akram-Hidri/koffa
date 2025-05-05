@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useUserBookings } from '@/hooks/useChefs';
@@ -161,7 +160,7 @@ export const UserBookings: React.FC<UserBookingsProps> = ({ limit }) => {
                     )}
                   </Avatar>
                   <div className="text-sm font-medium text-koffa-green">
-                    ${String(parseFloat(booking.total_price).toFixed(2))}
+                    ${booking.total_price}
                   </div>
                 </div>
                 <Link to={`/services/chef/${booking.chef_id}`}>
