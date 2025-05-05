@@ -13,7 +13,8 @@ import {
   Accessibility, 
   Globe, 
   LogOut,
-  LayoutGrid
+  LayoutGrid,
+  ChefHat
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -48,6 +49,24 @@ const SettingsPage = () => {
       
       {/* Main content */}
       <div className="px-4 py-6">
+        <h2 className="text-koffa-green font-medium mb-4">Features</h2>
+        
+        <Card className="border-koffa-beige/30 p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <ChefHat size={20} className="text-koffa-green mr-3" />
+              <span className="text-koffa-green">Chef Services</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/services')}
+              className="p-2 h-8 w-8"
+            >
+              <ArrowLeft size={16} className="rotate-180 text-koffa-green" />
+            </Button>
+          </div>
+        </Card>
+
         <h2 className="text-koffa-green font-medium mb-4">Preferences</h2>
         
         <Card className="border-koffa-beige/30 p-4 mb-4">

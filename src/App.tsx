@@ -32,6 +32,11 @@ import CalendarPage from '@/pages/calendar/CalendarPage';
 import TasksPage from '@/pages/tasks/TasksPage';
 import ReportsPage from '@/pages/reports/ReportsPage';
 
+// Services
+import ServicesPage from '@/pages/services/ServicesPage';
+import ChefDetailPage from '@/pages/services/ChefDetailPage';
+import UserBookingsPage from '@/pages/services/UserBookingsPage';
+
 // Settings
 import SettingsPage from '@/pages/SettingsPage';
 import NavigationSettings from '@/pages/settings/NavigationSettings';
@@ -77,6 +82,11 @@ function App() {
           <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+          
+          {/* Services Routes */}
+          <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+          <Route path="/services/chef/:id" element={<ProtectedRoute><ChefDetailPage /></ProtectedRoute>} />
+          <Route path="/services/bookings" element={<ProtectedRoute><UserBookingsPage /></ProtectedRoute>} />
           
           {/* Settings */}
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />

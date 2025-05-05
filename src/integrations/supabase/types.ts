@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      booking_groceries: {
+        Row: {
+          booking_id: string
+          created_at: string
+          grocery_item_id: string
+          id: string
+          quantity: number
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          grocery_item_id: string
+          id?: string
+          quantity: number
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          grocery_item_id?: string
+          id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_groceries_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "chef_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_groceries_grocery_item_id_fkey"
+            columns: ["grocery_item_id"]
+            isOneToOne: false
+            referencedRelation: "chef_grocery_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_events: {
         Row: {
           all_day: boolean | null
@@ -73,6 +112,195 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chef_bookings: {
+        Row: {
+          booking_date: string
+          chef_id: string
+          created_at: string
+          end_time: string
+          guests_count: number
+          id: string
+          meal_type: string
+          special_requests: string | null
+          start_time: string
+          status: string
+          total_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_date: string
+          chef_id: string
+          created_at?: string
+          end_time: string
+          guests_count: number
+          id?: string
+          meal_type: string
+          special_requests?: string | null
+          start_time: string
+          status?: string
+          total_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_date?: string
+          chef_id?: string
+          created_at?: string
+          end_time?: string
+          guests_count?: number
+          id?: string
+          meal_type?: string
+          special_requests?: string | null
+          start_time?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chef_bookings_chef_id_fkey"
+            columns: ["chef_id"]
+            isOneToOne: false
+            referencedRelation: "chefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chef_favorites: {
+        Row: {
+          chef_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chef_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chef_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chef_favorites_chef_id_fkey"
+            columns: ["chef_id"]
+            isOneToOne: false
+            referencedRelation: "chefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chef_grocery_items: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          price: number
+          unit: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          price: number
+          unit: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          unit?: string
+        }
+        Relationships: []
+      }
+      chef_reviews: {
+        Row: {
+          chef_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          chef_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          chef_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chef_reviews_chef_id_fkey"
+            columns: ["chef_id"]
+            isOneToOne: false
+            referencedRelation: "chefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chefs: {
+        Row: {
+          bio: string | null
+          created_at: string
+          cuisine_style: string
+          hourly_rate: number
+          id: string
+          name: string
+          profile_image: string | null
+          specialty: string | null
+          updated_at: string
+          user_id: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          cuisine_style: string
+          hourly_rate: number
+          id?: string
+          name: string
+          profile_image?: string | null
+          specialty?: string | null
+          updated_at?: string
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          cuisine_style?: string
+          hourly_rate?: number
+          id?: string
+          name?: string
+          profile_image?: string | null
+          specialty?: string | null
+          updated_at?: string
+          user_id?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
       }
       custom_terms: {
         Row: {
