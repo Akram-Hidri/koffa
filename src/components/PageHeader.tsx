@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 
 interface PageHeaderProps {
   title: string;
+  icon?: React.ReactNode;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ title }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({ title, icon }) => {
   const { signOut } = useAuth();
 
   return (
@@ -20,7 +21,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title }) => {
           <Link to="/home" className="flex items-center">
             <Logo size="sm" />
           </Link>
-          <h1 className="text-xl font-semibold text-koffa-green-dark dark:text-green-300">{title}</h1>
+          <div className="flex items-center gap-2">
+            {icon && <span className="text-koffa-green-dark dark:text-green-300">{icon}</span>}
+            <h1 className="text-xl font-semibold text-koffa-green-dark dark:text-green-300">{title}</h1>
+          </div>
         </div>
         
         <div className="flex items-center gap-4">

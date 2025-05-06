@@ -1,3 +1,4 @@
+
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -53,6 +54,7 @@ const queryClient = new QueryClient();
 import './App.css';
 
 import RecipesPage from './pages/recipes/RecipesPage';
+import { Utensils } from 'lucide-react';
 
 function App() {
   return (
@@ -107,7 +109,7 @@ function App() {
                 path="/recipes/*"
                 element={
                   <ProtectedRoute>
-                    <PageLayout>
+                    <PageLayout title="Recipes" icon={<Utensils className="h-5 w-5" />}>
                       <Routes>
                         <Route index element={<RecipesPage />} />
                         {/* We'll add more recipe routes later */}
