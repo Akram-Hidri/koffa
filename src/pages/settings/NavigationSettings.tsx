@@ -15,7 +15,9 @@ import {
   Calendar, 
   ListTodo, 
   BookOpen, 
-  Settings 
+  Settings,
+  ChefHat,
+  Utensils
 } from 'lucide-react';
 import { toast } from 'sonner';
 import SettingsLayout from '@/components/SettingsLayout';
@@ -39,7 +41,9 @@ const NavigationSettings = () => {
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
     { id: 'tasks', label: 'Tasks', icon: <ListTodo size={20} /> },
     { id: 'notes', label: 'Notes', icon: <BookOpen size={20} /> },
-    { id: 'settings', label: 'Settings', icon: <Settings size={20} /> }
+    { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+    { id: 'services', label: 'Rent Chef', icon: <ChefHat size={20} /> },
+    { id: 'recipes', label: 'Recipes', icon: <Utensils size={20} /> }
   ];
 
   // Filter available items to only show those not already selected

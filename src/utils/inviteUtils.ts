@@ -1,4 +1,6 @@
 
+import { formatInviteCode } from "@/contexts/settings/settingsUtils";
+
 export const generateInviteCode = () => {
   // Generate a random 8-character alphanumeric code
   const characters = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789'; // Removed confusing chars like O/0

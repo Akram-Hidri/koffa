@@ -3,7 +3,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
-import { Home, Package, ShoppingCart, LayoutGrid, Users, User, Calendar, ListTodo, BookOpen, Settings } from 'lucide-react';
+import { Home, Package, ShoppingCart, LayoutGrid, Users, User, Calendar, ListTodo, BookOpen, Settings, ChefHat, Utensils } from 'lucide-react';
 
 const PageNavigation = () => {
   const location = useLocation();
@@ -16,17 +16,19 @@ const PageNavigation = () => {
     return location.pathname.startsWith(route);
   };
 
-  // Map of available navigation items with their icons
+  // Map of available navigation items with their icons and routes
   const navIconMap = {
-    home: Home,
-    pantry: Package,
-    shopping: ShoppingCart,
-    spaces: LayoutGrid,
-    family: Users,
-    calendar: Calendar,
-    tasks: ListTodo,
-    notes: BookOpen,
-    settings: Settings
+    home: { icon: Home, route: '/home' },
+    pantry: { icon: Package, route: '/pantry' },
+    shopping: { icon: ShoppingCart, route: '/shopping' },
+    spaces: { icon: LayoutGrid, route: '/spaces' },
+    family: { icon: Users, route: '/family' },
+    calendar: { icon: Calendar, route: '/calendar' },
+    tasks: { icon: ListTodo, route: '/tasks' },
+    notes: { icon: BookOpen, route: '/notes' },
+    settings: { icon: Settings, route: '/settings' },
+    services: { icon: ChefHat, route: '/services' }, // Rent Chef
+    recipes: { icon: Utensils, route: '/recipes' }, // Recipes
   };
 
   // Get navigation items from settings or use default
@@ -36,8 +38,11 @@ const PageNavigation = () => {
 
   // Render the icon for a specific navigation item
   const renderNavIcon = (item: string) => {
-    const IconComponent = navIconMap[item as keyof typeof navIconMap];
-    const active = isActive(`/${item}`);
+    const navItem = navIconMap[item as keyof typeof navIconMap];
+    if (!navItem) return null;
+
+    const IconComponent = navItem.icon;
+    const active = isActive(navItem.route);
     
     return (
       <IconComponent 
@@ -45,6 +50,14 @@ const PageNavigation = () => {
         className={active ? "text-[#586b4d]" : "text-[#6a798f]"}
       />
     );
+  };
+
+  // Handle navigation
+  const handleNavigation = (item: string) => {
+    const navItem = navIconMap[item as keyof typeof navIconMap];
+    if (navItem) {
+      navigate(navItem.route);
+    }
   };
 
   return (
@@ -56,9 +69,9 @@ const PageNavigation = () => {
             key={index}
             variant="ghost" 
             className={`p-2 h-auto w-14 hover:bg-[#f3f3e3] rounded-full transition-all duration-300 ${
-              isActive(`/${item}`) ? 'bg-[#f3f3e3]' : ''
+              isActive(navIconMap[item as keyof typeof navIconMap]?.route || '') ? 'bg-[#f3f3e3]' : ''
             }`}
-            onClick={() => navigate(`/${item}`)}
+            onClick={() => handleNavigation(item)}
           >
             {renderNavIcon(item)}
           </Button>
