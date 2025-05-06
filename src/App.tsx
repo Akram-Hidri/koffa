@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import PageLayout from '@/components/PageLayout';
 
 // Public pages
 import Index from '@/pages/Index';
