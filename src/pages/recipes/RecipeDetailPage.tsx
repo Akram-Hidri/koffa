@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRecipes } from '@/hooks/useRecipes';
@@ -9,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ArrowLeft, Clock, Users, ChefHat, Edit, Trash2, Share2, ShoppingCart, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useShoppingLists } from '@/hooks/useShoppingLists';
+import * as ShoppingListsHooks from '@/hooks/useShoppingLists';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,8 +27,7 @@ const RecipeDetailPage = () => {
   const [showAddToListDialog, setShowAddToListDialog] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<Record<string, boolean>>({});
   
-  const { useShoppingListsList } = useShoppingLists();
-  const { data: shoppingLists } = useShoppingListsList();
+  const { data: shoppingLists } = ShoppingListsHooks.useShoppingListsList();
   const [selectedShoppingList, setSelectedShoppingList] = useState<string | null>(null);
   
   const handleDeleteRecipe = async () => {
