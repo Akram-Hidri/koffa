@@ -1,11 +1,16 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Share2, Download, RefreshCw, ArrowLeft, Save } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import ShoppingListItem from '@/components/shopping/ShoppingListItem';
-import { useShoppingListWithItems, useUpdateShoppingListItem, useAddShoppingList, useAddShoppingListItem, useDeleteShoppingListItem } from '@/hooks/useShoppingLists';
+import { 
+  useShoppingListWithItems, 
+  useUpdateShoppingListItem, 
+  useAddShoppingList, 
+  useAddShoppingListItem, 
+  useDeleteShoppingListItem 
+} from '@/hooks/useShoppingLists';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';

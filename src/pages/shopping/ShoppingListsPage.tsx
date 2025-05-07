@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw, Grid3x3 } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 import ShoppingListCard from '@/components/shopping/ShoppingListCard';
-import { useShoppingLists, ShoppingList } from '@/hooks/useShoppingLists';
+import { ShoppingList, useShoppingListsList } from '@/hooks/useShoppingLists';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,7 +15,7 @@ const ShoppingListsPage = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('active');
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
-  const { data: shoppingLists = [], isLoading, error, refetch } = useShoppingLists();
+  const { data: shoppingLists = [], isLoading, error, refetch } = useShoppingListsList();
   
   if (error) {
     toast.error("Failed to load shopping lists");
@@ -109,7 +108,7 @@ const ShoppingListsPage = () => {
         
         {/* Create new list and sort controls */}
         <div className="flex flex-wrap justify-between items-center gap-2">
-          <Button onClick={handleCreateNewList} className="whitespace-nowrap">
+          <Button onClick={() => navigate('/shopping/new')} className="whitespace-nowrap">
             <Plus className="mr-1 h-4 w-4" />
             Create New List
           </Button>
