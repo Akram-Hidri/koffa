@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSettings, FamilyMember, MemberRole } from '@/contexts/SettingsContext';
-import { UsersRound, Bell, Settings, Users, MessageCircle, UserPlus, Plus } from 'lucide-react';
+import { UsersRound, Bell, Settings, Users, MessageCircle, UserPlus, Plus, Copy, Mail, Phone } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -15,6 +14,8 @@ import PageLayout from '@/components/PageLayout';
 import { createFamilyInvitation, getFamilyForUser, getFamilyInvitations } from '@/utils/familyUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const FamilyPage = () => {
   const navigate = useNavigate();
@@ -25,8 +26,11 @@ const FamilyPage = () => {
   const [newMemberDetails, setNewMemberDetails] = useState({
     name: '',
     role: 'member' as MemberRole,
-    inviteMethod: 'code' // 'code' or 'direct'
+    inviteMethod: 'code' as 'code' | 'email' | 'phone',
+    email: '',
+    phone: '',
   });
+  const [codeCopied, setCodeCopied] = useState(false);
   const { toast } = useToast();
   
   // Add a default settings object to prevent null references
@@ -93,6 +97,7 @@ const FamilyPage = () => {
       // Create invitation in database
       const code = await createFamilyInvitation(family.id, user.id);
       setInviteCode(code);
+      setCodeCopied(false);
       
       // Show success toast
       toast({
@@ -108,6 +113,76 @@ const FamilyPage = () => {
       });
     } finally {
       setIsGeneratingCode(false);
+    }
+  };
+
+  const handleCopyInviteCode = () => {
+    if (inviteCode) {
+      navigator.clipboard.writeText(formatInviteCodeForDisplay(inviteCode));
+      setCodeCopied(true);
+      toast({
+        title: "Code copied!",
+        description: "The invitation code has been copied to your clipboard.",
+      });
+      
+      setTimeout(() => {
+        setCodeCopied(false);
+      }, 3000);
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (newMemberDetails.inviteMethod === 'email' && !newMemberDetails.email) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newMemberDetails.inviteMethod === 'phone' && !newMemberDetails.phone) {
+      toast({
+        title: "Error",
+        description: "Please enter a phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (newMemberDetails.inviteMethod === 'email') {
+        // Here you would integrate with an email sending service
+        // For now, we'll just simulate success
+        toast({
+          title: "Invitation sent!",
+          description: `An invitation has been sent to ${newMemberDetails.email}`,
+        });
+      } else if (newMemberDetails.inviteMethod === 'phone') {
+        // Here you would integrate with an SMS sending service
+        // For now, we'll just simulate success
+        toast({
+          title: "Invitation sent!",
+          description: `An invitation has been sent to ${newMemberDetails.phone}`,
+        });
+      }
+      
+      // Clear form
+      setNewMemberDetails({
+        ...newMemberDetails,
+        email: '',
+        phone: ''
+      });
+      
+      // Close dialog
+      setIsInviteDialogOpen(false);
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send invitation. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -163,7 +238,9 @@ const FamilyPage = () => {
       setNewMemberDetails({
         name: '',
         role: 'member',
-        inviteMethod: 'code'
+        inviteMethod: 'code',
+        email: '',
+        phone: ''
       });
       
       // Clear invite code if it was used
@@ -262,40 +339,75 @@ const FamilyPage = () => {
               
               <div className="space-y-2">
                 <Label>Invitation Method</Label>
-                <div className="flex space-x-2">
-                  <Button
-                    variant={newMemberDetails.inviteMethod === 'direct' ? 'default' : 'outline'}
-                    className={newMemberDetails.inviteMethod === 'direct' ? 'bg-koffa-green text-white' : ''}
-                    onClick={() => setNewMemberDetails({
-                      ...newMemberDetails,
-                      inviteMethod: 'direct'
-                    })}
-                  >
-                    Add Directly
-                  </Button>
-                  <Button
-                    variant={newMemberDetails.inviteMethod === 'code' ? 'default' : 'outline'}
-                    className={newMemberDetails.inviteMethod === 'code' ? 'bg-koffa-green text-white' : ''}
-                    onClick={() => setNewMemberDetails({
-                      ...newMemberDetails,
-                      inviteMethod: 'code'
-                    })}
-                  >
-                    Generate Code
-                  </Button>
-                </div>
+                <RadioGroup 
+                  value={newMemberDetails.inviteMethod}
+                  onValueChange={(value) => setNewMemberDetails({
+                    ...newMemberDetails,
+                    inviteMethod: value as 'code' | 'email' | 'phone'
+                  })}
+                  className="flex flex-col space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="code" id="invite-code" />
+                    <Label htmlFor="invite-code" className="flex items-center">
+                      <span className="mr-2">Invitation Code</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                      </svg>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="email" id="invite-email" />
+                    <Label htmlFor="invite-email" className="flex items-center">
+                      <span className="mr-2">Email Invitation</span>
+                      <Mail size={16} />
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="phone" id="invite-phone" />
+                    <Label htmlFor="invite-phone" className="flex items-center">
+                      <span className="mr-2">SMS Invitation</span>
+                      <Phone size={16} />
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
               
               {newMemberDetails.inviteMethod === 'code' && (
                 <div className="space-y-2 border rounded-md p-4 bg-slate-50">
                   <Label>Invitation Code</Label>
                   <div className="flex space-x-2">
-                    <Input 
-                      value={inviteCode ? formatInviteCodeForDisplay(inviteCode) : ''} 
-                      readOnly 
-                      placeholder="Click generate to create code" 
-                      className="font-mono"
-                    />
+                    <div className="relative flex-1">
+                      <Input 
+                        value={inviteCode ? formatInviteCodeForDisplay(inviteCode) : ''} 
+                        readOnly 
+                        placeholder="Click generate to create code" 
+                        className="font-mono pr-10"
+                      />
+                      {inviteCode && (
+                        <button 
+                          type="button"
+                          onClick={handleCopyInviteCode}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
+                          aria-label="Copy invite code"
+                        >
+                          <Copy size={16} className={codeCopied ? "text-koffa-green" : ""} />
+                        </button>
+                      )}
+                    </div>
                     <Button 
                       onClick={handleGenerateInviteCode}
                       type="button"
@@ -305,10 +417,56 @@ const FamilyPage = () => {
                     </Button>
                   </div>
                   {inviteCode && (
-                    <p className="text-xs text-muted-foreground">
-                      Share this code with the person you want to invite. They can use it to join your family.
-                    </p>
+                    <div className="mt-4 text-sm border-t pt-3">
+                      <h4 className="font-medium text-koffa-green mb-1">How to join:</h4>
+                      <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-1">
+                        <li>Download the Koffa app from the App Store or Google Play</li>
+                        <li>Create an account or sign in</li>
+                        <li>Tap "Join Family" and enter the code above</li>
+                      </ol>
+                      <p className="text-xs mt-2 text-muted-foreground">
+                        This code will expire in 7 days.
+                      </p>
+                    </div>
                   )}
+                </div>
+              )}
+              
+              {newMemberDetails.inviteMethod === 'email' && (
+                <div className="space-y-2 border rounded-md p-4 bg-slate-50">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input 
+                    id="email" 
+                    type="email"
+                    placeholder="Enter email address" 
+                    value={newMemberDetails.email}
+                    onChange={e => setNewMemberDetails({
+                      ...newMemberDetails,
+                      email: e.target.value
+                    })}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    We'll send an invitation with instructions to join your family.
+                  </p>
+                </div>
+              )}
+              
+              {newMemberDetails.inviteMethod === 'phone' && (
+                <div className="space-y-2 border rounded-md p-4 bg-slate-50">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel"
+                    placeholder="Enter phone number" 
+                    value={newMemberDetails.phone}
+                    onChange={e => setNewMemberDetails({
+                      ...newMemberDetails,
+                      phone: e.target.value
+                    })}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    We'll send an SMS with instructions to join your family.
+                  </p>
                 </div>
               )}
             </div>
@@ -317,13 +475,22 @@ const FamilyPage = () => {
               <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleAddMember} 
-                className="bg-koffa-green text-white hover:bg-koffa-green-dark"
-                disabled={newMemberDetails.inviteMethod === 'code' && !inviteCode}
-              >
-                {newMemberDetails.inviteMethod === 'direct' ? 'Add Member' : 'Create Invitation'}
-              </Button>
+              {newMemberDetails.inviteMethod === 'code' ? (
+                <Button 
+                  onClick={handleAddMember} 
+                  className="bg-koffa-green text-white hover:bg-koffa-green-dark"
+                  disabled={newMemberDetails.inviteMethod === 'code' && !inviteCode}
+                >
+                  {newMemberDetails.inviteMethod === 'direct' ? 'Add Member' : 'Create Invitation'}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSendInvite} 
+                  className="bg-koffa-green text-white hover:bg-koffa-green-dark"
+                >
+                  Send Invitation
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
