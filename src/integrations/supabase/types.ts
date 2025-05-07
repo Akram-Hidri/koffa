@@ -622,6 +622,144 @@ export type Database = {
           },
         ]
       }
+      recipe_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          optional: boolean | null
+          quantity: string
+          recipe_id: string
+          unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          optional?: boolean | null
+          quantity: string
+          recipe_id: string
+          unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          optional?: boolean | null
+          quantity?: string
+          recipe_id?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipe_shopping_items: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_id: string
+          recipe_id: string
+          shopping_list_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_id: string
+          recipe_id: string
+          shopping_list_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_id?: string
+          recipe_id?: string
+          shopping_list_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_shopping_items_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_shopping_items_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_shopping_items_shopping_list_id_fkey"
+            columns: ["shopping_list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          category: string | null
+          cook_time: number | null
+          created_at: string
+          cuisine: string | null
+          description: string | null
+          difficulty: string | null
+          id: string
+          image_url: string | null
+          instructions: string | null
+          prep_time: number | null
+          servings: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shopping_list_items: {
         Row: {
           added_by: string | null

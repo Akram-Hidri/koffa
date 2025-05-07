@@ -53,7 +53,10 @@ const queryClient = new QueryClient();
 
 import './App.css';
 
+// Recipe pages
 import RecipesPage from './pages/recipes/RecipesPage';
+import RecipeDetailPage from './pages/recipes/RecipeDetailPage';
+import RecipeFormPage from './pages/recipes/RecipeFormPage';
 import { Utensils } from 'lucide-react';
 
 function App() {
@@ -104,20 +107,11 @@ function App() {
               <Route path="/settings/dialect" element={<ProtectedRoute><DialectSettings /></ProtectedRoute>} />
               <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
               
-              {/* Add the new recipes route */}
-              <Route
-                path="/recipes/*"
-                element={
-                  <ProtectedRoute>
-                    <PageLayout title="Recipes" icon={<Utensils className="h-5 w-5" />}>
-                      <Routes>
-                        <Route index element={<RecipesPage />} />
-                        {/* We'll add more recipe routes later */}
-                      </Routes>
-                    </PageLayout>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Recipe Routes */}
+              <Route path="/recipes" element={<ProtectedRoute><PageLayout title="Recipes" icon={<Utensils className="h-5 w-5" />}><RecipesPage /></PageLayout></ProtectedRoute>} />
+              <Route path="/recipes/:id" element={<ProtectedRoute><PageLayout title="Recipe Details" icon={<Utensils className="h-5 w-5" />}><RecipeDetailPage /></PageLayout></ProtectedRoute>} />
+              <Route path="/recipes/create" element={<ProtectedRoute><PageLayout title="Create Recipe" icon={<Utensils className="h-5 w-5" />}><RecipeFormPage /></PageLayout></ProtectedRoute>} />
+              <Route path="/recipes/edit/:id" element={<ProtectedRoute><PageLayout title="Edit Recipe" icon={<Utensils className="h-5 w-5" />}><RecipeFormPage /></PageLayout></ProtectedRoute>} />
               
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
