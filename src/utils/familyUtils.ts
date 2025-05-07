@@ -106,11 +106,14 @@ export const verifyInviteCode = async (code: string) => {
 
 export const useInviteCode = async (code: string, userId: string) => {
   try {
+    // Normalize the code
+    const cleanCode = normalizeInviteCode(code);
+    
     // Get the invitation details
     const { data: invitation, error: invitationError } = await supabase
       .from('invitations')
       .select('family_id, is_used, expires_at')
-      .eq('code', code)
+      .eq('code', cleanCode)
       .maybeSingle();
       
     if (invitationError) throw invitationError;
@@ -125,7 +128,7 @@ export const useInviteCode = async (code: string, userId: string) => {
     const { error: updateError } = await supabase
       .from('invitations')
       .update({ is_used: true })
-      .eq('code', code);
+      .eq('code', cleanCode);
       
     if (updateError) throw updateError;
     

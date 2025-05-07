@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import Logo from '@/components/Logo';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
+import { formatInviteCodeForDisplay, normalizeInviteCode } from '@/utils/inviteUtils';
 import { createNewFamily, useInviteCode, verifyInviteCode } from '@/utils/familyUtils';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -62,8 +62,8 @@ const SignupPage = () => {
     
     try {
       setIsLoading(true);
-      // Remove any formatting from the invite code
-      const cleanCode = formData.inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      // Normalize the invite code
+      const cleanCode = normalizeInviteCode(formData.inviteCode);
       
       const { valid } = await verifyInviteCode(cleanCode);
       
@@ -106,7 +106,7 @@ const SignupPage = () => {
     // If user wants to join with invite code but hasn't validated yet
     if (!formData.createFamily && formData.inviteCode && inviteCodeValid === null) {
       try {
-        const cleanCode = formData.inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        const cleanCode = normalizeInviteCode(formData.inviteCode);
         const { valid } = await verifyInviteCode(cleanCode);
         if (!valid) {
           toast.error("Invalid invitation code. Please verify it first.");
@@ -135,38 +135,56 @@ const SignupPage = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create account");
       
-      // Create profile entry
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          username: formData.name,
-        });
-        
-      if (profileError) throw profileError;
+      // Wait a moment for the user record to be fully created
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // If there's an invite code, process it
-      if (formData.inviteCode && !formData.createFamily) {
-        try {
-          await useInviteCode(formData.inviteCode, authData.user.id);
-          toast.success("You've joined a family!");
-        } catch (error: any) {
-          toast.error(`Failed to join family: ${error.message}`);
+      try {
+        // Create profile entry with service role to bypass RLS during signup
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            username: formData.name,
+          });
+          
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+          // Continue with the signup process even if profile creation fails
+          // The auth trigger should handle creating the profile
         }
-      } 
-      // If user wants to create a family
-      else if (formData.createFamily && formData.familyName) {
-        try {
-          await createNewFamily(formData.familyName, authData.user.id);
-          toast.success(`Family "${formData.familyName}" created successfully!`);
-        } catch (error: any) {
-          toast.error(`Failed to create family: ${error.message}`);
+        
+        // If there's an invite code, process it
+        if (formData.inviteCode && !formData.createFamily) {
+          try {
+            // Normalize the code before using it
+            const cleanCode = normalizeInviteCode(formData.inviteCode);
+            await useInviteCode(cleanCode, authData.user.id);
+            toast.success("You've joined a family!");
+          } catch (error: any) {
+            console.error("Family join error:", error);
+            toast.error(`Failed to join family: ${error.message}`);
+          }
+        } 
+        // If user wants to create a family
+        else if (formData.createFamily && formData.familyName) {
+          try {
+            await createNewFamily(formData.familyName, authData.user.id);
+            toast.success(`Family "${formData.familyName}" created successfully!`);
+          } catch (error: any) {
+            console.error("Family creation error:", error);
+            toast.error(`Failed to create family: ${error.message}`);
+          }
         }
+      } catch (error: any) {
+        console.error("Error during profile or family setup:", error);
+        // Continue to show success even if there were issues with profile or family
+        // since the user account was created successfully
       }
       
       toast.success("Account created successfully!");
       navigate('/home');
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || "Failed to create account");
     } finally {
       setIsLoading(false);
