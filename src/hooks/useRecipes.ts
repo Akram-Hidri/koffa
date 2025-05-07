@@ -108,10 +108,10 @@ export const useRecipes = () => {
     // Extract ingredients to handle them separately
     const { ingredients, id, ...recipeData } = recipe;
     
-    // Update recipe data
+    // Update recipe data - Fix the Date to string conversion issue
     const { error: recipeError } = await supabase
       .from('recipes')
-      .update({ ...recipeData, updated_at: new Date() })
+      .update({ ...recipeData, updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (recipeError) throw recipeError;
