@@ -481,7 +481,7 @@ const FamilyPage = () => {
                   className="bg-koffa-green text-white hover:bg-koffa-green-dark"
                   disabled={newMemberDetails.inviteMethod === 'code' && !inviteCode}
                 >
-                  {newMemberDetails.inviteMethod === 'direct' ? 'Add Member' : 'Create Invitation'}
+                  Add Member
                 </Button>
               ) : (
                 <Button 
