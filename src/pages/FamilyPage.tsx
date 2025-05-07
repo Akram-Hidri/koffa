@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,14 @@ import { useToast } from '@/hooks/use-toast';
 import PageLayout from '@/components/PageLayout';
 import { createFamilyInvitation, getFamilyForUser, getFamilyInvitations } from '@/utils/familyUtils';
 import { supabase } from '@/integrations/supabase/client';
+import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
 
 const FamilyPage = () => {
   const navigate = useNavigate();
   const { settings, generateInviteCode, addFamilyMember } = useSettings();
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [newMemberDetails, setNewMemberDetails] = useState({
     name: '',
     role: 'member' as MemberRole,
@@ -45,6 +48,8 @@ const FamilyPage = () => {
 
   const handleGenerateInviteCode = async () => {
     try {
+      setIsGeneratingCode(true);
+      
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -56,13 +61,31 @@ const FamilyPage = () => {
         return;
       }
       
+      // Check if user has admin permissions to create invites
+      const currentMember = familyMembers.find(member => member.id === user.id);
+      const canInvite = currentMember?.permissions?.inviteMembers || 
+                        currentMember?.role === 'admin' || 
+                        !currentMember; // If no member record yet, assume they're the first user
+      
+      if (!canInvite) {
+        toast({
+          title: "Permission denied",
+          description: "You don't have permission to invite new members",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Get the user's family
       const family = await getFamilyForUser(user.id);
       if (!family) {
+        // If no family exists yet, we'll create one later during member signup
+        // For now, generate a standalone code
+        const code = generateInviteCode();
+        setInviteCode(code);
         toast({
-          title: "No family found",
-          description: "You must create or join a family first",
-          variant: "destructive",
+          title: "Invite code generated!",
+          description: `Share this code with family members: ${formatInviteCodeForDisplay(code)}`,
         });
         return;
       }
@@ -74,7 +97,7 @@ const FamilyPage = () => {
       // Show success toast
       toast({
         title: "Invite code generated!",
-        description: `Share this code with family members: ${code}`,
+        description: `Share this code with family members: ${formatInviteCodeForDisplay(code)}`,
       });
     } catch (error) {
       console.error("Error generating invite code:", error);
@@ -83,6 +106,8 @@ const FamilyPage = () => {
         description: "Failed to generate invite code. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingCode(false);
     }
   };
 
@@ -140,6 +165,9 @@ const FamilyPage = () => {
         role: 'member',
         inviteMethod: 'code'
       });
+      
+      // Clear invite code if it was used
+      setInviteCode(null);
       
       // Close dialog
       setIsInviteDialogOpen(false);
@@ -263,7 +291,7 @@ const FamilyPage = () => {
                   <Label>Invitation Code</Label>
                   <div className="flex space-x-2">
                     <Input 
-                      value={inviteCode || ''} 
+                      value={inviteCode ? formatInviteCodeForDisplay(inviteCode) : ''} 
                       readOnly 
                       placeholder="Click generate to create code" 
                       className="font-mono"
@@ -271,8 +299,9 @@ const FamilyPage = () => {
                     <Button 
                       onClick={handleGenerateInviteCode}
                       type="button"
+                      disabled={isGeneratingCode}
                     >
-                      Generate
+                      {isGeneratingCode ? "Generating..." : "Generate"}
                     </Button>
                   </div>
                   {inviteCode && (
@@ -291,6 +320,7 @@ const FamilyPage = () => {
               <Button 
                 onClick={handleAddMember} 
                 className="bg-koffa-green text-white hover:bg-koffa-green-dark"
+                disabled={newMemberDetails.inviteMethod === 'code' && !inviteCode}
               >
                 {newMemberDetails.inviteMethod === 'direct' ? 'Add Member' : 'Create Invitation'}
               </Button>

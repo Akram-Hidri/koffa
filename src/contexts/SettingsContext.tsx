@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Settings, SettingsContextType, FamilyMember } from "./settings/types";
 import { defaultSettings } from "./settings/defaultSettings";
-import { applyThemeSettings, generateInviteCode as generateRandomInviteCode, ensureSettingsArrays } from "./settings/settingsUtils";
+import { applyThemeSettings, ensureSettingsArrays } from "./settings/settingsUtils";
+import { generateInviteCode as generateRandomInviteCode } from "@/utils/inviteUtils";
 
 // Re-export types for convenience
 export type { Language, Theme, TextSize, ContrastMode, InputMethod, NavItem, MemberRole, MemberStatus, FamilyMember } from "./settings/types";
@@ -126,7 +127,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Increase pending invitations count
     setSettings(prevSettings => ({
       ...prevSettings,
-      pendingInvitations: prevSettings.pendingInvitations + 1
+      pendingInvitations: (prevSettings.pendingInvitations || 0) + 1
     }));
     
     return code;

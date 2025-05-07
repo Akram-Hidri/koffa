@@ -43,23 +43,12 @@ export const applyThemeSettings = (settings: Settings): void => {
   }
 };
 
-// Generate a random invite code
-export const generateInviteCode = (): string => {
-  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed easily confused characters like I, 1, O, 0
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  
-  return code;
-};
-
 // Format invite code for better readability
 export const formatInviteCode = (code: string): string => {
-  if (code.length === 8) {
+  if (code?.length === 8) {
     return `${code.substring(0, 4)}-${code.substring(4)}`;
   }
-  return code;
+  return code || '';
 };
 
 // Make sure arrays exist in settings

@@ -1,22 +1,26 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { generateInviteCode } from './inviteUtils';
 import { toast } from 'sonner';
 
 export const createFamilyInvitation = async (familyId: string, userId: string) => {
-  const code = generateInviteCode();
-  
-  const { data, error } = await supabase
-    .from('invitations')
-    .insert({
-      code,
-      family_id: familyId,
-      created_by: userId
-    })
-    .select();
-  
-  if (error) throw error;
-  return data?.[0]?.code || code;
+  try {
+    const code = generateInviteCode();
+    
+    const { data, error } = await supabase
+      .from('invitations')
+      .insert({
+        code,
+        family_id: familyId,
+        created_by: userId
+      })
+      .select();
+    
+    if (error) throw error;
+    return code; // Return the code directly
+  } catch (error) {
+    console.error("Error creating family invitation:", error);
+    throw error;
+  }
 };
 
 export const getFamilyForUser = async (userId: string) => {
