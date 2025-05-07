@@ -12,8 +12,20 @@ export const generateInviteCode = () => {
 
 export const formatInviteCodeForDisplay = (code: string) => {
   // Format like XXXX-XXXX for better readability
-  if (code?.length === 8) {
-    return `${code.substring(0, 4)}-${code.substring(4)}`;
+  if (!code) return '';
+  
+  // First, clean the code by removing non-alphanumeric characters
+  const cleanedCode = code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+  
+  // Format it if it's long enough
+  if (cleanedCode.length > 4) {
+    return `${cleanedCode.substring(0, 4)}-${cleanedCode.substring(4, 8)}`;
+  } else {
+    return cleanedCode;
   }
-  return code || '';
+};
+
+export const normalizeInviteCode = (code: string) => {
+  // Remove any non-alphanumeric characters and convert to uppercase
+  return code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 };

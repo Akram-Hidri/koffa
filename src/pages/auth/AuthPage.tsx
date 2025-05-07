@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -52,11 +51,18 @@ const AuthPage = () => {
       // Remove any formatting (like dashes) from the invite code
       const cleanCode = inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
       
+      console.log("Verifying invite code:", cleanCode);
+      
       // Check if the invite code is valid using our database function
       const { data, error } = await supabase
         .rpc('is_valid_invite_code', { code_param: cleanCode });
         
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      console.log("Invite code validation result:", data);
       
       if (!data) {
         throw new Error("Invalid or expired invitation code");
@@ -65,6 +71,7 @@ const AuthPage = () => {
       toast.success("Invitation code accepted!");
       navigate('/signup', { state: { inviteCode: cleanCode } });
     } catch (error: any) {
+      console.error("Invite code error:", error);
       toast.error(error.message || "Invalid invitation code");
     } finally {
       setIsLoading(false);
@@ -73,13 +80,13 @@ const AuthPage = () => {
 
   // Helper function to format invite code as user types
   const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove any non-alphanumeric characters
-    const rawValue = e.target.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    const value = e.target.value;
     
-    // Only allow up to 8 characters
-    if (rawValue.length > 8) return;
+    // Allow both formatted and unformatted input
+    // Keep the raw input including dashes
+    if (value.length > 9) return; // Max length including dash
     
-    setInviteCode(rawValue);
+    setInviteCode(value.toUpperCase());
   };
 
   return (

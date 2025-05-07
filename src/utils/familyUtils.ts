@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { generateInviteCode } from './inviteUtils';
+import { generateInviteCode, normalizeInviteCode } from './inviteUtils';
 import { toast } from 'sonner';
 
 export const createFamilyInvitation = async (familyId: string, userId: string) => {
@@ -67,14 +68,36 @@ export const getFamilyInvitations = async (familyId: string) => {
 
 export const verifyInviteCode = async (code: string) => {
   try {
+    // Clean the code before verifying
+    const cleanCode = normalizeInviteCode(code);
+    
+    console.log("Verifying cleaned invite code:", cleanCode);
+    
     // Check if code exists and is not used
     const { data, error } = await supabase
-      .rpc('is_valid_invite_code', { code_param: code });
+      .rpc('is_valid_invite_code', { code_param: cleanCode });
       
-    if (error) throw error;
+    if (error) {
+      console.error("Error verifying invite code:", error);
+      throw error;
+    }
+    
+    // Get family info if valid
+    let familyId = null;
+    if (data) {
+      const { data: inviteData, error: inviteError } = await supabase
+        .from('invitations')
+        .select('family_id')
+        .eq('code', cleanCode)
+        .single();
+        
+      if (!inviteError && inviteData) {
+        familyId = inviteData.family_id;
+      }
+    }
     
     // Return validity and family info
-    return { valid: !!data, familyId: null };
+    return { valid: !!data, familyId };
   } catch (error) {
     console.error('Error verifying invite code:', error);
     return { valid: false, familyId: null };
