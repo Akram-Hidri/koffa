@@ -6,12 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
+import { useAddPantryItem } from '@/hooks/usePantryItems';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AddPantryItemPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { mutate: addPantryItem, isPending } = useAddPantryItem();
+  
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -35,11 +40,36 @@ const AddPantryItemPage = () => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, save the data to your backend
-    toast.success('Item added to pantry', {
-      description: `${formData.name} has been added to your pantry.`
+    
+    if (!user) {
+      toast.error('You must be logged in to add items');
+      return;
+    }
+    
+    // Transform form data to match the PantryItem structure
+    const newPantryItem = {
+      name: formData.name,
+      quantity: formData.quantity,
+      unit: formData.unit,
+      expiry_date: formData.noExpiration ? null : formData.expirationDate,
+      location: formData.location,
+      low_stock: formData.lowStockThreshold && Number(formData.quantity) <= Number(formData.lowStockThreshold),
+      notes: formData.notes ? `${formData.category}${formData.notes ? `: ${formData.notes}` : ''}` : formData.category,
+      added_by: user.email || 'Anonymous',
+    };
+    
+    // Submit using the usePantryItems hook
+    addPantryItem(newPantryItem, {
+      onSuccess: () => {
+        toast.success('Item added to pantry', {
+          description: `${formData.name} has been added to your pantry.`
+        });
+        navigate('/pantry');
+      },
+      onError: (error: Error) => {
+        toast.error(`Failed to add item: ${error.message}`);
+      }
     });
-    navigate('/pantry');
   };
   
   const handleCancel = () => {
@@ -208,7 +238,9 @@ const AddPantryItemPage = () => {
           </div>
           
           <div className="flex space-x-4">
-            <Button type="submit" className="flex-1">Add To Pantry</Button>
+            <Button type="submit" className="flex-1" disabled={isPending}>
+              {isPending ? 'Adding...' : 'Add To Pantry'}
+            </Button>
             <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
               Cancel
             </Button>

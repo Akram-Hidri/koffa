@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/PageLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +7,36 @@ import { Utensils, ShoppingBag, LayoutGrid, Bell, Calendar, ListTodo, BookOpen }
 import { useSpaces } from '@/hooks/useSpaces';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/ui/icon';
+import { usePantryItems } from '@/hooks/usePantryItems';
 
 const HomePage = () => {
-  // Sample data for quick stats
+  // Fetch real pantry data
+  const { data: pantryItems = [] } = usePantryItems();
+  const [pantryStats, setPantryStats] = useState({
+    lowStockItems: 0,
+    expiringItems: 0
+  });
+
+  useEffect(() => {
+    if (pantryItems.length > 0) {
+      // Calculate pantry stats
+      const lowStockItems = pantryItems.filter(item => item.low_stock).length;
+      
+      const expiringItems = pantryItems.filter(item => {
+        if (!item.expiry_date) return false;
+        const expiryDate = new Date(item.expiry_date);
+        const today = new Date();
+        const sevenDaysLater = new Date();
+        sevenDaysLater.setDate(today.getDate() + 7);
+        return expiryDate <= sevenDaysLater && expiryDate >= today;
+      }).length;
+      
+      setPantryStats({ lowStockItems, expiringItems });
+    }
+  }, [pantryItems]);
+
+  // Sample data for other stats
   const quickStats = {
-    lowStockItems: 4,
-    expiringItems: 2,
     pendingTasks: 8,
     shoppingLists: 3
   };
@@ -83,11 +106,11 @@ const HomePage = () => {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-sm">Low stock items:</span>
-                  <span className="font-medium text-amber-500">{quickStats.lowStockItems}</span>
+                  <span className="font-medium text-amber-500">{pantryStats.lowStockItems}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Expiring soon:</span>
-                  <span className="font-medium text-amber-500">{quickStats.expiringItems}</span>
+                  <span className="font-medium text-amber-500">{pantryStats.expiringItems}</span>
                 </div>
               </div>
             </CardContent>

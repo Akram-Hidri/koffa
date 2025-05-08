@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { usePantryItems, PantryItem } from '@/hooks/usePantryItems';
 import { toast } from 'sonner';
@@ -18,6 +18,11 @@ const PantryPage = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
   
   const { data: pantryItems = [], isLoading, error, refetch } = usePantryItems();
+  
+  useEffect(() => {
+    // Initial load of data
+    refetch();
+  }, [refetch]);
   
   if (error) {
     toast.error("Failed to load pantry items");
@@ -44,8 +49,8 @@ const PantryPage = () => {
       return false;
     }
     
-    // Category filter
-    if (categoryFilter && item.notes?.includes(categoryFilter)) {
+    // Category filter - assuming category might be in the notes field
+    if (categoryFilter && !item.notes?.toLowerCase().includes(categoryFilter.toLowerCase())) {
       return false;
     }
     
@@ -56,6 +61,25 @@ const PantryPage = () => {
     
     return true;
   });
+
+  // Calculate stats for the home page
+  const calculateStats = () => {
+    const lowStockItems = pantryItems.filter(item => item.low_stock).length;
+    
+    const expiringItems = pantryItems.filter(item => {
+      if (!item.expiry_date) return false;
+      const expiryDate = new Date(item.expiry_date);
+      const today = new Date();
+      const sevenDaysLater = new Date();
+      sevenDaysLater.setDate(today.getDate() + 7);
+      return expiryDate <= sevenDaysLater && expiryDate >= today;
+    }).length;
+    
+    return { lowStockItems, expiringItems };
+  };
+
+  // Make stats available as a static method that can be called from HomePage
+  PantryPage.getStats = calculateStats;
 
   return (
     <PageLayout title="Pantry Management">

@@ -26,6 +26,6 @@ export const formatInviteCodeForDisplay = (code: string) => {
 };
 
 export const normalizeInviteCode = (code: string) => {
-  // Remove any non-alphanumeric characters and convert to uppercase
+  // Remove any non-alphanumeric characters (including hyphens) and convert to uppercase
   return code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 };

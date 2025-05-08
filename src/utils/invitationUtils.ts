@@ -32,36 +32,42 @@ export const createFamilyInvitation = async (familyId: string, userId: string) =
  */
 export const verifyInviteCode = async (code: string) => {
   try {
-    // Clean the code before verifying
+    // Clean the code before verifying (removing hyphens and standardizing format)
     const cleanCode = normalizeInviteCode(code);
     
     console.log("Verifying cleaned invite code:", cleanCode);
     
-    // Check if code exists and is not used
-    const { data, error } = await supabase
-      .rpc('is_valid_invite_code', { code_param: cleanCode });
+    // First, get the invitation directly to check if it exists
+    const { data: inviteData, error: inviteError } = await supabase
+      .from('invitations')
+      .select('*')
+      .eq('code', cleanCode)
+      .single();
       
-    if (error) {
-      console.error("Error verifying invite code:", error);
-      throw error;
+    if (inviteError) {
+      console.error("Error retrieving invite code:", inviteError);
+      return { valid: false, familyId: null };
     }
     
-    // Get family info if valid
-    let familyId = null;
-    if (data) {
-      const { data: inviteData, error: inviteError } = await supabase
-        .from('invitations')
-        .select('family_id')
-        .eq('code', cleanCode)
-        .single();
-        
-      if (!inviteError && inviteData) {
-        familyId = inviteData.family_id;
-      }
+    if (!inviteData) {
+      console.log("No invitation found with code:", cleanCode);
+      return { valid: false, familyId: null };
     }
     
-    // Return validity and family info
-    return { valid: !!data, familyId };
+    // Check if the code is valid (not expired and not used)
+    const isValid = !inviteData.is_used && new Date(inviteData.expires_at) > new Date();
+    
+    console.log("Invitation found:", { 
+      isValid, 
+      isUsed: inviteData.is_used,
+      expires: inviteData.expires_at,
+      currentTime: new Date().toISOString()
+    });
+    
+    return { 
+      valid: isValid, 
+      familyId: isValid ? inviteData.family_id : null 
+    };
   } catch (error) {
     console.error('Error verifying invite code:', error);
     return { valid: false, familyId: null };
