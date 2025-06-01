@@ -54,17 +54,19 @@ const PantryPage = () => {
       return false;
     }
     
-    // Added by filter
-    if (addedByFilter && item.added_by !== addedByFilter) {
-      return false;
-    }
+    // Added by filter - skip for now since added_by doesn't exist in schema
+    // if (addedByFilter && item.added_by !== addedByFilter) {
+    //   return false;
+    // }
     
     return true;
   });
 
   // Calculate stats for the home page
   const calculateStats = () => {
-    const lowStockItems = pantryItems.filter(item => item.low_stock).length;
+    const lowStockItems = pantryItems.filter(item => 
+      item.quantity !== null && item.quantity <= 2
+    ).length;
     
     const expiringItems = pantryItems.filter(item => {
       if (!item.expiry_date) return false;
@@ -77,9 +79,6 @@ const PantryPage = () => {
     
     return { lowStockItems, expiringItems };
   };
-
-  // Make stats available as a static method that can be called from HomePage
-  PantryPage.getStats = calculateStats;
 
   return (
     <PageLayout title="Pantry Management">
@@ -111,6 +110,24 @@ const PantryPage = () => {
       </div>
     </PageLayout>
   );
+};
+
+// Export the stats function separately for use in HomePage
+export const getPantryStats = (items: PantryItem[]) => {
+  const lowStockItems = items.filter(item => 
+    item.quantity !== null && item.quantity <= 2
+  ).length;
+  
+  const expiringItems = items.filter(item => {
+    if (!item.expiry_date) return false;
+    const expiryDate = new Date(item.expiry_date);
+    const today = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(today.getDate() + 7);
+    return expiryDate <= sevenDaysLater && expiryDate >= today;
+  }).length;
+  
+  return { lowStockItems, expiringItems };
 };
 
 export default PantryPage;

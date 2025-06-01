@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -10,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import PageNavigation from '@/components/PageNavigation';
 
@@ -18,13 +18,10 @@ const DialectSettings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { settings, updateSettings } = useSettings();
-  const [dialects, setDialects] = useState<any[]>([]);
-  const [selectedDialect, setSelectedDialect] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTermWord, setCustomTermWord] = useState('');
   const [selectedStandardTerm, setSelectedStandardTerm] = useState('Shopping List');
-  const [comparisonTerms, setComparisonTerms] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   const standardTermOptions = [
     'Shopping List',
@@ -34,66 +31,27 @@ const DialectSettings = () => {
     'Home'
   ];
 
-  useEffect(() => {
-    fetchDialects();
-    if (settings.language === 'arabic') {
-      fetchComparisonTerms();
-    }
-  }, []);
-  
-  const fetchDialects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('dialects')
-        .select('*')
-        .order('name');
-        
-      if (error) throw error;
-      
-      setDialects(data || []);
-      
-      // Set initial selected dialect
-      if (data && data.length > 0) {
-        const userDialect = settings.preferred_dialect_id; 
-        if (userDialect) {
-          setSelectedDialect(userDialect);
-        } else {
-          // Default to Standard Arabic
-          const standardDialect = data.find(d => d.name === 'Standard Arabic');
-          if (standardDialect) {
-            setSelectedDialect(standardDialect.id);
-          }
-        }
-      }
-    } catch (error: any) {
-      toast.error('Failed to load dialects');
-      console.error('Error fetching dialects:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const fetchComparisonTerms = async () => {
-    try {
-      const query = supabase
-        .from('custom_terms')
-        .select('custom_terms.*, dialects.name as dialect_name')
-        .eq('standard_term', searchTerm || 'Shopping List');
-        
-      // Using custom join for TypeScript compatibility
-      const { data, error } = await query.eq('custom_terms.dialect_id', 'dialects.id');
-        
-      if (error) throw error;
-      
-      setComparisonTerms(data || []);
-    } catch (error: any) {
-      toast.error('Failed to load comparison terms');
-      console.error('Error fetching comparison terms:', error);
-    }
-  };
+  // Mock dialects data since the table doesn't exist
+  const mockDialects = [
+    { id: '1', name: 'Standard Arabic', region: 'Standard' },
+    { id: '2', name: 'Egyptian', region: 'Egypt' },
+    { id: '3', name: 'Tunisian', region: 'Tunisia' },
+    { id: '4', name: 'Moroccan', region: 'Morocco' },
+    { id: '5', name: 'Lebanese', region: 'Lebanon' }
+  ];
+
+  // Mock comparison terms
+  const mockComparisonTerms = [
+    { standard_term: 'Shopping List', dialect_name: 'Standard Arabic', custom_term: 'قائمة التسوق' },
+    { standard_term: 'Shopping List', dialect_name: 'Egyptian', custom_term: 'لستة الشراء' },
+    { standard_term: 'Shopping List', dialect_name: 'Tunisian', custom_term: 'قائمة الخدمات' },
+    { standard_term: 'Low Stock', dialect_name: 'Standard Arabic', custom_term: 'مخزون منخفض' },
+    { standard_term: 'Low Stock', dialect_name: 'Egyptian', custom_term: 'مخزون قليل' },
+    { standard_term: 'Task', dialect_name: 'Standard Arabic', custom_term: 'مهمة' },
+    { standard_term: 'Task', dialect_name: 'Egyptian', custom_term: 'شغلة' }
+  ];
 
   const handleDialectChange = (dialectId: string) => {
-    setSelectedDialect(dialectId);
     updateSettings({ preferred_dialect_id: dialectId } as any);
     toast.success('Dialect preference updated');
   };
@@ -104,34 +62,19 @@ const DialectSettings = () => {
   };
   
   const handleSearch = () => {
-    fetchComparisonTerms();
+    // Mock search functionality
+    toast.info('Search functionality coming soon');
   };
   
   const saveCustomTerm = async () => {
-    if (!selectedDialect || !customTermWord || !selectedStandardTerm) {
+    if (!customTermWord || !selectedStandardTerm) {
       toast.error('Please fill in all fields');
       return;
     }
     
-    try {
-      const { error } = await supabase
-        .from('custom_terms')
-        .upsert({ 
-          dialect_id: selectedDialect,
-          standard_term: selectedStandardTerm,
-          custom_term: customTermWord,
-          created_by: user?.id
-        });
-        
-      if (error) throw error;
-      
-      toast.success('Custom term saved successfully');
-      setCustomTermWord('');
-      fetchComparisonTerms();
-    } catch (error: any) {
-      toast.error('Failed to save custom term');
-      console.error('Error saving custom term:', error);
-    }
+    // Mock save functionality
+    toast.success('Custom term saved successfully (demo mode)');
+    setCustomTermWord('');
   };
   
   return (
@@ -210,32 +153,26 @@ const DialectSettings = () => {
                 Choose Regional Arabic Dialect
               </h2>
               
-              {loading ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin h-6 w-6 border-2 border-koffa-green border-t-transparent rounded-full"></div>
-                </div>
-              ) : (
-                <RadioGroup 
-                  value={selectedDialect || ''} 
-                  onValueChange={handleDialectChange}
-                  className="grid grid-cols-1 gap-2"
-                >
-                  {dialects.map((dialect) => (
-                    <div key={dialect.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={dialect.id} id={`dialect-${dialect.id}`} />
-                      <Label 
-                        htmlFor={`dialect-${dialect.id}`} 
-                        className="flex items-center justify-between w-full"
-                      >
-                        <span>{dialect.name}</span>
-                        <span className="text-xs text-gray-500 rtl:font-arabic">
-                          {dialect.region !== 'Standard' && `(${dialect.region})`}
-                        </span>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
+              <RadioGroup 
+                value={settings.preferred_dialect_id || mockDialects[0].id} 
+                onValueChange={handleDialectChange}
+                className="grid grid-cols-1 gap-2"
+              >
+                {mockDialects.map((dialect) => (
+                  <div key={dialect.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={dialect.id} id={`dialect-${dialect.id}`} />
+                    <Label 
+                      htmlFor={`dialect-${dialect.id}`} 
+                      className="flex items-center justify-between w-full"
+                    >
+                      <span>{dialect.name}</span>
+                      <span className="text-xs text-gray-500 rtl:font-arabic">
+                        {dialect.region !== 'Standard' && `(${dialect.region})`}
+                      </span>
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
               
               <Button 
                 className="mt-4 bg-koffa-green text-white hover:bg-koffa-green-dark"
@@ -281,13 +218,13 @@ const DialectSettings = () => {
                       <tr key={term} className="border-b border-koffa-beige/40">
                         <td className="py-2 px-3">{term}</td>
                         <td className="py-2 px-3 font-arabic">
-                          {comparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Standard Arabic')?.custom_term || '-'}
+                          {mockComparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Standard Arabic')?.custom_term || '-'}
                         </td>
                         <td className="py-2 px-3 font-arabic">
-                          {comparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Tunisian')?.custom_term || '-'}
+                          {mockComparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Tunisian')?.custom_term || '-'}
                         </td>
                         <td className="py-2 px-3 font-arabic">
-                          {comparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Egyptian')?.custom_term || '-'}
+                          {mockComparisonTerms.find(t => t.standard_term === term && t.dialect_name === 'Egyptian')?.custom_term || '-'}
                         </td>
                       </tr>
                     ))}
@@ -338,7 +275,7 @@ const DialectSettings = () => {
                     />
                     <Button 
                       onClick={saveCustomTerm}
-                      disabled={!selectedDialect || !customTermWord || !selectedStandardTerm}
+                      disabled={!customTermWord || !selectedStandardTerm}
                     >
                       Save
                     </Button>

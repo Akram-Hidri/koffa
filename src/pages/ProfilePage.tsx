@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 
 interface UserProfile {
   username?: string;
-  avatar_url?: string;
   family_id?: string;
   family_name?: string;
 }
@@ -33,7 +32,7 @@ const ProfilePage = () => {
         // Fetch user profile data
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('username, avatar_url, family_id')
+          .select('username, family_id')
           .eq('id', user.id)
           .single();
           
@@ -58,7 +57,8 @@ const ProfilePage = () => {
         }
         
         setProfile({
-          ...profileData,
+          username: profileData?.username,
+          family_id: profileData?.family_id,
           family_name: familyName
         });
       } catch (error: any) {
