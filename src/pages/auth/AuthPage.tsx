@@ -84,9 +84,9 @@ const AuthPage = () => {
     
     // Allow both formatted and unformatted input
     // Keep the raw input including dashes
-    if (value.length > 9) return; // Max length including dash
-    
-    setInviteCode(value.toUpperCase());
+    if (value.length <= 9) { // Max length including dash
+      setInviteCode(value.toUpperCase());
+    }
   };
 
   return (
