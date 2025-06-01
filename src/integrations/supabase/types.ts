@@ -384,6 +384,36 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pantry_items: {
         Row: {
           barcode: string | null
@@ -474,6 +504,240 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      recipe_ingredients: {
+        Row: {
+          id: string
+          name: string
+          optional: boolean | null
+          quantity: string
+          recipe_id: string
+          unit: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          optional?: boolean | null
+          quantity: string
+          recipe_id: string
+          unit?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          optional?: boolean | null
+          quantity?: string
+          recipe_id?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          category: string | null
+          cook_time: number | null
+          created_at: string
+          cuisine: string | null
+          description: string | null
+          difficulty: string | null
+          id: string
+          image_url: string | null
+          instructions: string | null
+          prep_time: number | null
+          servings: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          instructions?: string | null
+          prep_time?: number | null
+          servings?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopping_list_items: {
+        Row: {
+          added_by: string | null
+          checked: boolean
+          created_at: string
+          id: string
+          list_id: string
+          name: string
+          note: string | null
+          priority: string | null
+          quantity: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          list_id: string
+          name: string
+          note?: string | null
+          priority?: string | null
+          quantity?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          list_id?: string
+          name?: string
+          note?: string | null
+          priority?: string | null
+          quantity?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_lists: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          id: string
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      space_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed: boolean
+          created_at: string
+          due_date: string | null
+          id: string
+          recurrence: string | null
+          space_id: string
+          task: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          recurrence?: string | null
+          space_id: string
+          task: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          recurrence?: string | null
+          space_id?: string
+          task?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_tasks_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spaces: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

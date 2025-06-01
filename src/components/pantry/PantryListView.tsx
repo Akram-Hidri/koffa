@@ -10,6 +10,11 @@ interface PantryListViewProps {
 }
 
 const PantryListView: React.FC<PantryListViewProps> = ({ items, onNavigateToEdit }) => {
+  // Helper function to check if item is low stock
+  const isLowStock = (item: PantryItem) => {
+    return item.quantity !== null && item.quantity <= 2;
+  };
+
   return (
     <div>
       {items.map((item) => (
@@ -20,8 +25,8 @@ const PantryListView: React.FC<PantryListViewProps> = ({ items, onNavigateToEdit
           quantity={`${item.quantity} ${item.unit || ''}`}
           expiryDate={item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '--'}
           location={item.location || 'Not specified'}
-          addedBy={item.added_by || 'Unknown'}
-          isLowStock={item.low_stock || false}
+          addedBy="Unknown"
+          isLowStock={isLowStock(item)}
           notes={item.notes || ''}
         />
       ))}

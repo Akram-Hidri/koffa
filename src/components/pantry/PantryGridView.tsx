@@ -27,47 +27,56 @@ const PantryGridView: React.FC<PantryGridViewProps> = ({ items, onAddItem, onNav
     return categories;
   };
 
+  // Helper function to check if item is low stock
+  const isLowStock = (item: PantryItem) => {
+    return item.quantity !== null && item.quantity <= 2;
+  };
+
+  // Helper function to check if item is expiring soon
+  const isExpiringSoon = (item: PantryItem) => {
+    if (!item.expiry_date) return false;
+    const expiryDate = new Date(item.expiry_date);
+    const today = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(today.getDate() + 7);
+    return expiryDate <= sevenDaysLater && expiryDate >= today;
+  };
+
   return (
     <div>
       {Object.entries(categorizedItems()).map(([location, locationItems]) => (
         <div key={location} className="mb-6">
           <h3 className="text-lg font-medium mb-3">{location}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {locationItems.map(item => (
               <Card 
                 key={item.id}
-                className="p-4 hover:shadow-md transition-shadow"
+                className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => onNavigateToEdit(item.id)}
               >
-                <div className="flex justify-between">
-                  <h4 className="font-medium truncate">{item.name}</h4>
-                  <span className="font-medium text-sm">{item.quantity} {item.unit || ''}</span>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-medium truncate text-sm sm:text-base">{item.name}</h4>
+                  <span className="font-medium text-sm whitespace-nowrap ml-2">
+                    {item.quantity} {item.unit || ''}
+                  </span>
                 </div>
                 
                 {item.notes && (
                   <p className="text-xs text-gray-600 mt-1 truncate">{item.notes}</p>
                 )}
                 
-                <div className="flex justify-between mt-2 pt-2 border-t">
+                <div className="flex justify-between items-center mt-2 pt-2 border-t">
                   <span className={`text-xs font-medium ${
-                    item.low_stock ? 'text-amber-500' : 'text-green-500'
+                    isLowStock(item) ? 'text-amber-500' : 
+                    isExpiringSoon(item) ? 'text-red-500' : 'text-green-500'
                   }`}>
-                    {item.low_stock ? '⚠️ LOW' : '✓ IN STOCK'}
+                    {isLowStock(item) ? '⚠️ LOW' : 
+                     isExpiringSoon(item) ? '🔶 EXPIRING' : '✓ OK'}
                   </span>
                   
                   <span className="text-xs text-gray-500">
                     {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '--'}
                   </span>
-                </div>
-                
-                <div className="flex justify-end mt-2 gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 px-2"
-                    onClick={() => onNavigateToEdit(item.id)}
-                  >
-                    Edit
-                  </Button>
                 </div>
               </Card>
             ))}
@@ -84,7 +93,7 @@ const PantryGridView: React.FC<PantryGridViewProps> = ({ items, onAddItem, onNav
         </div>
       ))}
       
-      {/* Ensure we always show at least one card if there are no categories */}
+      {/* If no categories yet, show add new item button */}
       {Object.keys(categorizedItems()).length === 0 && (
         <Card 
           className="p-8 text-center cursor-pointer hover:shadow-md transition-shadow border-dashed"
