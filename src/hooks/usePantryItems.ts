@@ -7,15 +7,18 @@ import { toast } from 'sonner';
 export type PantryItem = {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number | null;
   unit: string | null;
   expiry_date: string | null;
   location: string | null;
-  low_stock: boolean;
   notes: string | null;
-  added_by: string | null;
-  user_id: string;
+  category: string | null;
+  image_url: string | null;
+  barcode: string | null;
+  created_by: string;
+  family_id: string;
   created_at: string;
+  updated_at: string;
 };
 
 export const usePantryItems = () => {
@@ -26,9 +29,22 @@ export const usePantryItems = () => {
     queryFn: async () => {
       console.log('Fetching pantry items for user ID:', user?.id);
       
+      // First get user's family_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('family_id')
+        .eq('id', user?.id)
+        .single();
+      
+      if (!profile?.family_id) {
+        console.log('User has no family, returning empty array');
+        return [];
+      }
+      
       const { data, error } = await supabase
         .from('pantry_items')
         .select('*')
+        .eq('family_id', profile.family_id)
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -48,8 +64,19 @@ export const useAddPantryItem = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (item: Omit<PantryItem, 'id' | 'created_at' | 'user_id'>) => {
+    mutationFn: async (item: Omit<PantryItem, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'family_id'>) => {
       if (!user) throw new Error('User must be logged in');
+      
+      // Get user's family_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('family_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (!profile?.family_id) {
+        throw new Error('You must be part of a family to add pantry items');
+      }
       
       console.log('Adding pantry item for user ID:', user.id);
       console.log('Item data:', item);
@@ -58,7 +85,8 @@ export const useAddPantryItem = () => {
         .from('pantry_items')
         .insert({
           ...item,
-          user_id: user.id
+          created_by: user.id,
+          family_id: profile.family_id
         })
         .select();
       
@@ -92,7 +120,7 @@ export const useUpdatePantryItem = () => {
     }: Partial<PantryItem> & { id: string }) => {
       const { error } = await supabase
         .from('pantry_items')
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id);
       
       if (error) throw error;

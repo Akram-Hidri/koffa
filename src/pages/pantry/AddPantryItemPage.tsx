@@ -1,252 +1,216 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { Upload } from 'lucide-react';
-import PageLayout from '@/components/PageLayout';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { useAddPantryItem } from '@/hooks/usePantryItems';
-import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const AddPantryItemPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { mutate: addPantryItem, isPending } = useAddPantryItem();
+  const addPantryItem = useAddPantryItem();
   
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
-    quantity: '',
+    quantity: 1,
     unit: '',
+    category: '',
     location: '',
-    expirationDate: '',
-    noExpiration: false,
-    lowStockThreshold: '',
-    notes: ''
+    notes: '',
+    expiry_date: null as Date | null,
   });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, noExpiration: checked }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
-      toast.error('You must be logged in to add items');
+    if (!formData.name.trim()) {
+      toast.error('Please enter an item name');
       return;
     }
-    
-    // Transform form data to match the PantryItem structure
-    const newPantryItem = {
-      name: formData.name,
-      quantity: formData.quantity,
-      unit: formData.unit,
-      expiry_date: formData.noExpiration ? null : formData.expirationDate,
-      location: formData.location,
-      low_stock: formData.lowStockThreshold && Number(formData.quantity) <= Number(formData.lowStockThreshold),
-      notes: formData.notes ? `${formData.category}${formData.notes ? `: ${formData.notes}` : ''}` : formData.category,
-      added_by: user.email || 'Anonymous',
-    };
-    
-    // Submit using the usePantryItems hook
-    addPantryItem(newPantryItem, {
-      onSuccess: () => {
-        toast.success('Item added to pantry', {
-          description: `${formData.name} has been added to your pantry.`
-        });
-        navigate('/pantry');
-      },
-      onError: (error: Error) => {
-        toast.error(`Failed to add item: ${error.message}`);
-      }
-    });
-  };
-  
-  const handleCancel = () => {
-    navigate('/pantry');
+
+    try {
+      await addPantryItem.mutateAsync({
+        name: formData.name.trim(),
+        quantity: formData.quantity || null,
+        unit: formData.unit || null,
+        category: formData.category || null,
+        location: formData.location || null,
+        notes: formData.notes || null,
+        expiry_date: formData.expiry_date ? format(formData.expiry_date, 'yyyy-MM-dd') : null,
+        image_url: null,
+        barcode: null,
+      });
+      
+      toast.success('Item added successfully!');
+      navigate('/pantry');
+    } catch (error) {
+      console.error('Error adding pantry item:', error);
+    }
   };
 
+  const categories = [
+    'Fruits & Vegetables',
+    'Meat & Poultry',
+    'Dairy & Eggs',
+    'Pantry Staples',
+    'Frozen Foods',
+    'Beverages',
+    'Snacks',
+    'Condiments & Sauces',
+    'Bakery',
+    'Other'
+  ];
+
+  const units = [
+    'pieces',
+    'kg',
+    'g',
+    'lb',
+    'oz',
+    'liters',
+    'ml',
+    'cups',
+    'tbsp',
+    'tsp',
+    'cans',
+    'bottles',
+    'packages'
+  ];
+
+  const locations = [
+    'Refrigerator',
+    'Freezer',
+    'Pantry',
+    'Kitchen Counter',
+    'Spice Rack',
+    'Vegetable Drawer',
+    'Other'
+  ];
+
   return (
-    <PageLayout title="Add New Pantry Item">
-      <Card className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-center">Item Information</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="name">Item Name:</Label>
-              <Input 
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="category">Category:</Label>
-                <Button type="button" variant="link" className="text-sm h-auto p-0">
-                  + Add Category
-                </Button>
-              </div>
-              <select
-                id="category"
-                name="category"
-                className="w-full rounded-md border border-input p-2 bg-background"
-                value={formData.category}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Category</option>
-                <option value="grains">Grains</option>
-                <option value="dairy">Dairy</option>
-                <option value="meat">Meat</option>
-                <option value="produce">Produce</option>
-                <option value="canned">Canned Goods</option>
-                <option value="spices">Spices</option>
-                <option value="snacks">Snacks</option>
-              </select>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity:</Label>
-                <Input 
-                  id="quantity"
-                  name="quantity"
-                  type="number"
-                  min="0"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="unit">Unit:</Label>
-                <select
-                  id="unit"
-                  name="unit"
-                  className="w-full rounded-md border border-input p-2 bg-background"
-                  value={formData.unit}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Unit</option>
-                  <option value="kg">Kilogram (kg)</option>
-                  <option value="g">Gram (g)</option>
-                  <option value="l">Liter (L)</option>
-                  <option value="ml">Milliliter (ml)</option>
-                  <option value="pcs">Pieces (pcs)</option>
-                  <option value="box">Box</option>
-                  <option value="bottle">Bottle</option>
-                  <option value="carton">Carton</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="location">Location:</Label>
-                <Button type="button" variant="link" className="text-sm h-auto p-0">
-                  + Add Location
-                </Button>
-              </div>
-              <select
-                id="location"
-                name="location"
-                className="w-full rounded-md border border-input p-2 bg-background"
-                value={formData.location}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Location</option>
-                <option value="kitchen">Kitchen</option>
-                <option value="pantry">Pantry</option>
-                <option value="refrigerator">Refrigerator</option>
-                <option value="freezer">Freezer</option>
-                <option value="cabinet">Cabinet</option>
-                <option value="shelf">Shelf</option>
-              </select>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <Label htmlFor="expirationDate">Expiration Date:</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="noExpiration" 
-                    checked={formData.noExpiration} 
-                    onCheckedChange={handleCheckboxChange}
-                  />
-                  <label htmlFor="noExpiration" className="text-sm">
-                    No Expiration
-                  </label>
-                </div>
-              </div>
-              <Input 
-                id="expirationDate"
-                name="expirationDate"
-                type="date"
-                value={formData.expirationDate}
-                onChange={handleChange}
-                disabled={formData.noExpiration}
-                required={!formData.noExpiration}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lowStockThreshold">Low Stock Threshold:</Label>
-              <Input 
-                id="lowStockThreshold"
-                name="lowStockThreshold"
-                type="number"
-                min="0"
-                value={formData.lowStockThreshold}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes:</Label>
-              <textarea
-                id="notes"
-                name="notes"
-                rows={3}
-                className="w-full rounded-md border border-input p-2 bg-background"
-                value={formData.notes}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <Button type="button" variant="outline" className="w-full">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Photo
-            </Button>
+    <PageLayout title="Add Pantry Item">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Item Name *</label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter item name"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Quantity</label>
+            <Input
+              type="number"
+              value={formData.quantity}
+              onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+              min="1"
+            />
           </div>
-          
-          <div className="flex space-x-4">
-            <Button type="submit" className="flex-1" disabled={isPending}>
-              {isPending ? 'Adding...' : 'Add To Pantry'}
-            </Button>
-            <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
-              Cancel
-            </Button>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Unit</label>
+            <Select value={formData.unit} onValueChange={(value) => setFormData({ ...formData, unit: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select unit" />
+              </SelectTrigger>
+              <SelectContent>
+                {units.map((unit) => (
+                  <SelectItem key={unit} value={unit}>{unit}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </form>
-      </Card>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Category</label>
+          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Location</label>
+          <Select value={formData.location} onValueChange={(value) => setFormData({ ...formData, location: value })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select location" />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map((location) => (
+                <SelectItem key={location} value={location}>{location}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Expiry Date</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formData.expiry_date ? format(formData.expiry_date, 'PPP') : 'Pick a date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={formData.expiry_date || undefined}
+                onSelect={(date) => setFormData({ ...formData, expiry_date: date || null })}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Notes</label>
+          <Textarea
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="Additional notes about this item"
+            rows={3}
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate('/pantry')}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={addPantryItem.isPending}
+            className="flex-1"
+          >
+            {addPantryItem.isPending ? 'Adding...' : 'Add Item'}
+          </Button>
+        </div>
+      </form>
     </PageLayout>
   );
 };
