@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Search, Utensils, Clock, ChefHat, Filter } from 'lucide-react';
@@ -6,12 +5,11 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { useRecipes } from '@/hooks/useRecipes';
+import { useRecipeList } from '@/hooks/useRecipes';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const RecipesPage = () => {
   const navigate = useNavigate();
-  const { useRecipeList } = useRecipes();
   const { data: recipes, isLoading, error } = useRecipeList();
   
   const [searchQuery, setSearchQuery] = useState('');

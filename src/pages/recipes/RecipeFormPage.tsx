@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,23 +20,34 @@ import {
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
-import { useRecipes, Recipe, RecipeIngredient } from '@/hooks/useRecipes';
+import { useRecipe, useCreateRecipe, useUpdateRecipe, Recipe, RecipeIngredient } from '@/hooks/useRecipes';
 import { ArrowLeft, Plus, X, Save, Trash2, ChefHat, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+
+interface NewIngredient {
+  name: string;
+  quantity: string;
+  unit?: string;
+  optional?: boolean;
+}
 
 const RecipeFormPage = () => {
   const { id } = useParams();
   const isEditMode = !!id;
   const navigate = useNavigate();
   
-  const { useRecipe, useCreateRecipe, useUpdateRecipe } = useRecipes();
-  const { data: existingRecipe, isLoading: isLoadingRecipe } = useRecipe(id);
+  const { data: existingRecipe, isLoading: isLoadingRecipe } = useRecipe(id || '');
   const { mutateAsync: createRecipe, isPending: isCreating } = useCreateRecipe();
   const { mutateAsync: updateRecipe, isPending: isUpdating } = useUpdateRecipe();
   
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
-  const [newIngredient, setNewIngredient] = useState<RecipeIngredient>({ name: '', quantity: '' });
+  const [newIngredient, setNewIngredient] = useState<NewIngredient>({ 
+    name: '', 
+    quantity: '',
+    unit: '',
+    optional: false
+  });
   const [showIngredientDialog, setShowIngredientDialog] = useState(false);
 
   const form = useForm<Recipe>({
@@ -81,8 +91,17 @@ const RecipeFormPage = () => {
       return;
     }
     
-    setIngredients([...ingredients, newIngredient]);
-    setNewIngredient({ name: '', quantity: '' });
+    const ingredientToAdd: RecipeIngredient = {
+      id: crypto.randomUUID(),
+      recipe_id: id || '',
+      name: newIngredient.name,
+      quantity: newIngredient.quantity,
+      unit: newIngredient.unit,
+      optional: newIngredient.optional
+    };
+    
+    setIngredients([...ingredients, ingredientToAdd]);
+    setNewIngredient({ name: '', quantity: '', unit: '', optional: false });
     setShowIngredientDialog(false);
   };
   
