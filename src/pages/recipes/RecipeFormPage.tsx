@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
-import { useRecipe, useCreateRecipe, useUpdateRecipe, Recipe, RecipeIngredient } from '@/hooks/useRecipes';
+import { useRecipe, useCreateRecipe, useUpdateRecipe, useRecipeIngredients, Recipe, RecipeIngredient } from '@/hooks/useRecipes';
 import { ArrowLeft, Plus, X, Save, Trash2, ChefHat, Clock, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -38,6 +39,7 @@ const RecipeFormPage = () => {
   const navigate = useNavigate();
   
   const { data: existingRecipe, isLoading: isLoadingRecipe } = useRecipe(id || '');
+  const { data: existingIngredients, isLoading: isLoadingIngredients } = useRecipeIngredients(id || '');
   const { mutateAsync: createRecipe, isPending: isCreating } = useCreateRecipe();
   const { mutateAsync: updateRecipe, isPending: isUpdating } = useUpdateRecipe();
   
@@ -80,10 +82,15 @@ const RecipeFormPage = () => {
         cuisine: existingRecipe.cuisine || '',
         image_url: existingRecipe.image_url || '',
       });
-      
-      setIngredients(existingRecipe.ingredients || []);
     }
   }, [existingRecipe, isEditMode, form]);
+
+  // Load existing ingredients when editing
+  useEffect(() => {
+    if (isEditMode && existingIngredients) {
+      setIngredients(existingIngredients);
+    }
+  }, [existingIngredients, isEditMode]);
   
   const addIngredient = () => {
     if (!newIngredient.name || !newIngredient.quantity) {
@@ -140,7 +147,7 @@ const RecipeFormPage = () => {
   const cuisines = ['Middle Eastern', 'Mediterranean', 'Italian', 'Asian', 'American', 'Indian'];
   const difficultyLevels = ['Easy', 'Medium', 'Hard'];
 
-  if (isEditMode && isLoadingRecipe) {
+  if (isEditMode && (isLoadingRecipe || isLoadingIngredients)) {
     return (
       <div className="flex items-center justify-center p-8">
         <span className="text-koffa-green">Loading recipe...</span>
