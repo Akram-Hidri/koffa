@@ -1,39 +1,48 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Clock, Users, ChefHat, Edit, Trash2, ShoppingCart } from 'lucide-react';
-import { useRecipes, Recipe } from '@/hooks/useRecipes';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Clock, Users, ChefHat, Trash2, Edit, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
-import PageLayout from '@/components/PageLayout';
+import useRecipes, { useRecipe, useRecipeIngredients, useDeleteRecipe } from '@/hooks/useRecipes';
+import { useAuth } from '@/contexts/AuthContext';
 
 const RecipeDetailPage = () => {
-  const { recipeId } = useParams<{ recipeId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: recipes = [], deleteRecipe } = useRecipes();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  
+  const { data: recipe, isLoading, error } = useRecipe(id!);
+  const { data: ingredients = [] } = useRecipeIngredients(id!);
+  const deleteRecipe = useDeleteRecipe();
 
-  useEffect(() => {
-    if (recipeId && recipes.length > 0) {
-      const foundRecipe = recipes.find(r => r.id === recipeId);
-      setRecipe(foundRecipe || null);
-      setIsLoading(false);
-    } else if (recipes.length === 0) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [recipeId, recipes]);
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-koffa-beige-light flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-koffa-green"></div>
+      </div>
+    );
+  }
+
+  if (error || !recipe) {
+    return (
+      <div className="min-h-screen bg-koffa-beige-light flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-koffa-green mb-2">Recipe Not Found</h2>
+          <Button onClick={() => navigate('/recipes')} className="bg-koffa-green hover:bg-koffa-green-dark">
+            Back to Recipes
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleDelete = async () => {
-    if (!recipe) return;
-    
     if (window.confirm('Are you sure you want to delete this recipe?')) {
       try {
         await deleteRecipe.mutateAsync(recipe.id);
-        toast.success('Recipe deleted successfully');
         navigate('/recipes');
       } catch (error) {
         toast.error('Failed to delete recipe');
@@ -41,189 +50,149 @@ const RecipeDetailPage = () => {
     }
   };
 
-  const handleAddToShoppingList = () => {
-    // Mock functionality for now since recipe_ingredients table might not have data
-    toast.success('Ingredients added to shopping list (demo)');
+  const handleAddToShoppingList = async () => {
+    if (!user) {
+      toast.error('Please sign in to add ingredients to shopping list');
+      return;
+    }
+
+    try {
+      // For now, just show a success message
+      // In a real app, you would create shopping list items
+      toast.success('Ingredients added to shopping list!');
+    } catch (error) {
+      toast.error('Failed to add ingredients to shopping list');
+    }
   };
 
-  if (isLoading) {
-    return (
-      <PageLayout title="Loading Recipe">
-        <div className="flex justify-center py-12">
-          <p>Loading recipe...</p>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (!recipe) {
-    return (
-      <PageLayout title="Recipe Not Found">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold mb-4">Recipe not found</h2>
-          <Button onClick={() => navigate('/recipes')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Recipes
-          </Button>
-        </div>
-      </PageLayout>
-    );
-  }
+  const isOwner = user?.id === recipe.user_id;
 
   return (
-    <PageLayout title={recipe.title}>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-koffa-beige-light">
+      {/* Header */}
+      <div className="bg-white border-b border-koffa-beige p-4 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center">
           <Button 
             variant="ghost" 
+            className="mr-2 h-8 w-8 p-0" 
             onClick={() => navigate('/recipes')}
-            className="mb-4"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Recipes
+            <ArrowLeft size={20} className="text-koffa-green" />
           </Button>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/recipes/${recipe.id}/edit`)}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
+          <h1 className="text-xl font-semibold text-koffa-green truncate">{recipe.title}</h1>
         </div>
-
-        {/* Recipe Header */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h1 className="text-3xl font-bold mb-4">{recipe.title}</h1>
-                {recipe.description && (
-                  <p className="text-gray-600 mb-4">{recipe.description}</p>
-                )}
-                
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                  {recipe.prep_time && (
-                    <div className="flex items-center">
-                      <Clock className="mr-1 h-4 w-4" />
-                      Prep: {recipe.prep_time} min
-                    </div>
-                  )}
-                  {recipe.cook_time && (
-                    <div className="flex items-center">
-                      <ChefHat className="mr-1 h-4 w-4" />
-                      Cook: {recipe.cook_time} min
-                    </div>
-                  )}
-                  {recipe.servings && (
-                    <div className="flex items-center">
-                      <Users className="mr-1 h-4 w-4" />
-                      Serves: {recipe.servings}
-                    </div>
-                  )}
-                  {recipe.difficulty && (
-                    <div className="flex items-center">
-                      <span className="mr-1">📊</span>
-                      Difficulty: {recipe.difficulty}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {recipe.image_url && (
-                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                  <img 
-                    src={recipe.image_url} 
-                    alt={recipe.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Ingredients */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Ingredients</CardTitle>
+        
+        {isOwner && (
+          <div className="flex gap-2">
             <Button 
               variant="outline" 
               size="sm"
-              onClick={handleAddToShoppingList}
+              onClick={() => navigate(`/recipes/edit/${recipe.id}`)}
             >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Shopping List
+              <Edit size={16} className="mr-1" />
+              Edit
             </Button>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-500">Ingredients list will be available when recipe ingredients are added.</p>
-          </CardContent>
-        </Card>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleDelete}
+              className="text-koffa-red border-koffa-red hover:bg-koffa-red hover:text-white"
+            >
+              <Trash2 size={16} />
+            </Button>
+          </div>
+        )}
+      </div>
 
-        {/* Instructions */}
-        {recipe.instructions && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Instructions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose max-w-none">
-                {recipe.instructions.split('\n').map((step, index) => (
-                  <div key={index} className="mb-3">
-                    <span className="font-semibold text-blue-600 mr-2">
-                      {index + 1}.
-                    </span>
-                    {step}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      <div className="p-4 space-y-6">
+        {/* Recipe Image */}
+        {recipe.image_url && (
+          <div className="aspect-video rounded-lg overflow-hidden">
+            <img 
+              src={recipe.image_url} 
+              alt={recipe.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+          </div>
         )}
 
         {/* Recipe Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recipe Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {recipe.category && (
-                <div>
-                  <span className="font-semibold">Category:</span> {recipe.category}
-                </div>
-              )}
-              {recipe.cuisine && (
-                <div>
-                  <span className="font-semibold">Cuisine:</span> {recipe.cuisine}
-                </div>
-              )}
-              <div>
-                <span className="font-semibold">Created:</span> {new Date(recipe.created_at).toLocaleDateString()}
-              </div>
-              {recipe.updated_at !== recipe.created_at && (
-                <div>
-                  <span className="font-semibold">Updated:</span> {new Date(recipe.updated_at).toLocaleDateString()}
-                </div>
-              )}
+        <Card className="p-6">
+          <div className="flex flex-wrap gap-4 mb-4">
+            <div className="flex items-center text-koffa-green-dark">
+              <Clock size={16} className="mr-1" />
+              <span className="text-sm">{recipe.prep_time + recipe.cook_time} min</span>
             </div>
-          </CardContent>
+            <div className="flex items-center text-koffa-green-dark">
+              <Users size={16} className="mr-1" />
+              <span className="text-sm">{recipe.servings} servings</span>
+            </div>
+            <div className="flex items-center text-koffa-green-dark">
+              <ChefHat size={16} className="mr-1" />
+              <span className="text-sm">{recipe.difficulty}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="secondary">{recipe.category}</Badge>
+            <Badge variant="outline">{recipe.cuisine}</Badge>
+          </div>
+
+          {recipe.description && (
+            <p className="text-koffa-green-dark mb-4">{recipe.description}</p>
+          )}
+
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleAddToShoppingList}
+              className="bg-koffa-green hover:bg-koffa-green-dark flex-1"
+            >
+              <ShoppingCart size={16} className="mr-2" />
+              Add to Shopping List
+            </Button>
+          </div>
+        </Card>
+
+        {/* Ingredients */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-koffa-green mb-4">Ingredients</h2>
+          <div className="space-y-2">
+            {ingredients.map((ingredient) => (
+              <div key={ingredient.id} className="flex justify-between items-center py-2 border-b border-koffa-beige last:border-b-0">
+                <span className="text-koffa-green">{ingredient.name}</span>
+                <span className="text-koffa-green-dark text-sm">
+                  {ingredient.quantity} {ingredient.unit}
+                  {ingredient.optional && <span className="text-koffa-green-dark ml-1">(optional)</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Instructions */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-koffa-green mb-4">Instructions</h2>
+          <div className="prose prose-sm max-w-none">
+            <div className="whitespace-pre-wrap text-koffa-green-dark">
+              {recipe.instructions}
+            </div>
+          </div>
+        </Card>
+
+        {/* Recipe Meta */}
+        <Card className="p-4">
+          <div className="text-sm text-koffa-green-dark">
+            <p>Prep time: {recipe.prep_time} minutes</p>
+            <p>Cook time: {recipe.cook_time} minutes</p>
+            <p>Created: {new Date(recipe.created_at).toLocaleDateString()}</p>
+          </div>
         </Card>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

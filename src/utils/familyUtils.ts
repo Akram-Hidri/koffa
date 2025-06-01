@@ -2,6 +2,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Re-export functions from other utility files
+export { createNewFamily } from './familyCreationUtils';
+export { useInviteCode, verifyInviteCode } from './invitationUtils';
+export { getFamilyForUser } from './familyMemberUtils';
+
 export const createFamilyInvitation = async (familyId: string, createdBy: string) => {
   try {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();

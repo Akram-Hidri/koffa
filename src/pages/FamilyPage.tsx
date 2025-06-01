@@ -1,749 +1,192 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSettings, FamilyMember, MemberRole } from '@/contexts/SettingsContext';
-import { UsersRound, Bell, Settings, Users, MessageCircle, UserPlus, Plus, Copy, Mail, Phone } from 'lucide-react';
-import Logo from '@/components/Logo';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Copy, Plus, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import PageLayout from '@/components/PageLayout';
-import { createFamilyInvitation, getFamilyForUser, getFamilyInvitations } from '@/utils/familyUtils';
-import { supabase } from '@/integrations/supabase/client';
 import { formatInviteCodeForDisplay } from '@/utils/inviteUtils';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { getFamilyInvitations, createFamilyInvitation, getFamilyForUser } from '@/utils/familyUtils';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface Family {
+  id: string;
+  name: string;
+  created_by: string;
+  created_at: string;
+}
+
+interface Invitation {
+  id: string;
+  code: string;
+  family_id: string;
+  created_by: string;
+  created_at: string;
+  expires_at: string;
+  is_used: boolean;
+}
 
 const FamilyPage = () => {
   const navigate = useNavigate();
-  const { settings, generateInviteCode, addFamilyMember } = useSettings();
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
-  const [newMemberDetails, setNewMemberDetails] = useState({
-    name: '',
-    role: 'member' as MemberRole,
-    inviteMethod: 'code' as 'code' | 'email' | 'phone',
-    email: '',
-    phone: '',
-  });
-  const [codeCopied, setCodeCopied] = useState(false);
-  const { toast } = useToast();
-  
-  // Add a default settings object to prevent null references
-  const defaultSettings = {
-    familyMembers: [],
-    staffMembers: [],
-    pendingInvitations: 0,
-    navItems: ["home", "pantry", "shopping", "spaces", "family"]
-  };
+  const { user } = useAuth();
+  const [family, setFamily] = useState<Family | null>(null);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newInviteCode, setNewInviteCode] = useState<string>('');
 
-  // Use safe access to settings with fallbacks
-  const familyMembers = Array.isArray(settings?.familyMembers) ? settings.familyMembers : defaultSettings.familyMembers;
-  const staffMembers = Array.isArray(settings?.staffMembers) ? settings.staffMembers : defaultSettings.staffMembers;
-  const pendingInvitations = settings?.pendingInvitations ?? defaultSettings.pendingInvitations;
-  
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
+  useEffect(() => {
+    if (user) {
+      loadFamilyData();
+    }
+  }, [user]);
 
-  const handleGenerateInviteCode = async () => {
+  const loadFamilyData = async () => {
+    if (!user) return;
+    
     try {
-      setIsGeneratingCode(true);
+      setLoading(true);
       
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication error",
-          description: "You must be logged in to generate an invite code",
-          variant: "destructive",
-        });
-        return;
+      // Get user's family
+      const familyData = await getFamilyForUser(user.id);
+      
+      if (familyData) {
+        setFamily(familyData);
+        
+        // Get invitations for this family
+        const invitationsData = await getFamilyInvitations(familyData.id);
+        setInvitations(invitationsData);
       }
-      
-      // Check if user has admin permissions to create invites
-      const currentMember = familyMembers.find(member => member.id === user.id);
-      const canInvite = currentMember?.permissions?.inviteMembers || 
-                        currentMember?.role === 'admin' || 
-                        !currentMember; // If no member record yet, assume they're the first user
-      
-      if (!canInvite) {
-        toast({
-          title: "Permission denied",
-          description: "You don't have permission to invite new members",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Get the user's family
-      const family = await getFamilyForUser(user.id);
-      if (!family) {
-        // If no family exists yet, we'll create one later during member signup
-        // For now, generate a standalone code
-        const code = generateInviteCode();
-        setInviteCode(code);
-        toast({
-          title: "Invite code generated!",
-          description: `Share this code with family members: ${formatInviteCodeForDisplay(code)}`,
-        });
-        return;
-      }
-      
-      // Create invitation in database
-      const code = await createFamilyInvitation(family.id, user.id);
-      setInviteCode(code);
-      setCodeCopied(false);
-      
-      // Show success toast
-      toast({
-        title: "Invite code generated!",
-        description: `Share this code with family members: ${formatInviteCodeForDisplay(code)}`,
-      });
     } catch (error) {
-      console.error("Error generating invite code:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate invite code. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error loading family data:', error);
+      toast.error('Failed to load family information');
     } finally {
-      setIsGeneratingCode(false);
+      setLoading(false);
     }
   };
 
-  const handleCopyInviteCode = () => {
-    if (inviteCode) {
-      navigator.clipboard.writeText(formatInviteCodeForDisplay(inviteCode));
-      setCodeCopied(true);
-      toast({
-        title: "Code copied!",
-        description: "The invitation code has been copied to your clipboard.",
-      });
-      
-      setTimeout(() => {
-        setCodeCopied(false);
-      }, 3000);
-    }
-  };
-
-  const handleSendInvite = async () => {
-    if (newMemberDetails.inviteMethod === 'email' && !newMemberDetails.email) {
-      toast({
-        title: "Error",
-        description: "Please enter an email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newMemberDetails.inviteMethod === 'phone' && !newMemberDetails.phone) {
-      toast({
-        title: "Error",
-        description: "Please enter a phone number",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleCreateInvitation = async () => {
+    if (!family || !user) return;
+    
     try {
-      if (newMemberDetails.inviteMethod === 'email') {
-        // Here you would integrate with an email sending service
-        // For now, we'll just simulate success
-        toast({
-          title: "Invitation sent!",
-          description: `An invitation has been sent to ${newMemberDetails.email}`,
-        });
-      } else if (newMemberDetails.inviteMethod === 'phone') {
-        // Here you would integrate with an SMS sending service
-        // For now, we'll just simulate success
-        toast({
-          title: "Invitation sent!",
-          description: `An invitation has been sent to ${newMemberDetails.phone}`,
-        });
-      }
-      
-      // Clear form
-      setNewMemberDetails({
-        ...newMemberDetails,
-        email: '',
-        phone: ''
-      });
-      
-      // Close dialog
-      setIsInviteDialogOpen(false);
+      const invitation = await createFamilyInvitation(family.id, user.id);
+      setNewInviteCode(invitation.code);
+      await loadFamilyData(); // Refresh the invitations list
+      toast.success('New invitation code created!');
     } catch (error) {
-      console.error("Error sending invitation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send invitation. Please try again.",
-        variant: "destructive",
-      });
+      toast.error('Failed to create invitation');
     }
   };
 
-  const handleAddMember = () => {
-    if (!newMemberDetails.name) {
-      toast({
-        title: "Error",
-        description: "Please enter a member name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Create a new member with default permissions based on the role
-    const newMember: FamilyMember = {
-      id: Date.now().toString(),
-      name: newMemberDetails.name,
-      role: newMemberDetails.role,
-      status: "active",
-      joined: new Date().toLocaleDateString(),
-      tasksAssigned: 0,
-      permissions: {
-        viewPantry: true,
-        editPantry: newMemberDetails.role !== "limitedUser",
-        viewTasks: true,
-        completeTasks: newMemberDetails.role !== "limitedUser",
-        createTasks: newMemberDetails.role !== "limitedUser",
-        assignTasks: newMemberDetails.role === "admin",
-        viewSpaces: true,
-        manageSpaces: newMemberDetails.role !== "limitedUser",
-        viewFamily: true,
-        inviteMembers: newMemberDetails.role === "admin",
-        viewStaff: newMemberDetails.role !== "limitedUser",
-        manageStaff: newMemberDetails.role === "admin",
-        viewFinancial: newMemberDetails.role === "admin",
-        adminSettings: newMemberDetails.role === "admin",
-        addToShoppingLists: true,
-        createShoppingLists: newMemberDetails.role !== "limitedUser"
-      }
-    };
-
-    try {
-      // Add the new member
-      addFamilyMember(newMember);
-      
-      // Show success toast
-      toast({
-        title: "Success!",
-        description: `${newMember.name} has been added as a ${newMember.role}`,
-      });
-      
-      // Reset form
-      setNewMemberDetails({
-        name: '',
-        role: 'member',
-        inviteMethod: 'code',
-        email: '',
-        phone: ''
-      });
-      
-      // Clear invite code if it was used
-      setInviteCode(null);
-      
-      // Close dialog
-      setIsInviteDialogOpen(false);
-    } catch (error) {
-      console.error("Error adding family member:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add new member. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
 
-  const handleManageMember = (id: string) => {
-    navigate(`/family/member/${id}`);
-  };
+  if (loading) {
+    return (
+      <PageLayout title="Family">
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-koffa-green"></div>
+        </div>
+      </PageLayout>
+    );
+  }
 
-  const handleMessageMember = (id: string) => {
-    toast({
-      title: "Messaging coming soon",
-      description: "This feature will be available in a future update.",
-    });
-  };
+  if (!family) {
+    return (
+      <PageLayout title="Family">
+        <div className="text-center py-8">
+          <Users className="mx-auto h-12 w-12 text-koffa-green-dark mb-4" />
+          <h2 className="text-xl font-semibold text-koffa-green mb-2">No Family Found</h2>
+          <p className="text-koffa-green-dark mb-4">You're not currently part of a family.</p>
+          <Button onClick={() => navigate('/create-family')} className="bg-koffa-green hover:bg-koffa-green-dark">
+            Create a Family
+          </Button>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
-    <PageLayout title="Family Members">
-      <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-koffa-green">Family Members</h1>
-        <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-koffa-green text-white hover:bg-koffa-green-dark">
-              <Plus size={16} className="mr-1" /> Invite
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite a New Member</DialogTitle>
-              <DialogDescription>
-                Add a new family member or invite someone to join your family.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input 
-                  id="name" 
-                  placeholder="Enter name" 
-                  value={newMemberDetails.name}
-                  onChange={e => setNewMemberDetails({
-                    ...newMemberDetails,
-                    name: e.target.value
-                  })}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <div className="flex space-x-2">
-                  <Button
-                    variant={newMemberDetails.role === 'admin' ? 'default' : 'outline'}
-                    className={newMemberDetails.role === 'admin' ? 'bg-koffa-green text-white' : ''}
-                    onClick={() => setNewMemberDetails({
-                      ...newMemberDetails,
-                      role: 'admin'
-                    })}
-                  >
-                    Admin
-                  </Button>
-                  <Button
-                    variant={newMemberDetails.role === 'member' ? 'default' : 'outline'}
-                    className={newMemberDetails.role === 'member' ? 'bg-koffa-green text-white' : ''}
-                    onClick={() => setNewMemberDetails({
-                      ...newMemberDetails,
-                      role: 'member'
-                    })}
-                  >
-                    Member
-                  </Button>
-                  <Button
-                    variant={newMemberDetails.role === 'limitedUser' ? 'default' : 'outline'}
-                    className={newMemberDetails.role === 'limitedUser' ? 'bg-koffa-green text-white' : ''}
-                    onClick={() => setNewMemberDetails({
-                      ...newMemberDetails,
-                      role: 'limitedUser'
-                    })}
-                  >
-                    Limited
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Invitation Method</Label>
-                <RadioGroup 
-                  value={newMemberDetails.inviteMethod}
-                  onValueChange={(value) => setNewMemberDetails({
-                    ...newMemberDetails,
-                    inviteMethod: value as 'code' | 'email' | 'phone'
-                  })}
-                  className="flex flex-col space-y-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="code" id="invite-code" />
-                    <Label htmlFor="invite-code" className="flex items-center">
-                      <span className="mr-2">Invitation Code</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="9 11 12 14 22 4"></polyline>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                      </svg>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="email" id="invite-email" />
-                    <Label htmlFor="invite-email" className="flex items-center">
-                      <span className="mr-2">Email Invitation</span>
-                      <Mail size={16} />
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="phone" id="invite-phone" />
-                    <Label htmlFor="invite-phone" className="flex items-center">
-                      <span className="mr-2">SMS Invitation</span>
-                      <Phone size={16} />
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              
-              {newMemberDetails.inviteMethod === 'code' && (
-                <div className="space-y-2 border rounded-md p-4 bg-slate-50">
-                  <Label>Invitation Code</Label>
-                  <div className="flex space-x-2">
-                    <div className="relative flex-1">
-                      <Input 
-                        value={inviteCode ? formatInviteCodeForDisplay(inviteCode) : ''} 
-                        readOnly 
-                        placeholder="Click generate to create code" 
-                        className="font-mono pr-10"
-                      />
-                      {inviteCode && (
-                        <button 
-                          type="button"
-                          onClick={handleCopyInviteCode}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-800"
-                          aria-label="Copy invite code"
-                        >
-                          <Copy size={16} className={codeCopied ? "text-koffa-green" : ""} />
-                        </button>
-                      )}
-                    </div>
-                    <Button 
-                      onClick={handleGenerateInviteCode}
-                      type="button"
-                      disabled={isGeneratingCode}
-                    >
-                      {isGeneratingCode ? "Generating..." : "Generate"}
-                    </Button>
-                  </div>
-                  {inviteCode && (
-                    <div className="mt-4 text-sm border-t pt-3">
-                      <h4 className="font-medium text-koffa-green mb-1">How to join:</h4>
-                      <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-1">
-                        <li>Download the Koffa app from the App Store or Google Play</li>
-                        <li>Create an account or sign in</li>
-                        <li>Tap "Join Family" and enter the code above</li>
-                      </ol>
-                      <p className="text-xs mt-2 text-muted-foreground">
-                        This code will expire in 7 days.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {newMemberDetails.inviteMethod === 'email' && (
-                <div className="space-y-2 border rounded-md p-4 bg-slate-50">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input 
-                    id="email" 
-                    type="email"
-                    placeholder="Enter email address" 
-                    value={newMemberDetails.email}
-                    onChange={e => setNewMemberDetails({
-                      ...newMemberDetails,
-                      email: e.target.value
-                    })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    We'll send an invitation with instructions to join your family.
-                  </p>
-                </div>
-              )}
-              
-              {newMemberDetails.inviteMethod === 'phone' && (
-                <div className="space-y-2 border rounded-md p-4 bg-slate-50">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input 
-                    id="phone" 
-                    type="tel"
-                    placeholder="Enter phone number" 
-                    value={newMemberDetails.phone}
-                    onChange={e => setNewMemberDetails({
-                      ...newMemberDetails,
-                      phone: e.target.value
-                    })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    We'll send an SMS with instructions to join your family.
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
-                Cancel
+    <PageLayout title="Family">
+      <div className="space-y-6">
+        {/* Family Info */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-koffa-green">{family.name}</h2>
+            <Badge variant="secondary">Family</Badge>
+          </div>
+          <p className="text-koffa-green-dark">Family ID: {family.id}</p>
+        </Card>
+
+        {/* New Invite Code Display */}
+        {newInviteCode && (
+          <Card className="p-6 bg-koffa-accent-blue/10 border-koffa-accent-blue">
+            <h3 className="text-lg font-semibold text-koffa-green mb-2">New Invitation Code</h3>
+            <div className="flex items-center gap-2">
+              <Input
+                value={formatInviteCodeForDisplay(newInviteCode)}
+                readOnly
+                className="font-mono text-lg"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => copyToClipboard(formatInviteCodeForDisplay(newInviteCode))}
+              >
+                <Copy className="h-4 w-4" />
               </Button>
-              {newMemberDetails.inviteMethod === 'code' ? (
-                <Button 
-                  onClick={handleAddMember} 
-                  className="bg-koffa-green text-white hover:bg-koffa-green-dark"
-                  disabled={newMemberDetails.inviteMethod === 'code' && !inviteCode}
-                >
-                  Add Member
-                </Button>
-              ) : (
-                <Button 
-                  onClick={handleSendInvite} 
-                  className="bg-koffa-green text-white hover:bg-koffa-green-dark"
-                >
-                  Send Invitation
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      <Tabs defaultValue="family" className="mb-6">
-        <TabsList className="bg-koffa-beige mb-4">
-          <TabsTrigger value="family" className="data-[state=active]:bg-koffa-green data-[state=active]:text-white">
-            <UsersRound size={16} className="mr-1" /> Family
-          </TabsTrigger>
-          <TabsTrigger value="staff" className="data-[state=active]:bg-koffa-green data-[state=active]:text-white">
-            <Users size={16} className="mr-1" /> Staff
-          </TabsTrigger>
-          <TabsTrigger value="roles" className="data-[state=active]:bg-koffa-green data-[state=active]:text-white">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-1"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-            Roles
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="family">
-          {familyMembers.length > 0 ? (
-            familyMembers.map((member) => (
-              <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
-                      {member.avatar || member.name[0]}
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="font-medium text-koffa-green">{member.name}</h3>
-                      <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-koffa-green">Role: {member.role}</p>
-                    <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                  <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleManageMember(member.id)}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleMessageMember(member.id)}
-                    >
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No family members found. Add new members using the Invite button.
             </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="staff">
-          {staffMembers.length > 0 ? (
-            staffMembers.map((member) => (
-              <Card key={member.id} className="mb-4 border-koffa-beige/30 p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-koffa-beige-dark flex items-center justify-center text-lg font-medium">
-                      {member.avatar || member.name[0]}
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="font-medium text-koffa-green">{member.name}</h3>
-                      <p className="text-xs text-koffa-green-dark">Status: {member.status}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-koffa-green">Role: {member.role}</p>
-                    <p className="text-xs text-koffa-green-dark">Joined: {member.joined}</p>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center mt-3">
-                  <p className="text-sm text-koffa-green-dark">Tasks assigned: {member.tasksAssigned}</p>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleManageMember(member.id)}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-                      onClick={() => handleMessageMember(member.id)}
-                    >
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              No staff members found.
-            </div>
-          )}
-          
-          <Button 
-            variant="outline" 
-            className="w-full border-dashed border-koffa-green text-koffa-green hover:bg-koffa-beige-light mt-4"
-            onClick={() => setIsInviteDialogOpen(true)}
-          >
-            <UserPlus size={16} className="mr-1" />
-            Add Staff Member
-          </Button>
-        </TabsContent>
-        
-        <TabsContent value="roles">
-          <div className="space-y-6">
-            <Card className="border-koffa-beige/30 p-4">
-              <h3 className="font-semibold text-lg text-koffa-green mb-2">Admin</h3>
-              <p className="text-koffa-green-dark text-sm mb-4">
-                Admins have full access to all features of the application.
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-koffa-green-dark text-sm">
-                <li>Manage family and staff members</li>
-                <li>Full access to all pantry and shopping features</li>
-                <li>Create and assign tasks to any member</li>
-                <li>View and manage financial information</li>
-                <li>Configure application settings</li>
-              </ul>
-            </Card>
-            
-            <Card className="border-koffa-beige/30 p-4">
-              <h3 className="font-semibold text-lg text-koffa-green mb-2">Family Member</h3>
-              <p className="text-koffa-green-dark text-sm mb-4">
-                Regular family members with standard access to daily features.
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-koffa-green-dark text-sm">
-                <li>View and edit pantry items</li>
-                <li>Create and view shopping lists</li>
-                <li>Create and complete tasks</li>
-                <li>View family members</li>
-                <li>No access to financial information or admin settings</li>
-              </ul>
-            </Card>
-            
-            <Card className="border-koffa-beige/30 p-4">
-              <h3 className="font-semibold text-lg text-koffa-green mb-2">Limited User</h3>
-              <p className="text-koffa-green-dark text-sm mb-4">
-                Restricted access for occasional users or elderly family members.
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-koffa-green-dark text-sm">
-                <li>View pantry items but cannot edit</li>
-                <li>View but cannot create shopping lists</li>
-                <li>View tasks but cannot create or assign tasks</li>
-                <li>View family members</li>
-                <li>No access to staff management or financial information</li>
-              </ul>
-            </Card>
-            
-            <Card className="border-koffa-beige/30 p-4">
-              <h3 className="font-semibold text-lg text-koffa-green mb-2">Staff</h3>
-              <p className="text-koffa-green-dark text-sm mb-4">
-                For helpers like drivers, shoppers who need specific access.
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-koffa-green-dark text-sm">
-                <li>View assigned tasks</li>
-                <li>Limited access based on role (driver, shopper, etc.)</li>
-                <li>No access to family management or financial information</li>
-                <li>Cannot invite other members</li>
-              </ul>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-        <Card className="border-koffa-beige/30 p-4">
-          <div className="flex items-center space-x-3 mb-2">
-            <Users size={20} className="text-koffa-green" />
-            <h3 className="font-medium text-koffa-green">Staff Members: {staffMembers.length}</h3>
-          </div>
-          <p className="text-sm text-koffa-green-dark mb-4">
-            Manage your staff access and permissions
+            <p className="text-sm text-koffa-green-dark mt-2">
+              Share this code with family members to invite them.
+            </p>
+          </Card>
+        )}
+
+        {/* Create New Invitation */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-koffa-green mb-4">Invite Family Members</h3>
+          <p className="text-koffa-green-dark mb-4">
+            Create a new invitation code to invite family members to join.
           </p>
-          <Button 
-            variant="outline" 
-            className="w-full border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-            onClick={() => navigate('/family/staff')}
-          >
-            View Staff
+          <Button onClick={handleCreateInvitation} className="bg-koffa-green hover:bg-koffa-green-dark">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Invitation
           </Button>
         </Card>
-        
-        <Card className="border-koffa-beige/30 p-4">
-          <div className="flex items-center space-x-3 mb-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-koffa-accent-orange"
-            >
-              <path d="M22 7.99a8 8 0 0 0-4-5.05 8 8 0 0 0-4 0h0a8 8 0 0 0-4 5.05 8 8 0 0 0 0 4 8 8 0 0 0 4 5.05 8 8 0 0 0 4 0h0a8 8 0 0 0 4-5.05 8 8 0 0 0 0-4Z" />
-              <path d="M16.5 16.5 21 21" />
-              <path d="M12 8v8" />
-              <path d="m8 12 8 0" />
-            </svg>
-            <h3 className="font-medium text-koffa-green">Pending Invitations: {pendingInvitations}</h3>
-          </div>
-          <p className="text-sm text-koffa-green-dark mb-4">
-            Review and manage pending member invitations
-          </p>
-          <Button 
-            variant="outline" 
-            className="w-full border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
-            onClick={() => navigate('/family/invitations')}
-          >
-            Manage Invitations
-          </Button>
+
+        {/* Active Invitations */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-koffa-green mb-4">Active Invitations</h3>
+          {invitations.length === 0 ? (
+            <p className="text-koffa-green-dark">No active invitations.</p>
+          ) : (
+            <div className="space-y-3">
+              {invitations.map((invitation) => (
+                <div key={invitation.id} className="flex items-center justify-between p-3 bg-koffa-beige-light rounded-lg">
+                  <div>
+                    <code className="text-sm font-mono bg-white px-2 py-1 rounded">
+                      {formatInviteCodeForDisplay(invitation.code)}
+                    </code>
+                    <p className="text-xs text-koffa-green-dark mt-1">
+                      Created: {new Date(invitation.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(formatInviteCodeForDisplay(invitation.code))}
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copy
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </PageLayout>
