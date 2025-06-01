@@ -82,4 +82,102 @@ export const useSpaceTasks = (spaceId: string) => {
   });
 };
 
+// Add the missing useSpaceWithTasks hook
+export const useSpaceWithTasks = (spaceId: string) => {
+  return useQuery({
+    queryKey: ['space-with-tasks', spaceId],
+    queryFn: async () => {
+      // Get space details
+      const { data: space, error: spaceError } = await supabase
+        .from('spaces')
+        .select('*')
+        .eq('id', spaceId)
+        .single();
+
+      if (spaceError) throw spaceError;
+
+      // Get space tasks
+      const { data: tasks, error: tasksError } = await supabase
+        .from('space_tasks')
+        .select('*')
+        .eq('space_id', spaceId)
+        .order('created_at', { ascending: false });
+
+      if (tasksError) throw tasksError;
+
+      return { space, tasks: tasks || [] };
+    },
+    enabled: !!spaceId,
+  });
+};
+
+// Add the missing useAddTask hook
+export const useAddTask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (task: {
+      task: string;
+      space_id: string;
+      due_date?: string;
+      assigned_to?: string;
+      recurrence?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('space_tasks')
+        .insert({
+          ...task,
+          user_id: (await supabase.auth.getUser()).data.user?.id || '',
+          completed: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['space-tasks', variables.space_id] });
+      queryClient.invalidateQueries({ queryKey: ['space-with-tasks', variables.space_id] });
+      toast.success('Task added successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to add task');
+      console.error(error);
+    },
+  });
+};
+
+// Add the missing useToggleTaskCompletion hook
+export const useToggleTaskCompletion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ taskId, completed, spaceId }: {
+      taskId: string;
+      completed: boolean;
+      spaceId: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('space_tasks')
+        .update({ completed })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['space-tasks', variables.spaceId] });
+      queryClient.invalidateQueries({ queryKey: ['space-with-tasks', variables.spaceId] });
+      toast.success(variables.completed ? 'Task completed!' : 'Task marked as incomplete');
+    },
+    onError: (error) => {
+      toast.error('Failed to update task');
+      console.error(error);
+    },
+  });
+};
+
 export default useSpaces;

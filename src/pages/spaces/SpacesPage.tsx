@@ -142,8 +142,16 @@ const SpacesPage = () => {
       return;
     }
     
+    if (!user) {
+      toast.error("Please sign in to create a space");
+      return;
+    }
+    
     try {
-      await createSpace.mutateAsync(newSpace);
+      await createSpace.mutateAsync({
+        ...newSpace,
+        user_id: user.id // Add the missing user_id
+      });
       setIsAddDialogOpen(false);
       setNewSpace({
         name: '',

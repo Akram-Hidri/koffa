@@ -8,6 +8,7 @@ export interface Notification {
   body: string;
   type: string;
   read: boolean;
+  is_read: boolean; // Add this for compatibility
   created_at: string;
 }
 
@@ -38,6 +39,22 @@ export const createNotification = async (
   }
 };
 
+// Add the missing createEventNotification function
+export const createEventNotification = async (
+  userId: string,
+  eventId: string,
+  title: string,
+  body: string,
+  type: string = 'info'
+) => {
+  return createNotification(userId, title, body, type);
+};
+
+// Add the missing fetchNotifications function
+export const fetchNotifications = async (userId: string): Promise<Notification[]> => {
+  return getUserNotifications(userId);
+};
+
 export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
   try {
     const { data, error } = await supabase
@@ -56,6 +73,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
       body: item.body,
       type: item.type,
       read: item.read,
+      is_read: item.read, // Add for compatibility
       created_at: item.created_at
     }));
   } catch (error) {
@@ -64,7 +82,7 @@ export const getUserNotifications = async (userId: string): Promise<Notification
   }
 };
 
-export const markNotificationAsRead = async (notificationId: string) => {
+export const markNotificationAsRead = async (notificationId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('notifications')
@@ -72,13 +90,14 @@ export const markNotificationAsRead = async (notificationId: string) => {
       .eq('id', notificationId);
 
     if (error) throw error;
+    return true;
   } catch (error) {
     console.error('Error marking notification as read:', error);
-    throw error;
+    return false;
   }
 };
 
-export const markAllNotificationsAsRead = async (userId: string) => {
+export const markAllNotificationsAsRead = async (userId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('notifications')
@@ -87,10 +106,45 @@ export const markAllNotificationsAsRead = async (userId: string) => {
       .eq('read', false);
 
     if (error) throw error;
+    return true;
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
-    throw error;
+    return false;
   }
+};
+
+// Add the missing dismissNotification function
+export const dismissNotification = async (notificationId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', notificationId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error dismissing notification:', error);
+    return false;
+  }
+};
+
+// Add the missing formatNotificationTime function
+export const formatNotificationTime = (timestamp: string): string => {
+  const now = new Date();
+  const notificationTime = new Date(timestamp);
+  const diffInMinutes = Math.floor((now.getTime() - notificationTime.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 1) return 'Just now';
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+  
+  return notificationTime.toLocaleDateString();
 };
 
 // Helper function to create common notification types

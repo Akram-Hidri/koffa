@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -42,6 +41,9 @@ export const useRecipeList = () => {
     },
   });
 };
+
+// Add the missing useRecipes hook (alias for useRecipeList)
+export const useRecipes = useRecipeList;
 
 export const useRecipe = (id: string) => {
   return useQuery({
@@ -150,9 +152,10 @@ export const useDeleteRecipe = () => {
   });
 };
 
-// Export as an object with all hooks
+// Export as an object with all hooks AND as named exports
 export default {
   useRecipeList,
+  useRecipes,
   useRecipe,
   useRecipeIngredients,
   useCreateRecipe,
