@@ -17,7 +17,7 @@ interface Family {
   name: string;
   created_at: string;
   updated_at: string;
-  created_by?: string; // Make this optional since it might not exist in the database
+  created_by?: string;
 }
 
 const FamilyPage = () => {
@@ -42,9 +42,12 @@ const FamilyPage = () => {
       
       if (familyData) {
         // Add created_by if it doesn't exist
-        const familyWithCreatedBy = {
-          ...familyData,
-          created_by: familyData.created_by || user.id
+        const familyWithCreatedBy: Family = {
+          id: familyData.id,
+          name: familyData.name,
+          created_at: familyData.created_at,
+          updated_at: familyData.updated_at,
+          created_by: user.id
         };
         setFamily(familyWithCreatedBy);
         

@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -59,64 +59,62 @@ function App() {
         <SettingsProvider>
           <AuthProvider>
             <Toaster />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/create-family" element={<CreateFamilyPage />} />
-                
-                <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-                
-                {/* Pantry Routes */}
-                <Route path="/pantry" element={<ProtectedRoute><PantryPage /></ProtectedRoute>} />
-                <Route path="/pantry/add" element={<ProtectedRoute><AddPantryItemPage /></ProtectedRoute>} />
-                
-                {/* Calendar Routes */}
-                <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-                
-                {/* Shopping Routes */}
-                <Route path="/shopping" element={<ProtectedRoute><ShoppingListsPage /></ProtectedRoute>} />
-                <Route path="/shopping/new" element={<ProtectedRoute><NewShoppingListPage /></ProtectedRoute>} />
-                <Route path="/shopping/list/:listId" element={<ProtectedRoute><ShoppingListDetailPage /></ProtectedRoute>} />
-                
-                {/* Services Routes */}
-                <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-                <Route path="/services/chef/:chefId" element={<ProtectedRoute><ChefDetailPage /></ProtectedRoute>} />
-                <Route path="/services/bookings" element={<ProtectedRoute><UserBookingsPage /></ProtectedRoute>} />
-                
-                {/* Spaces Routes */}
-                <Route path="/spaces" element={<ProtectedRoute><SpacesPage /></ProtectedRoute>} />
-                <Route path="/spaces/new" element={<ProtectedRoute><NewSpacePage /></ProtectedRoute>} />
-                <Route path="/spaces/:spaceId" element={<ProtectedRoute><SpaceDetailPage /></ProtectedRoute>} />
-                
-                {/* Recipe Routes */}
-                <Route path="/recipes" element={<ProtectedRoute><RecipesPage /></ProtectedRoute>} />
-                <Route path="/recipes/create" element={<ProtectedRoute><RecipeFormPage /></ProtectedRoute>} />
-                <Route path="/recipes/:recipeId" element={<ProtectedRoute><RecipeDetailPage /></ProtectedRoute>} />
-                <Route path="/recipes/:recipeId/edit" element={<ProtectedRoute><RecipeFormPage /></ProtectedRoute>} />
-                
-                {/* Other Routes */}
-                <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
-                <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-                <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-                
-                {/* Settings Routes */}
-                <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
-                <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
-                <Route path="/settings/appearance" element={<ProtectedRoute><AppearanceSettings /></ProtectedRoute>} />
-                <Route path="/settings/navigation" element={<ProtectedRoute><NavigationSettings /></ProtectedRoute>} />
-                <Route path="/settings/accessibility" element={<ProtectedRoute><AccessibilitySettings /></ProtectedRoute>} />
-                <Route path="/settings/dialect" element={<ProtectedRoute><DialectSettings /></ProtectedRoute>} />
-                
-                {/* Family Routes */}
-                <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
-                <Route path="/family/invitations" element={<ProtectedRoute><FamilyInvitationsPage /></ProtectedRoute>} />
-                <Route path="/members/:memberId" element={<ProtectedRoute><MemberPage /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              </Routes>
-            </BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/create-family" element={<CreateFamilyPage />} />
+              
+              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+              
+              {/* Pantry Routes */}
+              <Route path="/pantry" element={<ProtectedRoute><PantryPage /></ProtectedRoute>} />
+              <Route path="/pantry/add" element={<ProtectedRoute><AddPantryItemPage /></ProtectedRoute>} />
+              
+              {/* Calendar Routes */}
+              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+              
+              {/* Shopping Routes */}
+              <Route path="/shopping" element={<ProtectedRoute><ShoppingListsPage /></ProtectedRoute>} />
+              <Route path="/shopping/new" element={<ProtectedRoute><NewShoppingListPage /></ProtectedRoute>} />
+              <Route path="/shopping/list/:listId" element={<ProtectedRoute><ShoppingListDetailPage /></ProtectedRoute>} />
+              
+              {/* Services Routes */}
+              <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+              <Route path="/services/chef/:chefId" element={<ProtectedRoute><ChefDetailPage /></ProtectedRoute>} />
+              <Route path="/services/bookings" element={<ProtectedRoute><UserBookingsPage /></ProtectedRoute>} />
+              
+              {/* Spaces Routes */}
+              <Route path="/spaces" element={<ProtectedRoute><SpacesPage /></ProtectedRoute>} />
+              <Route path="/spaces/new" element={<ProtectedRoute><NewSpacePage /></ProtectedRoute>} />
+              <Route path="/spaces/:spaceId" element={<ProtectedRoute><SpaceDetailPage /></ProtectedRoute>} />
+              
+              {/* Recipe Routes */}
+              <Route path="/recipes" element={<ProtectedRoute><RecipesPage /></ProtectedRoute>} />
+              <Route path="/recipes/create" element={<ProtectedRoute><RecipeFormPage /></ProtectedRoute>} />
+              <Route path="/recipes/:recipeId" element={<ProtectedRoute><RecipeDetailPage /></ProtectedRoute>} />
+              <Route path="/recipes/:recipeId/edit" element={<ProtectedRoute><RecipeFormPage /></ProtectedRoute>} />
+              
+              {/* Other Routes */}
+              <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              
+              {/* Settings Routes */}
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+              <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
+              <Route path="/settings/appearance" element={<ProtectedRoute><AppearanceSettings /></ProtectedRoute>} />
+              <Route path="/settings/navigation" element={<ProtectedRoute><NavigationSettings /></ProtectedRoute>} />
+              <Route path="/settings/accessibility" element={<ProtectedRoute><AccessibilitySettings /></ProtectedRoute>} />
+              <Route path="/settings/dialect" element={<ProtectedRoute><DialectSettings /></ProtectedRoute>} />
+              
+              {/* Family Routes */}
+              <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
+              <Route path="/family/invitations" element={<ProtectedRoute><FamilyInvitationsPage /></ProtectedRoute>} />
+              <Route path="/members/:memberId" element={<ProtectedRoute><MemberPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            </Routes>
           </AuthProvider>
         </SettingsProvider>
       </TooltipProvider>
