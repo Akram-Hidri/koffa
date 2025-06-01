@@ -80,7 +80,7 @@ const AuthPage = () => {
 
   // Helper function to format invite code as user types
   const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value: string = e.target.value;
     
     // Allow both formatted and unformatted input
     // Keep the raw input including dashes
