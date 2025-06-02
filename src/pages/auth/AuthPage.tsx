@@ -78,9 +78,9 @@ const AuthPage = () => {
   };
 
   const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value.length <= 9) {
-      setInviteCode(value.toUpperCase());
+    const inputValue = e.target.value;
+    if (inputValue.length <= 9) {
+      setInviteCode(inputValue.toUpperCase());
     }
   };
 
