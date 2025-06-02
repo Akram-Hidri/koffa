@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [inviteCode, setInviteCode] = useState<string>('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -48,12 +49,10 @@ const AuthPage = () => {
         throw new Error("Please enter an invitation code");
       }
       
-      // Remove any formatting (like dashes) from the invite code
       const cleanCode = inviteCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
       
       console.log("Verifying invite code:", cleanCode);
       
-      // Check if the invite code is valid using our database function
       const { data, error } = await supabase
         .rpc('is_valid_invite_code', { code_param: cleanCode });
         
@@ -78,44 +77,40 @@ const AuthPage = () => {
     }
   };
 
-  // Helper function to format invite code as user types
   const handleInviteCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Allow both formatted and unformatted input
-    // Keep the raw input including dashes
-    if (value.length <= 9) { // Max length including dash
+    if (value.length <= 9) {
       setInviteCode(value.toUpperCase());
     }
   };
 
   return (
     <div className="min-h-screen bg-koffa-beige-light flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="mb-8 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-6 sm:mb-8 text-center">
           <Logo size="lg" />
-          <h2 className="text-2xl font-semibold text-koffa-green mt-6">Welcome to Koffa</h2>
-          <p className="text-koffa-green-dark mt-1">Your family grocery companion</p>
+          <h2 className="text-xl sm:text-2xl font-semibold text-koffa-green mt-4 sm:mt-6">Welcome to Koffa</h2>
+          <p className="text-sm sm:text-base text-koffa-green-dark mt-1">Your family grocery companion</p>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 sm:p-6">
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-3 mb-4 sm:mb-6 h-auto">
               <TabsTrigger 
                 value="email" 
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
               >
                 Email
               </TabsTrigger>
               <TabsTrigger 
                 value="phone"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
               >
                 Phone
               </TabsTrigger>
               <TabsTrigger 
                 value="invite"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
               >
                 Invite Code
               </TabsTrigger>
@@ -133,7 +128,7 @@ const AuthPage = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
                       placeholder="Enter your email"
                     />
                   </div>
@@ -149,13 +144,13 @@ const AuthPage = () => {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green"
+                      className="pl-10 pr-12 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
                       placeholder="Enter your password"
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -164,7 +159,7 @@ const AuthPage = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Log In"}
@@ -178,14 +173,14 @@ const AuthPage = () => {
                   <label className="text-sm font-medium text-koffa-green">Phone</label>
                   <Input 
                     type="tel"
-                    className="border-koffa-beige focus-visible:ring-koffa-green"
+                    className="border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
                     placeholder="Enter your phone number"
                   />
                 </div>
                 
                 <Button 
                   type="button" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
                   onClick={() => toast.info("Phone authentication coming soon")}
                 >
                   Send Code
@@ -205,7 +200,7 @@ const AuthPage = () => {
                       type="text"
                       value={formatInviteCodeForDisplay(inviteCode)}
                       onChange={handleInviteCodeChange}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green font-mono tracking-wider text-center"
+                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green font-mono tracking-wider text-center h-12 text-base"
                       placeholder="XXXX-XXXX"
                     />
                   </div>
@@ -216,7 +211,7 @@ const AuthPage = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white"
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
                   disabled={isLoading || inviteCode.length < 1}
                 >
                   {isLoading ? "Verifying..." : "Join Family"}
@@ -226,18 +221,18 @@ const AuthPage = () => {
           </Tabs>
         </div>
         
-        <div className="mt-8 text-center">
+        <div className="mt-6 sm:mt-8 text-center w-full max-w-md">
           <div className="flex items-center justify-center my-4">
             <div className="border-t flex-1 border-koffa-beige"></div>
             <span className="px-4 text-sm text-koffa-green-dark">OR</span>
             <div className="border-t flex-1 border-koffa-beige"></div>
           </div>
           
-          <p className="text-koffa-green-dark mb-2">New to Koffa?</p>
+          <p className="text-koffa-green-dark mb-2 text-sm sm:text-base">New to Koffa?</p>
           <Button 
             onClick={() => navigate('/signup')}
             variant="outline" 
-            className="w-full max-w-md border-koffa-green text-koffa-green hover:bg-koffa-beige-light"
+            className="w-full border-koffa-green text-koffa-green hover:bg-koffa-beige-light h-12 text-base font-medium"
           >
             Create Account
           </Button>

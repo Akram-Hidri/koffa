@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -16,6 +15,7 @@ const AccessibilitySettings = () => {
   const { settings, updateSettings } = useSettings();
   
   const handleTextSizeChange = (value: string) => {
+    console.log('Changing text size to:', value);
     updateSettings({ textSize: value as any });
     toast.success(`Text size changed to ${value}`);
   };
@@ -48,7 +48,7 @@ const AccessibilitySettings = () => {
         <div className="flex items-center">
           <Button 
             variant="ghost" 
-            className="mr-2 h-8 w-8 p-0" 
+            className="mr-2 h-8 w-8 p-0 touch-target" 
             onClick={() => navigate('/settings')}
           >
             <ArrowLeft size={20} className="text-koffa-green" />
@@ -56,11 +56,11 @@ const AccessibilitySettings = () => {
           <Logo size="sm" />
         </div>
         
-        <h1 className="text-xl font-semibold text-koffa-green">Accessibility</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-koffa-green">Accessibility</h1>
         
         <Button 
           variant="ghost" 
-          className="rounded-full p-2 h-auto w-auto"
+          className="rounded-full p-2 h-auto w-auto touch-target"
           onClick={() => navigate('/profile')}
         >
           <div className="w-8 h-8 rounded-full bg-koffa-beige flex items-center justify-center text-sm font-medium text-koffa-green">
@@ -70,34 +70,35 @@ const AccessibilitySettings = () => {
       </div>
       
       {/* Main content */}
-      <div className="px-4 py-6">
-        <Card className="border-koffa-beige/30 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-koffa-green mb-4">Vision Settings</h2>
+      <div className="px-4 py-6 container-mobile">
+        <Card className="border-koffa-beige/30 p-4 sm:p-6 mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-koffa-green mb-4">Vision Settings</h2>
           
           <div className="space-y-6">
             {/* Text Size */}
             <div>
-              <h3 className="font-medium text-koffa-green mb-2">Text Size:</h3>
+              <h3 className="font-medium text-koffa-green mb-3">Text Size:</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-2">Current setting: {settings.textSize}</p>
               <RadioGroup 
                 value={settings.textSize} 
                 onValueChange={handleTextSizeChange}
-                className="flex flex-wrap gap-4"
+                className="grid grid-cols-2 sm:flex sm:flex-wrap gap-4"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="medium" id="default-size" />
-                  <Label htmlFor="default-size">Default</Label>
+                  <Label htmlFor="default-size" className="text-sm">Default</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="large" id="large-size" />
-                  <Label htmlFor="large-size">Large</Label>
+                  <Label htmlFor="large-size" className="text-lg">Large</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="extraLarge" id="extra-large-size" />
-                  <Label htmlFor="extra-large-size">Extra Large</Label>
+                  <Label htmlFor="extra-large-size" className="text-xl">Extra Large</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="huge" id="huge-size" />
-                  <Label htmlFor="huge-size">Huge</Label>
+                  <Label htmlFor="huge-size" className="text-2xl">Huge</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -110,11 +111,11 @@ const AccessibilitySettings = () => {
                 onValueChange={handleContrastChange}
                 className="flex flex-wrap gap-4"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="normal" id="normal-contrast" />
                   <Label htmlFor="normal-contrast">Normal</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="highContrast" id="high-contrast" />
                   <Label htmlFor="high-contrast">High Contrast</Label>
                 </div>
@@ -123,7 +124,7 @@ const AccessibilitySettings = () => {
             
             {/* Visual Preferences */}
             <div className="space-y-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="boldText" 
                   checked={settings.boldText}
@@ -137,7 +138,7 @@ const AccessibilitySettings = () => {
                 </label>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="reduceTransparency" 
                   checked={settings.reduceTransparency}
@@ -151,7 +152,7 @@ const AccessibilitySettings = () => {
                 </label>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="reduceMotion" 
                   checked={settings.reduceMotion}
@@ -168,12 +169,12 @@ const AccessibilitySettings = () => {
           </div>
         </Card>
         
-        <Card className="border-koffa-beige/30 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-koffa-green mb-4">Interaction Settings</h2>
+        <Card className="border-koffa-beige/30 p-4 sm:p-6 mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-koffa-green mb-4">Interaction Settings</h2>
           
           <div className="space-y-4">
             <div className="space-y-3">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="voiceCommands" 
                   checked={settings.voiceCommands}
@@ -187,7 +188,7 @@ const AccessibilitySettings = () => {
                 </label>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="screenReaderSupport" 
                   checked={settings.screenReaderCompatible}
@@ -201,7 +202,7 @@ const AccessibilitySettings = () => {
                 </label>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="touchAccommodations" 
                   checked={settings.touchAccommodations}
@@ -223,15 +224,15 @@ const AccessibilitySettings = () => {
                 onValueChange={handleInputMethodChange}
                 className="flex flex-wrap gap-4"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="touch" id="touch-input" />
                   <Label htmlFor="touch-input">Touch</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="voice" id="voice-input" />
                   <Label htmlFor="voice-input">Voice</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 touch-target">
                   <RadioGroupItem value="switch" id="switch-input" />
                   <Label htmlFor="switch-input">Switch Control</Label>
                 </div>
@@ -240,12 +241,12 @@ const AccessibilitySettings = () => {
           </div>
         </Card>
         
-        <Card className="border-koffa-beige/30 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-koffa-green mb-4">Simplified Interface</h2>
+        <Card className="border-koffa-beige/30 p-4 sm:p-6 mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-koffa-green mb-4">Simplified Interface</h2>
           
           <div className="space-y-4">
             <div className="space-y-1">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 touch-target">
                 <Checkbox 
                   id="simplifiedMode" 
                   checked={settings.simplifiedMode}
@@ -261,7 +262,7 @@ const AccessibilitySettings = () => {
               <p className="text-xs text-koffa-green-dark ml-6">Shows fewer options and larger buttons</p>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 touch-target">
               <Checkbox 
                 id="showLabelsWithIcons" 
                 checked={settings.showLabelsWithIcons}
@@ -275,7 +276,7 @@ const AccessibilitySettings = () => {
               </label>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 touch-target">
               <Checkbox 
                 id="reduceAnimations" 
                 checked={settings.reduceAnimations}
@@ -290,7 +291,7 @@ const AccessibilitySettings = () => {
             </div>
             
             <Button 
-              className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white mt-4"
+              className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white mt-4 touch-target"
               onClick={applyChanges}
             >
               Apply Changes
@@ -300,22 +301,22 @@ const AccessibilitySettings = () => {
       </div>
       
       {/* Floating Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-6 py-3 w-[80%] max-w-sm border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg px-4 sm:px-6 py-3 w-[90%] max-w-sm border border-koffa-beige/20 transition-all duration-300 hover:shadow-xl">
         <div className="flex justify-around items-center">
           <Button 
             variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+            className="p-2 h-auto w-12 sm:w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 touch-target"
             onClick={() => navigate('/home')}
           >
-            <Home size={28} className="text-koffa-green-dark" />
+            <Home size={24} className="text-koffa-green-dark" />
           </Button>
           
           <Button 
             variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+            className="p-2 h-auto w-12 sm:w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 touch-target"
             onClick={() => navigate('/settings')}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
@@ -323,10 +324,10 @@ const AccessibilitySettings = () => {
           
           <Button 
             variant="ghost" 
-            className="p-2 h-auto w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300"
+            className="p-2 h-auto w-12 sm:w-14 hover:bg-koffa-beige-light rounded-full transition-all duration-300 touch-target"
             onClick={() => navigate('/home')}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-koffa-green-dark">
               <path d="m12 19-7-7 7-7" />
               <path d="M19 12H5" />
             </svg>

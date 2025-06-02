@@ -45,6 +45,9 @@
     --koffa-accent-blue: 210 13% 49%;
     --koffa-accent-orange: 30 70% 50%;
     --koffa-accent-green: 120 70% 40%;
+    
+    /* Text size CSS custom properties */
+    --text-scale: 1;
   }
 
   .dark {
@@ -84,6 +87,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: calc(1rem * var(--text-scale));
+  }
+  
+  /* Text size scaling based on accessibility settings */
+  body.text-size-small {
+    --text-scale: 0.875;
+  }
+  
+  body.text-size-medium {
+    --text-scale: 1;
+  }
+  
+  body.text-size-large {
+    --text-scale: 1.25;
+  }
+  
+  body.text-size-extraLarge {
+    --text-scale: 1.5;
+  }
+  
+  body.text-size-huge {
+    --text-scale: 1.875;
   }
   
   /* Hide scrollbars but allow scrolling */
@@ -154,27 +179,6 @@
     }
   }
   
-  /* Accessibility - Text Size */
-  .text-size-small {
-    font-size: 0.875rem;
-  }
-  
-  .text-size-medium {
-    font-size: 1rem;
-  }
-  
-  .text-size-large {
-    font-size: 1.25rem;
-  }
-  
-  .text-size-extraLarge {
-    font-size: 1.5rem;
-  }
-  
-  .text-size-huge {
-    font-size: 1.875rem;
-  }
-  
   /* High Contrast Mode */
   .high-contrast {
     --koffa-green: 120 100% 30%;
@@ -211,19 +215,6 @@
     animation: none !important;
   }
   
-  /* Large text mode */
-  body.text-size-large * {
-    font-size: 1.25em;
-  }
-  
-  body.text-size-extraLarge * {
-    font-size: 1.5em;
-  }
-  
-  body.text-size-huge * {
-    font-size: 1.875em;
-  }
-  
   /* Enhanced hover effects for tiles */
   .dashboard-tile {
     transition: all 0.2s ease-in-out;
@@ -242,5 +233,23 @@
   
   .animate-pulse-subtle {
     animation: pulse-subtle 2s ease-in-out infinite;
+  }
+  
+  /* Accessibility improvements for touch targets */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Mobile responsive utilities */
+  @media (max-width: 640px) {
+    .text-responsive {
+      font-size: calc(0.875rem * var(--text-scale));
+    }
+    
+    .container-mobile {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }

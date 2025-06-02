@@ -17,8 +17,8 @@ export const applyThemeSettings = (settings: Settings): void => {
     }
   }
   
-  // Apply text size classes to body
-  document.body.classList.remove("text-size-small", "text-size-medium", "text-size-large", "text-size-extra-large", "text-size-huge");
+  // Apply text size classes to body - remove all first, then add the correct one
+  document.body.classList.remove("text-size-small", "text-size-medium", "text-size-large", "text-size-extraLarge", "text-size-huge");
   document.body.classList.add(`text-size-${settings.textSize}`);
   
   // Apply high contrast mode if enabled
@@ -30,9 +30,9 @@ export const applyThemeSettings = (settings: Settings): void => {
   
   // Apply reduced motion if enabled
   if (settings.reduceMotion || settings.reduceAnimations) {
-    document.documentElement.classList.remove("reduce-motion");
-  } else {
     document.documentElement.classList.add("reduce-motion");
+  } else {
+    document.documentElement.classList.remove("reduce-motion");
   }
 
   // Apply bold text if enabled
@@ -41,6 +41,9 @@ export const applyThemeSettings = (settings: Settings): void => {
   } else {
     document.documentElement.classList.remove("bold-text");
   }
+  
+  console.log('Applied text size setting:', settings.textSize);
+  console.log('Body classes:', document.body.className);
 };
 
 // Format invite code for better readability
