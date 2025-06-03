@@ -8,8 +8,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createNewFamily, useInviteCode, verifyInviteCode } from '@/utils/familyUtils';
 import { formatInviteCodeForDisplay, normalizeInviteCode } from '@/utils/inviteUtils';
-import CreateFamilySection from './CreateFamilySection';
-import JoinFamilySection from './JoinFamilySection';
+import { User, Mail, Lock, Users, Package, Check, X } from 'lucide-react';
 
 interface SignupFormProps {
   initialInviteCode?: string;
@@ -25,7 +24,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     confirmPassword: '',
     inviteCode: initialInviteCode,
     familyName: '',
-    createFamily: !initialInviteCode, // Default to true if no invite code
+    createFamily: !initialInviteCode,
   });
   
   const [inviteCodeValid, setInviteCodeValid] = useState<boolean | null>(
@@ -36,7 +35,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    // If changing invite code, reset validation
     if (name === 'inviteCode') {
       setInviteCodeValid(null);
     }
@@ -46,11 +44,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     setFormData(prev => ({
       ...prev,
       createFamily: checked,
-      // Clear invite code if switching to create family
       inviteCode: checked ? '' : prev.inviteCode
     }));
     
-    // Reset invite code validation
     if (checked) {
       setInviteCodeValid(null);
     }
@@ -64,7 +60,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     
     try {
       setIsLoading(true);
-      // Normalize the invite code
       const cleanCode = normalizeInviteCode(formData.inviteCode);
       
       const { valid } = await verifyInviteCode(cleanCode);
@@ -105,7 +100,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       return;
     }
     
-    // If user wants to join with invite code but hasn't validated yet
     if (!formData.createFamily && formData.inviteCode && inviteCodeValid === null) {
       try {
         const cleanCode = normalizeInviteCode(formData.inviteCode);
@@ -123,7 +117,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     }
     
     try {
-      // Register with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -137,11 +130,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create account");
       
-      // Wait a moment for the user record to be fully created
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
-        // Create profile entry with service role to bypass RLS during signup
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -151,14 +142,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
           
         if (profileError) {
           console.error("Profile creation error:", profileError);
-          // Continue with the signup process even if profile creation fails
-          // The auth trigger should handle creating the profile
         }
         
-        // If there's an invite code, process it
         if (formData.inviteCode && !formData.createFamily) {
           try {
-            // Normalize the code before using it
             const cleanCode = normalizeInviteCode(formData.inviteCode);
             await useInviteCode(cleanCode, authData.user.id);
             toast.success("You've joined a family!");
@@ -167,7 +154,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
             toast.error(`Failed to join family: ${error.message}`);
           }
         } 
-        // If user wants to create a family
         else if (formData.createFamily && formData.familyName) {
           try {
             await createNewFamily(formData.familyName, authData.user.id);
@@ -179,8 +165,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
         }
       } catch (error: any) {
         console.error("Error during profile or family setup:", error);
-        // Continue to show success even if there were issues with profile or family
-        // since the user account was created successfully
       }
       
       toast.success("Account created successfully!");
@@ -194,90 +178,152 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-koffa-green">Full Name</label>
-        <Input 
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="border-koffa-beige focus-visible:ring-koffa-green"
-          placeholder="Your full name"
-          required
-        />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name field */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-koffa-green block">Full Name</label>
+        <div className="relative">
+          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+          <Input 
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
+            placeholder="Your full name"
+            required
+          />
+        </div>
       </div>
       
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-koffa-green">Email</label>
-        <Input 
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="border-koffa-beige focus-visible:ring-koffa-green"
-          placeholder="Your email address"
-          required
-        />
+      {/* Email field */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-koffa-green block">Email Address</label>
+        <div className="relative">
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+          <Input 
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
+            placeholder="Your email address"
+            required
+          />
+        </div>
       </div>
       
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-koffa-green">Password</label>
-        <Input 
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className="border-koffa-beige focus-visible:ring-koffa-green"
-          placeholder="Create a password"
-          required
-        />
+      {/* Password field */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-koffa-green block">Password</label>
+        <div className="relative">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+          <Input 
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
+            placeholder="Create a password"
+            required
+          />
+        </div>
       </div>
       
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-koffa-green">Confirm Password</label>
-        <Input 
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          className="border-koffa-beige focus-visible:ring-koffa-green"
-          placeholder="Confirm your password"
-          required
-        />
+      {/* Confirm password field */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-koffa-green block">Confirm Password</label>
+        <div className="relative">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+          <Input 
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
+            placeholder="Confirm your password"
+            required
+          />
+        </div>
       </div>
       
-      <div className="flex items-center space-x-2">
+      {/* Create family toggle */}
+      <div className="flex items-center space-x-3 p-4 bg-koffa-beige-light rounded-xl">
         <Checkbox 
           id="createFamily" 
           checked={formData.createFamily}
           onCheckedChange={toggleCreateFamily}
+          className="touch-target"
         />
         <label
           htmlFor="createFamily"
-          className="text-sm font-medium leading-none"
+          className="text-sm font-medium leading-none touch-target flex-1"
         >
           Create a new family
         </label>
       </div>
       
+      {/* Conditional sections */}
       {formData.createFamily ? (
-        <CreateFamilySection 
-          familyName={formData.familyName}
-          onChange={handleChange}
-        />
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-koffa-green block">Family Name</label>
+          <div className="relative">
+            <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+            <Input 
+              name="familyName"
+              value={formData.familyName}
+              onChange={handleChange}
+              className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
+              placeholder="Enter your family name"
+              required
+            />
+          </div>
+        </div>
       ) : (
-        <JoinFamilySection 
-          inviteCode={formData.inviteCode}
-          inviteCodeValid={inviteCodeValid}
-          onChange={handleChange}
-          onValidate={validateInviteCode}
-          isLoading={isLoading}
-        />
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-koffa-green block">Invitation Code</label>
+          <div className="space-y-3">
+            <div className="flex space-x-3">
+              <div className="relative flex-1">
+                <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
+                <Input 
+                  name="inviteCode"
+                  value={formatInviteCodeForDisplay(formData.inviteCode)}
+                  onChange={handleChange}
+                  className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green font-mono rounded-xl transition-colors"
+                  placeholder="XXXX-XXXX"
+                  required
+                />
+              </div>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={validateInviteCode}
+                disabled={isLoading || !formData.inviteCode}
+                className="h-14 px-6 border-2 border-koffa-green text-koffa-green hover:bg-koffa-green hover:text-white rounded-xl transition-colors touch-target"
+              >
+                Verify
+              </Button>
+            </div>
+            {inviteCodeValid === true && (
+              <div className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 rounded-xl">
+                <Check className="w-4 h-4" />
+                <p className="text-sm font-medium">Valid invitation code - you'll join a family</p>
+              </div>
+            )}
+            {inviteCodeValid === false && (
+              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-xl">
+                <X className="w-4 h-4" />
+                <p className="text-sm font-medium">Invalid or expired invitation code</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
       
+      {/* Submit button */}
       <Button 
         type="submit" 
-        className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white mt-4" 
+        className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl touch-target" 
         disabled={isLoading}
       >
         {isLoading ? "Creating Account..." : "Create Account"}

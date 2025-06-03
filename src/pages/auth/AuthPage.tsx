@@ -17,7 +17,7 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [inviteCode, setInviteCode] = useState<string>('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -85,133 +85,144 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-koffa-beige-light flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-6 sm:mb-8 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-koffa-beige-light via-white to-koffa-beige flex flex-col">
+      {/* Mobile-optimized header */}
+      <div className="safe-area-top"></div>
+      
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
+        {/* Logo section - mobile optimized */}
+        <div className="mb-8 sm:mb-10 text-center animate-fade-in">
           <Logo size="lg" />
-          <h2 className="text-xl sm:text-2xl font-semibold text-koffa-green mt-4 sm:mt-6">Welcome to Koffa</h2>
-          <p className="text-sm sm:text-base text-koffa-green-dark mt-1">Your family grocery companion</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-koffa-green mt-6 mb-2">
+            Welcome to Koffa
+          </h1>
+          <p className="text-base sm:text-lg text-koffa-green-dark px-4">
+            Your family's digital assistant
+          </p>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 sm:p-6">
+        {/* Main card - mobile-first design */}
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-koffa-beige p-6 sm:p-8 mx-4">
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4 sm:mb-6 h-auto">
+            {/* Mobile-optimized tab list */}
+            <TabsList className="grid grid-cols-3 mb-6 h-12 bg-koffa-beige-light rounded-xl p-1">
               <TabsTrigger 
                 value="email" 
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-sm font-medium rounded-lg transition-all duration-200 touch-target"
               >
+                <Mail className="w-4 h-4 mr-1" />
                 Email
               </TabsTrigger>
               <TabsTrigger 
                 value="phone"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-sm font-medium rounded-lg transition-all duration-200 touch-target"
               >
                 Phone
               </TabsTrigger>
               <TabsTrigger 
                 value="invite"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-sm font-medium rounded-lg transition-all duration-200 touch-target"
               >
-                Invite Code
+                <Package className="w-4 h-4 mr-1" />
+                Invite
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="email">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Email</label>
+            {/* Email tab - mobile optimized */}
+            <TabsContent value="email" className="space-y-0">
+              <form onSubmit={handleSignIn} className="space-y-5">
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-koffa-green block">Email Address</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Mail size={18} />
-                    </span>
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
                     <Input 
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                      className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
                       placeholder="Enter your email"
+                      required
                     />
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Password</label>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-koffa-green block">Password</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Lock size={18} />
-                    </span>
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
                     <Input 
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-12 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                      className="pl-12 pr-14 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
                       placeholder="Enter your password"
+                      required
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-koffa-green/60 touch-target"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium" 
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl touch-target" 
                   disabled={isLoading}
                 >
-                  {isLoading ? "Signing in..." : "Log In"}
+                  {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
             
-            <TabsContent value="phone">
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Phone</label>
+            {/* Phone tab */}
+            <TabsContent value="phone" className="space-y-0">
+              <form className="space-y-5">
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-koffa-green block">Phone Number</label>
                   <Input 
                     type="tel"
-                    className="border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                    className="h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
                     placeholder="Enter your phone number"
                   />
                 </div>
                 
                 <Button 
                   type="button" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl touch-target"
                   onClick={() => toast.info("Phone authentication coming soon")}
                 >
-                  Send Code
+                  Send Verification Code
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="invite">
-              <form onSubmit={handleInviteCode} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
+            {/* Invite code tab - mobile optimized */}
+            <TabsContent value="invite" className="space-y-0">
+              <form onSubmit={handleInviteCode} className="space-y-5">
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-koffa-green block">Invitation Code</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Package size={18} />
-                    </span>
+                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
                     <Input 
                       type="text"
                       value={formatInviteCodeForDisplay(inviteCode)}
                       onChange={handleInviteCodeChange}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green font-mono tracking-wider text-center h-12 text-base"
+                      className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green font-mono tracking-wider text-center rounded-xl transition-colors"
                       placeholder="XXXX-XXXX"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Enter the 8-character invitation code you received from a family member
+                  <p className="text-xs text-koffa-green-dark text-center px-2">
+                    Enter the 8-character code from a family member
                   </p>
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
+                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl touch-target"
                   disabled={isLoading || inviteCode.length < 1}
                 >
                   {isLoading ? "Verifying..." : "Join Family"}
@@ -221,23 +232,27 @@ const AuthPage = () => {
           </Tabs>
         </div>
         
-        <div className="mt-6 sm:mt-8 text-center w-full max-w-md">
-          <div className="flex items-center justify-center my-4">
+        {/* Bottom section - mobile optimized */}
+        <div className="mt-8 text-center w-full max-w-sm px-4">
+          <div className="flex items-center justify-center my-6">
             <div className="border-t flex-1 border-koffa-beige"></div>
-            <span className="px-4 text-sm text-koffa-green-dark">OR</span>
+            <span className="px-4 text-sm text-koffa-green-dark font-medium">OR</span>
             <div className="border-t flex-1 border-koffa-beige"></div>
           </div>
           
-          <p className="text-koffa-green-dark mb-2 text-sm sm:text-base">New to Koffa?</p>
+          <p className="text-koffa-green-dark mb-4 text-base">New to Koffa?</p>
           <Button 
             onClick={() => navigate('/signup')}
             variant="outline" 
-            className="w-full border-koffa-green text-koffa-green hover:bg-koffa-beige-light h-12 text-base font-medium"
+            className="w-full border-2 border-koffa-green text-koffa-green hover:bg-koffa-green hover:text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 touch-target"
           >
-            Create Account
+            Create New Account
           </Button>
         </div>
       </div>
+      
+      {/* Safe area bottom for mobile */}
+      <div className="safe-area-bottom"></div>
     </div>
   );
 };
