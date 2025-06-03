@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { MobileButton } from '@/components/ui/mobile-button';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +17,7 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [inviteCode, setInviteCode] = useState<string>('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -85,157 +85,162 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-koffa-beige-light flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-6 sm:mb-8 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-bring-green/10 via-white to-bring-blue/10 flex flex-col">
+      <div className="flex-1 flex flex-col items-center justify-center mobile-container py-8">
+        <div className="mb-8 text-center">
           <Logo size="lg" />
-          <h2 className="text-xl sm:text-2xl font-semibold text-koffa-green mt-4 sm:mt-6">Welcome to Koffa</h2>
-          <p className="text-sm sm:text-base text-koffa-green-dark mt-1">Your family grocery companion</p>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-bring-green to-bring-blue bg-clip-text text-transparent mt-6">
+            Welcome to Koffa
+          </h2>
+          <p className="text-lg text-gray-600 mt-2">Your family grocery companion</p>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 sm:p-6">
+        <div className="w-full max-w-md bg-white/90 backdrop-blur-sm rounded-3xl shadow-mobile-lg p-6 border border-white/20">
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4 sm:mb-6 h-auto">
+            <TabsList className="grid grid-cols-3 mb-6 h-auto bg-gray-100 rounded-2xl p-1">
               <TabsTrigger 
                 value="email" 
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm font-semibold rounded-xl py-3"
               >
                 Email
               </TabsTrigger>
               <TabsTrigger 
                 value="phone"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm font-semibold rounded-xl py-3"
               >
                 Phone
               </TabsTrigger>
               <TabsTrigger 
                 value="invite"
-                className="data-[state=active]:bg-koffa-green data-[state=active]:text-white text-xs sm:text-sm p-2 sm:p-3"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm font-semibold rounded-xl py-3"
               >
-                Invite Code
+                Invite
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="email">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Email</label>
+                  <label className="text-sm font-semibold text-gray-700">Email</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Mail size={18} />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Mail size={20} />
                     </span>
                     <Input 
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                      className="pl-12 h-14 text-base rounded-2xl border-gray-200 focus:border-bring-green focus:ring-bring-green bg-white"
                       placeholder="Enter your email"
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Password</label>
+                  <label className="text-sm font-semibold text-gray-700">Password</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Lock size={18} />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Lock size={20} />
                     </span>
                     <Input 
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-12 border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                      className="pl-12 pr-12 h-14 text-base rounded-2xl border-gray-200 focus:border-bring-green focus:ring-bring-green bg-white"
                       placeholder="Enter your password"
                     />
                     <button 
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 mobile-touch"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                 </div>
                 
-                <Button 
+                <MobileButton 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium" 
+                  className="w-full h-14 text-lg font-bold"
                   disabled={isLoading}
+                  variant="success"
                 >
                   {isLoading ? "Signing in..." : "Log In"}
-                </Button>
+                </MobileButton>
               </form>
             </TabsContent>
             
             <TabsContent value="phone">
-              <form className="space-y-4">
+              <form className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Phone</label>
+                  <label className="text-sm font-semibold text-gray-700">Phone</label>
                   <Input 
                     type="tel"
-                    className="border-koffa-beige focus-visible:ring-koffa-green h-12 text-base"
+                    className="h-14 text-base rounded-2xl border-gray-200 focus:border-bring-blue focus:ring-bring-blue bg-white"
                     placeholder="Enter your phone number"
                   />
                 </div>
                 
-                <Button 
+                <MobileButton 
                   type="button" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
+                  className="w-full h-14 text-lg font-bold"
+                  variant="info"
                   onClick={() => toast.info("Phone authentication coming soon")}
                 >
                   Send Code
-                </Button>
+                </MobileButton>
               </form>
             </TabsContent>
 
             <TabsContent value="invite">
-              <form onSubmit={handleInviteCode} className="space-y-4">
+              <form onSubmit={handleInviteCode} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-koffa-green">Invitation Code</label>
+                  <label className="text-sm font-semibold text-gray-700">Invitation Code</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                      <Package size={18} />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                      <Package size={20} />
                     </span>
                     <Input 
                       type="text"
                       value={formatInviteCodeForDisplay(inviteCode)}
                       onChange={handleInviteCodeChange}
-                      className="pl-10 border-koffa-beige focus-visible:ring-koffa-green font-mono tracking-wider text-center h-12 text-base"
+                      className="pl-12 h-14 text-base rounded-2xl border-gray-200 focus:border-bring-purple focus:ring-bring-purple font-mono tracking-wider text-center bg-white"
                       placeholder="XXXX-XXXX"
                     />
                   </div>
-                  <p className="text-xs text-gray-500">
-                    Enter the 8-character invitation code you received from a family member
+                  <p className="text-xs text-gray-500 text-center">
+                    Enter the 8-character invitation code from a family member
                   </p>
                 </div>
                 
-                <Button 
+                <MobileButton 
                   type="submit" 
-                  className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-12 text-base font-medium"
+                  className="w-full h-14 text-lg font-bold"
                   disabled={isLoading || inviteCode.length < 1}
+                  variant="default"
                 >
                   {isLoading ? "Verifying..." : "Join Family"}
-                </Button>
+                </MobileButton>
               </form>
             </TabsContent>
           </Tabs>
         </div>
         
-        <div className="mt-6 sm:mt-8 text-center w-full max-w-md">
-          <div className="flex items-center justify-center my-4">
-            <div className="border-t flex-1 border-koffa-beige"></div>
-            <span className="px-4 text-sm text-koffa-green-dark">OR</span>
-            <div className="border-t flex-1 border-koffa-beige"></div>
+        <div className="mt-8 text-center w-full max-w-md">
+          <div className="flex items-center justify-center my-6">
+            <div className="border-t flex-1 border-gray-200"></div>
+            <span className="px-4 text-sm text-gray-500 font-medium">OR</span>
+            <div className="border-t flex-1 border-gray-200"></div>
           </div>
           
-          <p className="text-koffa-green-dark mb-2 text-sm sm:text-base">New to Koffa?</p>
-          <Button 
+          <p className="text-gray-600 mb-4 text-lg font-medium">New to Koffa?</p>
+          <MobileButton 
             onClick={() => navigate('/signup')}
             variant="outline" 
-            className="w-full border-koffa-green text-koffa-green hover:bg-koffa-beige-light h-12 text-base font-medium"
+            className="w-full h-14 text-lg font-bold bg-white/90 border-2 border-gray-200 text-gray-700 hover:bg-gray-50"
           >
             Create Account
-          </Button>
+          </MobileButton>
         </div>
       </div>
     </div>

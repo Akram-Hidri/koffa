@@ -5,79 +5,76 @@
 
 @layer base {
   :root {
-    --background: 60 33% 92%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 255 251 245;
+    --foreground: 20 20 20;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 255 255 255;
+    --card-foreground: 20 20 20;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 255 255 255;
+    --popover-foreground: 20 20 20;
 
-    --primary: 120 16% 36%;
-    --primary-foreground: 60 33% 92%;
+    --primary: 34 197 94;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 210 13% 49%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 243 244 246;
+    --secondary-foreground: 55 65 81;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 249 250 251;
+    --muted-foreground: 107 114 128;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 249 250 251;
+    --accent-foreground: 55 65 81;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --ring: 34 197 94;
 
-    --radius: 0.5rem;
+    --radius: 12px;
     
-    /* Koffa custom colors - updated with new palette */
-    --koffa-green: 120 16% 36%;
-    --koffa-green-dark: 120 16% 30%;
-    --koffa-beige: 60 33% 92%;
-    --koffa-beige-light: 60 33% 96%;
-    --koffa-beige-dark: 43 11% 57%;
-    --koffa-accent-red: 0 70% 50%;
-    --koffa-accent-blue: 210 13% 49%;
-    --koffa-accent-orange: 30 70% 50%;
-    --koffa-accent-green: 120 70% 40%;
+    /* Enhanced mobile color system */
+    --bring-green: 34 197 94;
+    --bring-blue: 59 130 246;
+    --bring-orange: 249 115 22;
+    --bring-red: 239 68 68;
+    --bring-purple: 168 85 247;
+    --bring-yellow: 245 158 11;
     
     /* Text size CSS custom properties */
     --text-scale: 1;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 17 24 39;
+    --foreground: 249 250 251;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 31 41 55;
+    --card-foreground: 249 250 251;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 31 41 55;
+    --popover-foreground: 249 250 251;
 
-    --primary: 120 16% 55%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 34 197 94;
+    --primary-foreground: 17 24 39;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 55 65 81;
+    --secondary-foreground: 249 250 251;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 55 65 81;
+    --muted-foreground: 156 163 175;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 55 65 81;
+    --accent-foreground: 249 250 251;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 249 250 251;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 75 85 99;
+    --input: 75 85 99;
+    --ring: 34 197 94;
   }
 }
 
@@ -88,9 +85,80 @@
   body {
     @apply bg-background text-foreground;
     font-size: calc(1rem * var(--text-scale));
+    /* Mobile-optimized typography */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent zoom on input focus for iOS */
+    -webkit-text-size-adjust: 100%;
   }
   
-  /* Text size scaling based on accessibility settings - FIXED */
+  /* Enhanced mobile interaction styles */
+  .mobile-touch {
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+  
+  /* Bring!-style gradients */
+  .gradient-green {
+    background: linear-gradient(135deg, rgb(34 197 94) 0%, rgb(22 163 74) 100%);
+  }
+  
+  .gradient-blue {
+    background: linear-gradient(135deg, rgb(59 130 246) 0%, rgb(37 99 235) 100%);
+  }
+  
+  .gradient-orange {
+    background: linear-gradient(135deg, rgb(249 115 22) 0%, rgb(234 88 12) 100%);
+  }
+  
+  .gradient-red {
+    background: linear-gradient(135deg, rgb(239 68 68) 0%, rgb(220 38 38) 100%);
+  }
+  
+  .gradient-purple {
+    background: linear-gradient(135deg, rgb(168 85 247) 0%, rgb(147 51 234) 100%);
+  }
+  
+  .gradient-yellow {
+    background: linear-gradient(135deg, rgb(245 158 11) 0%, rgb(217 119 6) 100%);
+  }
+  
+  /* Enhanced card styles */
+  .bring-card {
+    @apply bg-white rounded-2xl shadow-mobile border-0 overflow-hidden;
+    transition: all 0.2s ease-out;
+  }
+  
+  .bring-card:active {
+    transform: scale(0.98);
+  }
+  
+  .bring-card:hover {
+    @apply shadow-mobile-lg;
+    transform: translateY(-2px);
+  }
+  
+  /* Enhanced button styles */
+  .bring-button {
+    @apply mobile-touch rounded-xl font-semibold transition-all duration-200;
+  }
+  
+  .bring-button:active {
+    transform: scale(0.95);
+  }
+  
+  /* Mobile-optimized spacing */
+  .mobile-container {
+    @apply px-4 pb-20;
+  }
+  
+  /* Bottom navigation safe area */
+  .bottom-nav-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  
+  /* Text size scaling */
   body.text-size-small {
     --text-scale: 0.875;
   }
@@ -113,206 +181,58 @@
   
   /* Hide scrollbars but allow scrolling */
   .hide-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
   .hide-scrollbar::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none;
   }
   
-  /* Arabic font family */
-  .font-arabic {
-    font-family: 'Noto Sans Arabic', 'Amiri', 'Scheherazade New', sans-serif;
-    line-height: 1.6;
-  }
-  
-  /* RTL support */
-  [dir="rtl"] {
-    direction: rtl;
-    text-align: right;
-  }
-  
-  [dir="rtl"] .flex {
-    flex-direction: row-reverse;
-  }
-  
-  [dir="rtl"] .space-x-2 > * + * {
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
-  
-  [dir="rtl"] .space-x-3 > * + * {
-    margin-left: 0;
-    margin-right: 0.75rem;
-  }
-  
-  [dir="rtl"] .mr-2 {
-    margin-right: 0;
-    margin-left: 0.5rem;
-  }
-  
-  [dir="rtl"] .ml-2 {
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
-  
-  /* Dark mode */
-  .dark {
-    .bg-koffa-beige-light {
-      @apply bg-slate-800;
+  /* Enhanced mobile responsive */
+  @media (max-width: 640px) {
+    .mobile-grid {
+      @apply grid-cols-2 gap-3;
     }
-    .text-koffa-green {
-      @apply text-green-300;
+    
+    .mobile-text {
+      font-size: calc(1rem * var(--text-scale));
     }
-    .text-koffa-green-dark {
-      @apply text-green-400;
+    
+    /* Better mobile spacing */
+    .mobile-spacing > * + * {
+      margin-top: 1rem;
     }
-    .bg-koffa-green {
-      @apply bg-green-700;
-    }
-    .hover\:bg-koffa-green-dark:hover {
-      @apply hover:bg-green-800;
-    }
-    .border-koffa-beige {
-      @apply border-slate-600;
+    
+    /* Mobile-optimized forms */
+    .mobile-form input,
+    .mobile-form select,
+    .mobile-form textarea {
+      @apply text-base; /* Prevents zoom on iOS */
     }
   }
   
-  /* High Contrast Mode */
+  /* Accessibility improvements */
   .high-contrast {
-    --koffa-green: 120 100% 30%;
-    --koffa-green-dark: 120 100% 20%;
-    --koffa-beige: 0 0% 95%;
-    --koffa-beige-light: 0 0% 100%;
-    --koffa-beige-dark: 0 0% 85%;
-    --koffa-accent-red: 0 100% 50%;
-    --koffa-accent-blue: 210 100% 50%;
-    --koffa-accent-orange: 30 100% 50%;
-    --koffa-accent-green: 120 100% 40%;
-    
-    .text-koffa-green {
-      @apply text-black;
-    }
-    
-    .border {
-      @apply border-black border-2;
-    }
-    
-    .card {
-      @apply border-2 border-black shadow-lg;
-    }
+    --primary: 0 128 0;
+    --destructive: 255 0 0;
   }
   
-  /* Bold Text */
   .bold-text * {
     font-weight: 700 !important;
   }
   
-  /* Reduce Motion */
   .reduce-motion * {
     transition: none !important;
     animation: none !important;
   }
   
-  /* Enhanced hover effects for tiles */
-  .dashboard-tile {
-    transition: all 0.2s ease-in-out;
+  /* Loading states */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
   }
   
-  .dashboard-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(88, 107, 77, 0.15);
-  }
-  
-  /* Loading animations */
-  @keyframes pulse-subtle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  .animate-pulse-subtle {
-    animation: pulse-subtle 2s ease-in-out infinite;
-  }
-  
-  /* Accessibility improvements for touch targets */
-  .touch-target {
-    min-width: 44px;
-    min-height: 44px;
-  }
-  
-  /* Mobile responsive utilities */
-  @media (max-width: 640px) {
-    .text-responsive {
-      font-size: calc(0.875rem * var(--text-scale));
-    }
-    
-    .container-mobile {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-    
-    /* Improved mobile typography */
-    h1 {
-      font-size: calc(1.5rem * var(--text-scale));
-      line-height: 1.2;
-    }
-    
-    h2 {
-      font-size: calc(1.25rem * var(--text-scale));
-      line-height: 1.3;
-    }
-    
-    h3 {
-      font-size: calc(1.125rem * var(--text-scale));
-      line-height: 1.4;
-    }
-    
-    /* Better mobile spacing */
-    .space-y-4 > * + * {
-      margin-top: 0.75rem;
-    }
-    
-    .space-y-6 > * + * {
-      margin-top: 1rem;
-    }
-    
-    /* Mobile grid improvements */
-    .grid-cols-2 {
-      gap: 0.75rem;
-    }
-    
-    /* Mobile card improvements */
-    .card {
-      padding: 0.75rem;
-    }
-    
-    /* Mobile button improvements */
-    .button {
-      padding: 0.75rem 1rem;
-      font-size: calc(0.875rem * var(--text-scale));
-    }
-  }
-  
-  /* Line clamp utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
-  
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-  
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+  .dark .skeleton {
+    @apply bg-gray-700;
   }
 }
