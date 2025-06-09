@@ -53,19 +53,24 @@ const AuthPage = () => {
       
       console.log("Verifying invite code:", cleanCode);
       
-      const { data, error } = await supabase
-        .rpc('is_valid_invite_code', { code_param: cleanCode });
+      // Check if invitation exists and is valid
+      const { data: invitation, error: inviteError } = await supabase
+        .from('invitations')
+        .select('*')
+        .eq('code', cleanCode)
+        .eq('is_used', false)
+        .single();
         
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
-      
-      console.log("Invite code validation result:", data);
-      
-      if (!data) {
+      if (inviteError || !invitation) {
         throw new Error("Invalid or expired invitation code");
       }
+      
+      // Check if invitation is expired
+      if (new Date(invitation.expires_at) < new Date()) {
+        throw new Error("Invitation has expired");
+      }
+      
+      console.log("Invite code validation result:", true);
       
       toast.success("Invitation code accepted!");
       navigate('/signup', { state: { inviteCode: cleanCode } });

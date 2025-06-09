@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { generateInviteCode, normalizeInviteCode } from './inviteUtils';
+import { generateInviteCode, normalizeInviteCode, validateInviteCodeFormat } from './inviteUtils';
 import { toast } from 'sonner';
 
 /**
@@ -20,7 +20,7 @@ export const createFamilyInvitation = async (familyId: string, userId: string) =
       .select();
     
     if (error) throw error;
-    return code;
+    return data[0];
   } catch (error) {
     console.error("Error creating family invitation:", error);
     throw error;
@@ -32,45 +32,52 @@ export const createFamilyInvitation = async (familyId: string, userId: string) =
  */
 export const verifyInviteCode = async (code: string) => {
   try {
-    // Clean the code before verifying (removing hyphens and standardizing format)
-    const cleanCode = normalizeInviteCode(code);
+    // Validate format first
+    const { isValid, cleanCode, errors } = validateInviteCodeFormat(code);
+    
+    if (!isValid) {
+      console.log("Invalid invite code format:", errors);
+      return { valid: false, familyId: null, error: errors[0] };
+    }
     
     console.log("Verifying cleaned invite code:", cleanCode);
     
-    // First, get the invitation directly to check if it exists
+    // Check if the invitation exists and is valid
     const { data: inviteData, error: inviteError } = await supabase
       .from('invitations')
       .select('*')
       .eq('code', cleanCode)
+      .eq('is_used', false)
       .single();
       
-    if (inviteError) {
-      console.error("Error retrieving invite code:", inviteError);
-      return { valid: false, familyId: null };
+    if (inviteError || !inviteData) {
+      console.log("No valid invitation found with code:", cleanCode);
+      return { valid: false, familyId: null, error: "Invalid invitation code" };
     }
     
-    if (!inviteData) {
-      console.log("No invitation found with code:", cleanCode);
-      return { valid: false, familyId: null };
+    // Check if the code is expired
+    const isExpired = new Date(inviteData.expires_at) <= new Date();
+    
+    if (isExpired) {
+      console.log("Invitation has expired:", inviteData.expires_at);
+      return { valid: false, familyId: null, error: "Invitation has expired" };
     }
     
-    // Check if the code is valid (not expired and not used)
-    const isValid = !inviteData.is_used && new Date(inviteData.expires_at) > new Date();
-    
-    console.log("Invitation found:", { 
-      isValid, 
+    console.log("Invitation found and valid:", { 
+      isValid: true, 
       isUsed: inviteData.is_used,
       expires: inviteData.expires_at,
       currentTime: new Date().toISOString()
     });
     
     return { 
-      valid: isValid, 
-      familyId: isValid ? inviteData.family_id : null 
+      valid: true, 
+      familyId: inviteData.family_id,
+      invitation: inviteData
     };
   } catch (error) {
     console.error('Error verifying invite code:', error);
-    return { valid: false, familyId: null };
+    return { valid: false, familyId: null, error: "Failed to verify invitation code" };
   }
 };
 
@@ -79,25 +86,23 @@ export const verifyInviteCode = async (code: string) => {
  */
 export const useInviteCode = async (code: string, userId: string) => {
   try {
-    // Normalize the code
-    const cleanCode = normalizeInviteCode(code);
+    // Validate and normalize the code
+    const { isValid, cleanCode, errors } = validateInviteCodeFormat(code);
     
-    // Get the invitation details
-    const { data: invitation, error: invitationError } = await supabase
-      .from('invitations')
-      .select('family_id, is_used, expires_at')
-      .eq('code', cleanCode)
-      .maybeSingle();
-      
-    if (invitationError) throw invitationError;
-    
-    if (!invitation || invitation.is_used || new Date(invitation.expires_at) < new Date()) {
-      throw new Error('Invalid or expired invitation code');
+    if (!isValid) {
+      throw new Error(errors[0]);
     }
     
-    const familyId = invitation.family_id;
+    // Verify the invitation is valid
+    const verification = await verifyInviteCode(cleanCode);
     
-    // Begin transaction to update invitation and user profile
+    if (!verification.valid) {
+      throw new Error(verification.error || 'Invalid invitation code');
+    }
+    
+    const familyId = verification.familyId;
+    
+    // Begin transaction-like operations
     const { error: updateError } = await supabase
       .from('invitations')
       .update({ is_used: true })
@@ -143,4 +148,26 @@ export const getFamilyInvitations = async (familyId: string) => {
   
   if (error) throw error;
   return data || [];
+};
+
+/**
+ * Gets invitation statistics for a family
+ */
+export const getInvitationStats = async (familyId: string) => {
+  const { data, error } = await supabase
+    .from('invitations')
+    .select('is_used, expires_at')
+    .eq('family_id', familyId);
+  
+  if (error) throw error;
+  
+  const now = new Date();
+  const stats = {
+    total: data.length,
+    active: data.filter(inv => !inv.is_used && new Date(inv.expires_at) > now).length,
+    used: data.filter(inv => inv.is_used).length,
+    expired: data.filter(inv => !inv.is_used && new Date(inv.expires_at) <= now).length
+  };
+  
+  return stats;
 };

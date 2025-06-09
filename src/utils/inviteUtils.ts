@@ -29,3 +29,16 @@ export const normalizeInviteCode = (code: string) => {
   // Remove any non-alphanumeric characters (including hyphens) and convert to uppercase
   return code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 };
+
+export const validateInviteCodeFormat = (code: string) => {
+  const cleanCode = normalizeInviteCode(code);
+  return {
+    isValid: cleanCode.length === 8,
+    cleanCode,
+    errors: cleanCode.length !== 8 ? ['Code must be exactly 8 characters'] : []
+  };
+};
+
+export const isValidInviteCodeCharacter = (char: string) => {
+  return /^[A-Z0-9]$/i.test(char);
+};

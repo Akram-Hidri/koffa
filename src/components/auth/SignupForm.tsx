@@ -7,8 +7,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createNewFamily, useInviteCode, verifyInviteCode } from '@/utils/familyUtils';
-import { formatInviteCodeForDisplay, normalizeInviteCode } from '@/utils/inviteUtils';
-import { User, Mail, Lock, Users, Package, Check, X } from 'lucide-react';
+import { normalizeInviteCode, validateInviteCodeFormat } from '@/utils/inviteUtils';
+import InviteCodeInput from '@/components/ui/invite-code-input';
+import { User, Mail, Lock, Users, Package, Check, X, AlertCircle } from 'lucide-react';
 
 interface SignupFormProps {
   initialInviteCode?: string;
@@ -31,6 +32,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     initialInviteCode ? true : null
   );
   
+  const [inviteCodeValidating, setInviteCodeValidating] = useState(false);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -38,6 +41,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
     if (name === 'inviteCode') {
       setInviteCodeValid(null);
     }
+  };
+
+  const handleInviteCodeChange = (cleanCode: string) => {
+    setFormData(prev => ({ ...prev, inviteCode: cleanCode }));
+    setInviteCodeValid(null);
   };
 
   const toggleCreateFamily = (checked: boolean) => {
@@ -58,13 +66,22 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       return;
     }
     
+    // Validate format first
+    const { isValid, errors } = validateInviteCodeFormat(formData.inviteCode);
+    
+    if (!isValid) {
+      setInviteCodeValid(false);
+      toast.error(errors[0]);
+      return;
+    }
+    
     try {
-      setIsLoading(true);
+      setInviteCodeValidating(true);
       const cleanCode = normalizeInviteCode(formData.inviteCode);
       
-      const { valid } = await verifyInviteCode(cleanCode);
+      const verification = await verifyInviteCode(cleanCode);
       
-      if (valid) {
+      if (verification.valid) {
         setInviteCodeValid(true);
         toast.success("Invitation code is valid!");
         setFormData(prev => ({
@@ -74,13 +91,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
         }));
       } else {
         setInviteCodeValid(false);
-        toast.error("Invalid or expired invitation code");
+        toast.error(verification.error || "Invalid or expired invitation code");
       }
     } catch (error: any) {
       setInviteCodeValid(false);
       toast.error(error.message || "Failed to verify invitation code");
     } finally {
-      setIsLoading(false);
+      setInviteCodeValidating(false);
     }
   };
   
@@ -100,17 +117,23 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       return;
     }
     
-    if (!formData.createFamily && formData.inviteCode && inviteCodeValid === null) {
-      try {
-        const cleanCode = normalizeInviteCode(formData.inviteCode);
-        const { valid } = await verifyInviteCode(cleanCode);
-        if (!valid) {
-          toast.error("Invalid invitation code. Please verify it first.");
+    // Validate invite code if not creating family
+    if (!formData.createFamily && formData.inviteCode) {
+      if (inviteCodeValid === null) {
+        try {
+          const verification = await verifyInviteCode(formData.inviteCode);
+          if (!verification.valid) {
+            toast.error(verification.error || "Invalid invitation code. Please verify it first.");
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          toast.error("Please verify your invitation code first");
           setIsLoading(false);
           return;
         }
-      } catch (error) {
-        toast.error("Please verify your invitation code first");
+      } else if (inviteCodeValid === false) {
+        toast.error("Please enter a valid invitation code");
         setIsLoading(false);
         return;
       }
@@ -130,6 +153,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create account");
       
+      // Wait a moment for user creation to complete
       await new Promise(resolve => setTimeout(resolve, 500));
       
       try {
@@ -284,26 +308,27 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
           <div className="space-y-3">
             <div className="flex space-x-3">
               <div className="relative flex-1">
-                <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5" />
-                <Input 
-                  name="inviteCode"
-                  value={formatInviteCodeForDisplay(formData.inviteCode)}
-                  onChange={handleChange}
-                  className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green font-mono rounded-xl transition-colors"
+                <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-koffa-green/60 w-5 h-5 z-10" />
+                <InviteCodeInput
+                  value={formData.inviteCode}
+                  onChange={handleInviteCodeChange}
+                  className="pl-12 h-14 text-base border-2 border-koffa-beige focus:border-koffa-green rounded-xl transition-colors"
                   placeholder="XXXX-XXXX"
-                  required
+                  disabled={isLoading || inviteCodeValidating}
                 />
               </div>
               <Button 
                 type="button" 
                 variant="outline"
                 onClick={validateInviteCode}
-                disabled={isLoading || !formData.inviteCode}
+                disabled={isLoading || inviteCodeValidating || !formData.inviteCode}
                 className="h-14 px-6 border-2 border-koffa-green text-koffa-green hover:bg-koffa-green hover:text-white rounded-xl transition-colors touch-target"
               >
-                Verify
+                {inviteCodeValidating ? "..." : "Verify"}
               </Button>
             </div>
+            
+            {/* Validation feedback */}
             {inviteCodeValid === true && (
               <div className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 rounded-xl">
                 <Check className="w-4 h-4" />
@@ -316,6 +341,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
                 <p className="text-sm font-medium">Invalid or expired invitation code</p>
               </div>
             )}
+            {formData.inviteCode && inviteCodeValid === null && (
+              <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 p-3 rounded-xl">
+                <AlertCircle className="w-4 h-4" />
+                <p className="text-sm font-medium">Click "Verify" to check this invitation code</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -324,7 +355,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ initialInviteCode = '' }) => {
       <Button 
         type="submit" 
         className="w-full bg-koffa-green hover:bg-koffa-green-dark text-white h-14 text-base font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl touch-target" 
-        disabled={isLoading}
+        disabled={isLoading || inviteCodeValidating}
       >
         {isLoading ? "Creating Account..." : "Create Account"}
       </Button>
