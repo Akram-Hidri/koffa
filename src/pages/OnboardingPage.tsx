@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -95,10 +94,17 @@ const OnboardingPage = () => {
   };
 
   const handleComplete = async () => {
+    if (!user) {
+      toast.error('User not authenticated');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // Save onboarding data to database
+      console.log('Starting onboarding completion for user:', user.id);
+      
+      // First, update the user profile with onboarding data
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -108,48 +114,69 @@ const OnboardingPage = () => {
           age_group: onboardingData.userAge,
           accessibility_preferences: onboardingData.preferences
         })
-        .eq('id', user?.id);
+        .eq('id', user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw new Error(`Failed to update profile: ${profileError.message}`);
+      }
 
-      // Create family if needed
-      if (onboardingData.familyName) {
+      console.log('Profile updated successfully');
+
+      // Create family if family name is provided
+      if (onboardingData.familyName.trim()) {
+        console.log('Creating family:', onboardingData.familyName);
+        
         const { data: familyData, error: familyError } = await supabase
           .from('families')
           .insert({
-            name: onboardingData.familyName,
-            created_by: user?.id
+            name: onboardingData.familyName.trim()
           })
           .select()
           .single();
 
-        if (familyError) throw familyError;
+        if (familyError) {
+          console.error('Family creation error:', familyError);
+          throw new Error(`Failed to create family: ${familyError.message}`);
+        }
 
-        // Add user to family
+        console.log('Family created:', familyData);
+
+        // Add user to family as admin
         const { error: memberError } = await supabase
           .from('family_members')
           .insert({
             family_id: familyData.id,
-            user_id: user?.id,
+            user_id: user.id,
             role: 'admin'
           });
 
-        if (memberError) throw memberError;
+        if (memberError) {
+          console.error('Family member error:', memberError);
+          throw new Error(`Failed to add to family: ${memberError.message}`);
+        }
+
+        console.log('User added to family as admin');
 
         // Update profile with family_id
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ family_id: familyData.id })
-          .eq('id', user?.id);
+          .eq('id', user.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Family ID update error:', updateError);
+          throw new Error(`Failed to link family to profile: ${updateError.message}`);
+        }
+
+        console.log('Profile updated with family_id');
       }
 
       toast.success('Welcome to Koffa! Your setup is complete.');
       navigate('/home');
     } catch (error: any) {
-      console.error('Onboarding error:', error);
-      toast.error('Failed to complete setup. Please try again.');
+      console.error('Onboarding completion error:', error);
+      toast.error(error.message || 'Failed to complete setup. Please try again.');
     } finally {
       setIsLoading(false);
     }

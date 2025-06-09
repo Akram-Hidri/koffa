@@ -475,24 +475,36 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accessibility_preferences: Json | null
+          age_group: string | null
           created_at: string
           family_id: string | null
           id: string
+          onboarding_completed: boolean | null
           updated_at: string
+          user_role: string | null
           username: string | null
         }
         Insert: {
+          accessibility_preferences?: Json | null
+          age_group?: string | null
           created_at?: string
           family_id?: string | null
           id: string
+          onboarding_completed?: boolean | null
           updated_at?: string
+          user_role?: string | null
           username?: string | null
         }
         Update: {
+          accessibility_preferences?: Json | null
+          age_group?: string | null
           created_at?: string
           family_id?: string | null
           id?: string
+          onboarding_completed?: boolean | null
           updated_at?: string
+          user_role?: string | null
           username?: string | null
         }
         Relationships: [
